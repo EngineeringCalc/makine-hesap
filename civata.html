@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cıvata Sıkma Torku — MH Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ── DESIGN TOKENS ─────────────────────────────────── */
+    :root {
+      --bg:     #07070e;
+      --bg2:    #0c0c18;
+      --surf1:  #101020;
+      --surf2:  #17172a;
+      --surf3:  #1e1e34;
+      --border: rgba(255,255,255,0.06);
+      --text:   #dde1f0;
+      --dim:    #52527a;
+      --dim2:   #8080a8;
+      --accent: #f97316;
+      --teal:   #00d4aa;
+      --blue:   #60a5fa;
+      --yellow: #fbbf24;
+      --green:  #4ade80;
+      --red:    #f87171;
+      --purple: #a78bfa;
+      --font-h: 'Barlow Condensed', sans-serif;
+      --font-m: 'JetBrains Mono', monospace;
+      --font-b: 'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-b);
+      display: flex;
+      flex-direction: column;
+    }
+
+    body::before {
+      content: '';
+      background-image:
+        linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+      background-size: 44px 44px;
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ───────────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(7,7,14,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 20px;
+      height: 52px; gap: 20px;
+      flex-shrink: 0;
+    }
+    .brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px; letter-spacing: 3px;
+      color: var(--accent); text-decoration: none;
+    }
+    .brand em { color: var(--text); font-style: normal; }
+    .breadcrumb {
+      font-size: 12px; color: var(--dim2);
+      font-family: var(--font-m);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .breadcrumb .sep { color: var(--dim); }
+
+    /* ── APP SHELL ─────────────────────────────────────── */
+    .app {
+      display: flex; flex: 1; overflow: hidden;
+      position: relative; z-index: 1;
+    }
+
+    /* ── LEFT SIDEBAR ──────────────────────────────────── */
+    .sidebar {
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      width: 200px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+      padding-bottom: 16px;
+    }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .sec-label {
+      font-family: var(--font-h);
+      font-size: 13px; letter-spacing: 2px;
+      color: #9090c0; text-transform: uppercase;
+      padding: 14px 14px 8px;
+    }
+
+    .sb-btn {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 9px 14px;
+      background: transparent;
+      border: none; border-left: 3px solid transparent;
+      color: var(--dim2);
+      font-family: var(--font-b); font-size: 12.5px;
+      cursor: pointer; text-align: left;
+      transition: all 0.15s;
+    }
+    .sb-btn:hover { background: var(--surf1); color: var(--text); }
+    .sb-btn.active {
+      background: var(--surf1); color: var(--text);
+      font-weight: 500; border-left-color: var(--accent);
+    }
+    .sb-btn .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%; flex-shrink: 0;
+    }
+    .sb-btn .sb-info { display: flex; flex-direction: column; }
+    .sb-btn .sb-sub { font-size: 10px; color: var(--dim); margin-top: 1px; }
+    .sb-btn.active .sb-sub { color: var(--dim2); }
+
+    .sb-divider { height: 1px; background: var(--border); margin: 12px 14px; }
+
+    .sz-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; padding: 7px 14px;
+      background: transparent;
+      border: none; border-left: 3px solid transparent;
+      color: var(--dim2);
+      font-family: var(--font-m); font-size: 13px;
+      cursor: pointer; text-align: left;
+      transition: all 0.15s;
+    }
+    .sz-btn:hover { background: var(--surf1); color: var(--text); }
+    .sz-btn.active {
+      background: var(--surf1); color: var(--text);
+      font-weight: 600; border-left-color: var(--accent);
+    }
+    .sz-btn .sz-as { font-size: 10px; color: var(--dim); }
+    .sz-btn.active .sz-as { color: var(--dim2); }
+
+    /* ── MAIN CONTENT ──────────────────────────────────── */
+    .content {
+      width: 480px; max-width: 480px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+    }
+    .content::-webkit-scrollbar { width: 3px; }
+    .content::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .page-hdr {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 8px;
+    }
+    .page-title {
+      font-family: var(--font-h); font-size: 20px;
+      font-weight: 700; letter-spacing: 1px;
+    }
+    .page-sub {
+      font-size: 11px; color: var(--dim2);
+      font-family: var(--font-m); margin-top: 3px;
+    }
+    .size-badge {
+      font-family: var(--font-m); font-size: 24px;
+      font-weight: 600; color: var(--accent); line-height: 1;
+    }
+
+    /* ── SVG PREVIEW ───────────────────────────────────── */
+    .preview-wrap {
+      padding: 12px 16px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .preview-box {
+      background: var(--surf1);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      height: 160px; overflow: hidden;
+    }
+    .preview-box svg { width: 100%; height: 100%; }
+
+    /* ── SECTIONS ──────────────────────────────────────── */
+    .section {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sec-hdr {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 10px;
+    }
+    .sec-ttl {
+      font-family: var(--font-h); font-size: 13px;
+      letter-spacing: 2px; color: #9090c0; text-transform: uppercase;
+    }
+    .sec-tag {
+      font-family: var(--font-m); font-size: 11px; color: var(--dim2);
+    }
+
+    /* ── GRADE BUTTONS ─────────────────────────────────── */
+    .grade-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+    }
+    .g-btn {
+      padding: 10px 4px 8px;
+      background: var(--surf2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--dim2);
+      font-family: var(--font-m);
+      cursor: pointer; text-align: center;
+      transition: all 0.18s;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 3px;
+    }
+    .g-btn .g-num { font-size: 13px; font-weight: 600; }
+    .g-btn .g-rm  { font-size: 9px; color: var(--dim); }
+    .g-btn:hover  { background: var(--surf3); color: var(--text); }
+    .g-btn.active {
+      border-color: var(--gc);
+      color: var(--gc);
+      background: rgba(var(--gcr), 0.09);
+    }
+    .g-btn.active .g-rm { color: var(--gc); opacity: 0.65; }
+
+    /* ── FRICTION BUTTONS ──────────────────────────────── */
+    .mu-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .mu-btn {
+      padding: 9px 6px;
+      background: var(--surf2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--dim2);
+      font-family: var(--font-m);
+      cursor: pointer; text-align: center;
+      transition: all 0.18s;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 2px;
+    }
+    .mu-btn .mu-v { font-size: 14px; font-weight: 600; }
+    .mu-btn .mu-d { font-size: 9px; color: var(--dim); }
+    .mu-btn:hover { background: var(--surf3); color: var(--text); }
+    .mu-btn.active {
+      border-color: var(--teal);
+      color: var(--teal);
+      background: rgba(0,212,170,0.09);
+    }
+    .mu-btn.active .mu-d { color: var(--teal); opacity: 0.7; }
+
+    /* ── RESULT STRIP ──────────────────────────────────── */
+    .result-strip {
+      padding: 14px 16px;
+      display: flex; gap: 10px;
+    }
+    .res-card {
+      flex: 1;
+      background: var(--surf1);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .res-lbl {
+      font-family: var(--font-h); font-size: 11px;
+      letter-spacing: 1.5px; color: var(--dim2);
+      text-transform: uppercase;
+    }
+    .res-val {
+      font-family: var(--font-m); font-size: 22px;
+      font-weight: 600; color: var(--teal);
+      margin: 4px 0 2px;
+    }
+    .res-val.blue { color: var(--blue); }
+    .res-unit { font-family: var(--font-m); font-size: 11px; color: var(--dim2); }
+
+    /* ── INFO NOTE ─────────────────────────────────────── */
+    .info-box {
+      margin: 0 16px 14px;
+      padding: 12px 14px;
+      background: rgba(251,191,36,0.07);
+      border: 1px solid rgba(251,191,36,0.2);
+      border-radius: 8px;
+      color: #f0cc80;
+      font-size: 11px; line-height: 1.75;
+    }
+    .info-box strong { color: var(--yellow); font-family: var(--font-m); }
+
+    /* ── SPACER & RIGHT PANEL ──────────────────────────── */
+    .spacer { flex: 1; }
+
+    .right-panel {
+      background: var(--bg2);
+      border-left: 1px solid var(--border);
+      width: 320px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .rp-hdr {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      justify-content: space-between; flex-shrink: 0;
+    }
+    .rp-title {
+      font-family: var(--font-h); font-size: 15px;
+      font-weight: 700; letter-spacing: 1px;
+    }
+    .rp-body { flex: 1; overflow-y: auto; }
+    .rp-body::-webkit-scrollbar { width: 3px; }
+    .rp-body::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    /* ── SPEC TABLE (right panel) ──────────────────────── */
+    .spec-grp {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .spec-grp-title {
+      font-family: var(--font-h); font-size: 11px;
+      letter-spacing: 2px; color: var(--dim2);
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+    .spec-row {
+      display: flex; justify-content: space-between;
+      align-items: baseline; padding: 4px 0;
+    }
+    .spec-name { font-family: var(--font-b); font-size: 12px; color: var(--dim2); }
+    .spec-val  { font-family: var(--font-m); font-size: 13px; font-weight: 600; color: var(--text); }
+    .spec-val.teal  { color: var(--teal); font-size: 15px; }
+    .spec-val.blue  { color: var(--blue); }
+    .spec-val.ylw   { color: var(--yellow); }
+
+    /* ── MU COMPARISON TABLE ───────────────────────────── */
+    .mu-tbl { width: 100%; border-collapse: collapse; }
+    .mu-tbl th {
+      font-family: var(--font-h); font-size: 11px; letter-spacing: 1px;
+      color: var(--dim2); text-transform: uppercase;
+      padding: 6px 16px; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .mu-tbl td {
+      font-family: var(--font-m); font-size: 12px;
+      color: var(--text); padding: 7px 16px;
+    }
+    .mu-tbl tr:not(:last-child) td { border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .mu-tbl tr.sel td   { background: rgba(0,212,170,0.05); }
+    .mu-tbl tr.sel .ma-v { color: var(--teal); font-weight: 600; font-size: 14px; }
+    .mu-tbl tr.sel .mu-l { color: var(--teal); }
+
+    /* ── EMPTY STATE ───────────────────────────────────── */
+    .empty-st {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px; padding: 32px; text-align: center;
+    }
+    .empty-st .ei { font-size: 28px; opacity: 0.22; }
+    .empty-st p   { font-family: var(--font-m); font-size: 11px; color: var(--dim); line-height: 1.75; }
+
+    /* ── BADGE CHIPS ───────────────────────────────────── */
+    .chip {
+      font-family: var(--font-m); font-size: 10px;
+      padding: 3px 8px; border-radius: 4px;
+      font-weight: 600; letter-spacing: 0.5px;
+    }
+    .chip.iso  { background: rgba(96,165,250,0.12);  color: #60a5fa; border: 1px solid rgba(96,165,250,0.25);  }
+    .chip.din  { background: rgba(167,139,250,0.12); color: #a78bfa; border: 1px solid rgba(167,139,250,0.25); }
+    .chip.teal { background: rgba(0,212,170,0.12);   color: #00d4aa; border: 1px solid rgba(0,212,170,0.25);   }
+    .chip.org  { background: rgba(249,115,22,0.12);  color: #f97316; border: 1px solid rgba(249,115,22,0.25);  }
+
+    /* Formula block */
+    .formula-block {
+      font-family: var(--font-m); font-size: 10px;
+      color: var(--dim2); line-height: 2;
+    }
+    .formula-block .hi { color: var(--teal); }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAV ─────────────────────────────────────────── -->
+<nav>
+  <a href="index.html" class="brand">MH<em>Platform</em></a>
+  <div class="breadcrumb">
+    <span>Hesaplama Araçları</span>
+    <span class="sep">/</span>
+    <span>Cıvata Sıkma Torku</span>
+  </div>
+</nav>
+
+<div class="app">
+
+  <!-- ─── LEFT SIDEBAR ─────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sec-label">Standart</div>
+
+    <button class="sb-btn active" data-std="iso" onclick="selStd(this)">
+      <span class="dot" style="background:#60a5fa"></span>
+      <div class="sb-info">ISO 898-1<span class="sb-sub">Hex Cıvata</span></div>
+    </button>
+    <button class="sb-btn" data-std="din931" onclick="selStd(this)">
+      <span class="dot" style="background:#a78bfa"></span>
+      <div class="sb-info">DIN 931 / 933<span class="sb-sub">Hex Cıvata</span></div>
+    </button>
+    <button class="sb-btn" data-std="din912" onclick="selStd(this)">
+      <span class="dot" style="background:#00d4aa"></span>
+      <div class="sb-info">DIN 912<span class="sb-sub">Silindir Başlı</span></div>
+    </button>
+    <button class="sb-btn" data-std="din976" onclick="selStd(this)">
+      <span class="dot" style="background:#f97316"></span>
+      <div class="sb-info">DIN 976<span class="sb-sub">Şaplı Cıvata</span></div>
+    </button>
+
+    <div class="sb-divider"></div>
+    <div class="sec-label">Cıvata Boyutu</div>
+    <div id="size-list"></div>
+  </aside>
+
+  <!-- ─── MAIN CONTENT ──────────────────────────────── -->
+  <main class="content">
+
+    <div class="page-hdr">
+      <div>
+        <div class="page-title">CİVATA SIKMA TORKU</div>
+        <div class="page-sub">VDI 2230 · ISO 898-1 · Metrik Diş (Kaba Adım)</div>
+      </div>
+      <div id="hdr-size" class="size-badge" style="display:none"></div>
+    </div>
+
+    <!-- SVG Preview -->
+    <div class="preview-wrap">
+      <div class="preview-box">
+        <svg id="bolt-svg" viewBox="0 0 448 160" xmlns="http://www.w3.org/2000/svg">
+          <text x="224" y="86" text-anchor="middle"
+            font-family="'JetBrains Mono',monospace" font-size="12"
+            fill="rgba(80,80,120,0.5)">← Cıvata boyutu seçin</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Mukavemet Sınıfı -->
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-ttl">Mukavemet Sınıfı</div>
+        <div id="grade-detail" class="sec-tag"></div>
+      </div>
+      <div class="grade-grid" id="grade-grid"></div>
+    </div>
+
+    <!-- Sürtünme Katsayısı -->
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-ttl">Sürtünme Katsayısı (μ)</div>
+        <div class="sec-tag" style="color:var(--dim)">μG = μK</div>
+      </div>
+      <div class="mu-grid">
+        <button class="mu-btn" data-mu="0.08" onclick="selMu(this)">
+          <span class="mu-v">0.08</span>
+          <span class="mu-d">Yağlı / MoS₂</span>
+        </button>
+        <button class="mu-btn active" data-mu="0.10" onclick="selMu(this)">
+          <span class="mu-v">0.10</span>
+          <span class="mu-d">Hafif yağlı</span>
+        </button>
+        <button class="mu-btn" data-mu="0.12" onclick="selMu(this)">
+          <span class="mu-v">0.12</span>
+          <span class="mu-d">Kuru / Ham</span>
+        </button>
+        <button class="mu-btn" data-mu="0.16" onclick="selMu(this)">
+          <span class="mu-v">0.16</span>
+          <span class="mu-d">Galvan. / Fosfat</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sonuç Şeridi -->
+    <div class="result-strip" id="result-strip" style="display:none">
+      <div class="res-card">
+        <div class="res-lbl">Ön Yükleme FM</div>
+        <div class="res-val blue" id="r-fm">—</div>
+        <div class="res-unit">kN</div>
+      </div>
+      <div class="res-card">
+        <div class="res-lbl">Sıkma Torku MA</div>
+        <div class="res-val" id="r-ma">—</div>
+        <div class="res-unit">N·m</div>
+      </div>
+    </div>
+
+    <!-- Bilgi Notu -->
+    <div class="info-box">
+      <strong>VDI 2230</strong> hesap yöntemi kullanılmıştır.
+      Ön yükleme: FM = ν × Sp × As (ν = 0.90).
+      Sıkma torku: MA = FM × [p/2π + μ × d₂/√3 + μ × DKm/2].
+      Sürtünme katsayısı diş (μG) ve oturma yüzeyi (μK) için eşit kabul edilmiştir.
+      DIN 912 için DKm = (dk + 1.1d)/2; Hex için DKm = (s + 1.1d)/2.
+    </div>
+  </main>
+
+  <div class="spacer"></div>
+
+  <!-- ─── RIGHT PANEL ───────────────────────────────── -->
+  <aside class="right-panel">
+    <div class="rp-hdr">
+      <div class="rp-title">TEKNİK DETAYLAR</div>
+      <div id="rp-std-badge"></div>
+    </div>
+    <div class="rp-body" id="rp-body">
+      <div class="empty-st">
+        <div class="ei">⚙️</div>
+        <p>Cıvata boyutu ve mukavemet sınıfını<br>seçerek hesabı başlatın.</p>
+      </div>
+    </div>
+  </aside>
+
+</div><!-- /.app -->
+
+<script>
+/* ════════════════════════════════════════════════════
+   DATA
+   ════════════════════════════════════════════════════ */
+
+/* ISO 724 / ISO 898-1 metrik kaba adım cıvata verileri
+   d: nominal, p: adım, As: gerilim alanı, d2: flank çapı,
+   d3: dip çapı, s: anahtar ağzı (DIN EN ISO 4014/4017),
+   e: köşegenler arası, dk: DIN 912 kafa çapı              */
+const BOLTS = {
+  'M3':  {d:3,  p:0.5,  As:5.03,  d2:2.675,  d3:2.387,  s:5.5, e:6.01,  dk:5.5  },
+  'M4':  {d:4,  p:0.7,  As:8.78,  d2:3.545,  d3:3.141,  s:7,   e:7.66,  dk:7.0  },
+  'M5':  {d:5,  p:0.8,  As:14.2,  d2:4.480,  d3:4.019,  s:8,   e:8.79,  dk:8.5  },
+  'M6':  {d:6,  p:1.0,  As:20.1,  d2:5.350,  d3:4.773,  s:10,  e:11.05, dk:10.0 },
+  'M8':  {d:8,  p:1.25, As:36.6,  d2:7.188,  d3:6.466,  s:13,  e:14.38, dk:13.0 },
+  'M10': {d:10, p:1.5,  As:58.0,  d2:9.026,  d3:8.160,  s:17,  e:18.90, dk:16.0 },
+  'M12': {d:12, p:1.75, As:84.3,  d2:10.863, d3:9.853,  s:19,  e:21.10, dk:18.0 },
+  'M14': {d:14, p:2.0,  As:115,   d2:12.701, d3:11.546, s:22,  e:24.49, dk:21.0 },
+  'M16': {d:16, p:2.0,  As:157,   d2:14.701, d3:13.546, s:24,  e:26.75, dk:24.0 },
+  'M18': {d:18, p:2.5,  As:192,   d2:16.376, d3:14.933, s:27,  e:30.14, dk:27.0 },
+  'M20': {d:20, p:2.5,  As:245,   d2:18.376, d3:16.933, s:30,  e:33.53, dk:30.0 },
+  'M22': {d:22, p:2.5,  As:303,   d2:20.376, d3:18.933, s:32,  e:35.72, dk:33.0 },
+  'M24': {d:24, p:3.0,  As:353,   d2:22.051, d3:20.320, s:36,  e:40.18, dk:36.0 },
+  'M27': {d:27, p:3.0,  As:459,   d2:25.051, d3:23.320, s:41,  e:45.63, dk:40.0 },
+  'M30': {d:30, p:3.5,  As:561,   d2:27.727, d3:25.706, s:46,  e:51.28, dk:45.0 },
+  'M33': {d:33, p:3.5,  As:694,   d2:30.727, d3:28.706, s:50,  e:55.37, dk:50.0 },
+  'M36': {d:36, p:4.0,  As:817,   d2:33.402, d3:31.093, s:55,  e:60.79, dk:54.0 },
+  'M39': {d:39, p:4.0,  As:976,   d2:36.402, d3:34.093, s:60,  e:66.44, dk:58.0 },
+  'M42': {d:42, p:4.5,  As:1120,  d2:39.077, d3:36.479, s:65,  e:72.61, dk:63.0 },
+  'M48': {d:48, p:5.0,  As:1470,  d2:44.752, d3:41.866, s:75,  e:83.91, dk:72.0 },
+};
+
+/* ISO 898-1:2013 — Mukavemet sınıfı verileri
+   8.8 için d > 16 mm'de Rp/Rm/Sp farklı (JS'de işleniyor) */
+const GRADES = {
+  '4.6':  {Rp:240,  Rm:400,  Sp:225, c:'#8080a8', r:'128,128,168', std:'ISO 898-1'},
+  '5.8':  {Rp:420,  Rm:520,  Sp:380, c:'#4ade80', r:'74,222,128',  std:'ISO 898-1'},
+  '6.8':  {Rp:480,  Rm:600,  Sp:440, c:'#60a5fa', r:'96,165,250',  std:'ISO 898-1'},
+  '8.8':  {Rp:640,  Rm:800,  Sp:580, c:'#fbbf24', r:'251,191,36',  std:'ISO 898-1'},
+  '10.9': {Rp:940,  Rm:1040, Sp:830, c:'#f97316', r:'249,115,22',  std:'ISO 898-1'},
+  '12.9': {Rp:1100, Rm:1220, Sp:970, c:'#f87171', r:'248,113,113', std:'ISO 898-1'},
+};
+
+const STDS = {
+  iso:    {lbl:'ISO 898-1',   head:'hex',    cls:'iso',  name:'Altıköşe Cıvata (ISO 4014/4017)'},
+  din931: {lbl:'DIN 931/933', head:'hex',    cls:'din',  name:'Altıköşe Cıvata (DIN)'},
+  din912: {lbl:'DIN 912',     head:'socket', cls:'teal', name:'Silindir Başlı Allen Cıvata'},
+  din976: {lbl:'DIN 976',     head:'stud',   cls:'org',  name:'Şaplı Cıvata / Rötör'},
+};
+
+const MU_LABELS = {
+  '0.08':'Yağlı / MoS₂',
+  '0.10':'Hafif Yağlı',
+  '0.12':'Kuru / Ham',
+  '0.16':'Galvaniz / Fosfat',
+};
+
+/* ════════════════════════════════════════════════════
+   STATE
+   ════════════════════════════════════════════════════ */
+let curStd   = 'iso';
+let curSize  = 'M12';
+let curGrade = '8.8';
+let curMu    = 0.10;
+
+/* ════════════════════════════════════════════════════
+   INIT
+   ════════════════════════════════════════════════════ */
+function init() {
+  // Size list
+  const list = document.getElementById('size-list');
+  Object.entries(BOLTS).forEach(([sz, b]) => {
+    const btn = document.createElement('button');
+    btn.className = 'sz-btn' + (sz === curSize ? ' active' : '');
+    btn.dataset.size = sz;
+    btn.onclick = () => selSize(btn);
+    btn.innerHTML = `<span>${sz}</span><span class="sz-as">${b.As} mm²</span>`;
+    list.appendChild(btn);
+  });
+
+  // Grade grid
+  const grid = document.getElementById('grade-grid');
+  Object.entries(GRADES).forEach(([g, info]) => {
+    const btn = document.createElement('button');
+    btn.className = 'g-btn' + (g === curGrade ? ' active' : '');
+    btn.dataset.grade = g;
+    btn.style.cssText = `--gc:${info.c};--gcr:${info.r}`;
+    btn.onclick = () => selGrade(btn);
+    btn.innerHTML = `<span class="g-num">${g}</span><span class="g-rm">${info.Rm} MPa</span>`;
+    grid.appendChild(btn);
+  });
+
+  // Set initial grade detail
+  const g = GRADES[curGrade];
+  document.getElementById('grade-detail').textContent = `Rm ${g.Rm} · Rp0.2 ${g.Rp} MPa`;
+  document.getElementById('hdr-size').style.display = 'block';
+  document.getElementById('hdr-size').textContent = curSize;
+
+  updateAll();
+}
+
+/* ════════════════════════════════════════════════════
+   SELECTION HANDLERS
+   ════════════════════════════════════════════════════ */
+function selStd(btn) {
+  document.querySelectorAll('.sb-btn[data-std]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  curStd = btn.dataset.std;
+  updateAll();
+}
+
+function selSize(btn) {
+  document.querySelectorAll('.sz-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  curSize = btn.dataset.size;
+  document.getElementById('hdr-size').style.display = 'block';
+  document.getElementById('hdr-size').textContent = curSize;
+  updateAll();
+}
+
+function selGrade(btn) {
+  document.querySelectorAll('.g-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  curGrade = btn.dataset.grade;
+  const g = GRADES[curGrade];
+  document.getElementById('grade-detail').textContent = `Rm ${g.Rm} · Rp0.2 ${g.Rp} MPa`;
+  updateAll();
+}
+
+function selMu(btn) {
+  document.querySelectorAll('.mu-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  curMu = parseFloat(btn.dataset.mu);
+  updateAll();
+}
+
+/* ════════════════════════════════════════════════════
+   CALCULATION — VDI 2230 simplified
+   ════════════════════════════════════════════════════ */
+
+/* ISO 898-1: Sınıf 8.8 d > 16 mm için farklı değerler */
+function getGradeProps(grade, d) {
+  const g = { ...GRADES[grade] };
+  if (grade === '8.8' && d > 16) { g.Rp = 660; g.Rm = 830; g.Sp = 600; }
+  return g;
+}
+
+/* DKm = ortalama oturma yüzeyi çapı */
+function getDKm(bolt, std) {
+  const dh = 1.1 * bolt.d;   // tahliye deliği çapı ≈ 1.1 × d
+  if (std === 'din912') return (bolt.dk + dh) / 2;
+  return (bolt.s + dh) / 2;  // hex + stud (nut bearing)
+}
+
+/* VDI 2230 formülü:
+   MG = FM × (p/2π + μ·d₂/√3)   diş torku
+   MK = FM × μ · DKm/2            oturma torku
+   MA = MG + MK                   toplam                */
+function calcTorque(bolt, gp, mu, std) {
+  const FM_N = 0.9 * gp.Sp * bolt.As;                         // N
+  const DKm  = getDKm(bolt, std);                              // mm
+  const MG   = FM_N * (bolt.p / (2 * Math.PI) + mu * bolt.d2 / 1.732); // N·mm
+  const MK   = FM_N * mu * DKm / 2;                           // N·mm
+  const MA   = MG + MK;                                        // N·mm
+  return {
+    FM:  FM_N / 1000,    // kN
+    MG:  MG   / 1000,    // N·m
+    MK:  MK   / 1000,    // N·m
+    MA:  MA   / 1000,    // N·m
+    DKm,
+  };
+}
+
+/* ════════════════════════════════════════════════════
+   UPDATE ALL
+   ════════════════════════════════════════════════════ */
+function updateAll() {
+  // Std badge
+  const stdInfo = STDS[curStd];
+  document.getElementById('rp-std-badge').innerHTML =
+    `<span class="chip ${stdInfo.cls}">${stdInfo.lbl}</span>`;
+
+  drawBolt();
+
+  if (!curSize || !curGrade) return;
+
+  const bolt = BOLTS[curSize];
+  const gp   = getGradeProps(curGrade, bolt.d);
+  const calc = calcTorque(bolt, gp, curMu, curStd);
+
+  document.getElementById('result-strip').style.display = 'flex';
+  document.getElementById('r-fm').textContent = calc.FM.toFixed(2);
+  document.getElementById('r-ma').textContent = calc.MA.toFixed(1);
+
+  renderPanel(bolt, gp, calc);
+}
+
+/* ════════════════════════════════════════════════════
+   RIGHT PANEL RENDER
+   ════════════════════════════════════════════════════ */
+function renderPanel(bolt, gp, calc) {
+  const MU_ALL  = [0.08, 0.10, 0.12, 0.16];
+  const muRows  = MU_ALL.map(mu => {
+    const c = calcTorque(bolt, gp, mu, curStd);
+    return {mu, FM: c.FM, MA: c.MA};
+  });
+  const std = STDS[curStd];
+  const gcol = gp.c;
+  const dimLabel = std.head === 'socket' ? `dk = ${bolt.dk} mm (DIN 912)` : `s = ${bolt.s} mm (Anahtar)`;
+
+  document.getElementById('rp-body').innerHTML = `
+
+    <!-- 1. Geometrik Parametreler -->
+    <div class="spec-grp">
+      <div class="spec-grp-title">Geometrik Parametreler</div>
+      <div class="spec-row">
+        <span class="spec-name">d — Anma Çapı</span>
+        <span class="spec-val blue">${bolt.d} mm</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">p — Diş Adımı</span>
+        <span class="spec-val">${bolt.p} mm</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">d₂ — Flank Çapı</span>
+        <span class="spec-val">${bolt.d2.toFixed(3)} mm</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">d₃ — Dip Çapı</span>
+        <span class="spec-val">${bolt.d3.toFixed(3)} mm</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">As — Gerilim Alanı</span>
+        <span class="spec-val ylw">${bolt.As} mm²</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">${dimLabel.split(' (')[0]}</span>
+        <span class="spec-val">${std.head === 'socket' ? bolt.dk : bolt.s} mm</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">DKm — Ort. Oturma Çapı</span>
+        <span class="spec-val">${calc.DKm.toFixed(1)} mm</span>
+      </div>
+    </div>
+
+    <!-- 2. Malzeme Özellikleri -->
+    <div class="spec-grp">
+      <div class="spec-grp-title">Malzeme Özellikleri — Sınıf ${curGrade}</div>
+      <div class="spec-row">
+        <span class="spec-name">Rp0.2 — Akma Sınırı</span>
+        <span class="spec-val" style="color:${gcol}">${gp.Rp} MPa</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">Rm — Çekme Mukavemeti</span>
+        <span class="spec-val" style="color:${gcol}">${gp.Rm} MPa</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">Sp — İspat Yükü Gerilmesi</span>
+        <span class="spec-val">${gp.Sp} MPa</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">ν — Kullanım Faktörü</span>
+        <span class="spec-val">0.90</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">Standart</span>
+        <span class="spec-val" style="font-size:11px;color:var(--dim2)">${gp.std}</span>
+      </div>
+    </div>
+
+    <!-- 3. Hesap Sonuçları -->
+    <div class="spec-grp">
+      <div class="spec-grp-title">Hesap Sonuçları (μ = ${curMu.toFixed(2)})</div>
+      <div class="spec-row">
+        <span class="spec-name">FM — Ön Yükleme Kuvveti</span>
+        <span class="spec-val blue">${calc.FM.toFixed(2)} kN</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">FM — Ön Yükleme Kuvveti</span>
+        <span class="spec-val" style="color:var(--dim2);font-size:11px">${(calc.FM * 1000).toFixed(0)} N</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">MG — Diş Torku</span>
+        <span class="spec-val">${calc.MG.toFixed(1)} N·m</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">MK — Oturma Torku</span>
+        <span class="spec-val">${calc.MK.toFixed(1)} N·m</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">MA — Toplam Sıkma Torku</span>
+        <span class="spec-val teal">${calc.MA.toFixed(1)} N·m</span>
+      </div>
+    </div>
+
+    <!-- 4. Sürtünme Karşılaştırması -->
+    <div class="spec-grp">
+      <div class="spec-grp-title">Sürtünme Karşılaştırması</div>
+      <table class="mu-tbl">
+        <thead>
+          <tr>
+            <th>μ</th><th>Durum</th><th>FM (kN)</th><th>MA (N·m)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${muRows.map(r => `
+            <tr class="${r.mu === curMu ? 'sel' : ''}">
+              <td class="mu-l">${r.mu.toFixed(2)}</td>
+              <td style="color:var(--dim);font-size:10px">${MU_LABELS[r.mu.toFixed(2)]}</td>
+              <td>${r.FM.toFixed(2)}</td>
+              <td class="ma-v">${r.MA.toFixed(1)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 5. Formülasyon -->
+    <div class="spec-grp" style="background:rgba(0,212,170,0.025)">
+      <div class="spec-grp-title">VDI 2230 Formülasyon</div>
+      <div class="formula-block">
+        FM  = ν × Sp × As<br>
+        MG  = FM × [p/2π + μ × d₂/√3]<br>
+        MK  = FM × μ × DKm / 2<br>
+        <span class="hi">MA  = MG + MK</span>
+      </div>
+    </div>
+  `;
+}
+
+/* ════════════════════════════════════════════════════
+   SVG BOLT DRAWING
+   ════════════════════════════════════════════════════ */
+function drawBolt() {
+  const svg = document.getElementById('bolt-svg');
+  if (!curSize) return;
+
+  const bolt = BOLTS[curSize];
+  const std  = STDS[curStd];
+  const W = 448, H = 160;
+  const mx = 32;
+  const cy = H / 2;
+  const DH = 120; // usable height
+
+  // Vertical scale: fit head (s) in DH
+  const sc = Math.min(DH / (bolt.s * 1.25), 5.5);
+
+  // Pixel dimensions
+  const bR      = bolt.d  / 2 * sc;
+  const d3R     = bolt.d3 / 2 * sc;
+  const dkR     = bolt.dk / 2 * sc;
+  const hH      = bolt.s  * sc;          // head height (vertical)
+  const pPx     = bolt.p  * sc;          // pitch in px
+  const thrDepth= (bolt.d - bolt.d3) / 2 * sc;
+
+  // Head axial width (horizontal)
+  const hW = std.head === 'socket'
+    ? Math.max(0.65 * bolt.dk * sc, 13)
+    : std.head === 'stud'
+    ? 0
+    : Math.max(0.63 * bolt.d * sc, 12);
+
+  // Horizontal layout
+  const x0      = mx + 6;
+  const totDW   = W - mx - x0 - 6;
+  const thrW    = Math.max(pPx * 4, totDW * 0.38);
+
+  let headWidth, shaftStart, shaftW, thrStart;
+  if (std.head === 'stud') {
+    const leftThr = Math.max(pPx * 3, totDW * 0.22);
+    shaftW      = totDW - leftThr - thrW;
+    headWidth   = leftThr;
+    shaftStart  = x0 + headWidth;
+    thrStart    = shaftStart + shaftW;
+  } else {
+    headWidth  = hW;
+    shaftStart = x0 + headWidth;
+    shaftW     = totDW - headWidth - thrW;
+    thrStart   = shaftStart + shaftW;
+  }
+  const thrEnd = thrStart + thrW;
+  const chf    = bR * 0.45;
+
+  // Thread teeth (right end)
+  const nTh    = Math.max(3, Math.floor(thrW / pPx));
+  const pitchPx= thrW / nTh;
+  let pTop = `M${thrStart},${cy-bR}`;
+  let pBot = `M${thrStart},${cy+bR}`;
+  for (let i = 0; i < nTh; i++) {
+    const xi = thrStart + i * pitchPx;
+    const xp = xi + pitchPx * 0.42;
+    const xe = Math.min(xi + pitchPx, thrEnd - chf);
+    pTop += ` L${xp},${cy-bR-thrDepth*0.65} L${xe},${cy-bR}`;
+    pBot += ` L${xp},${cy+bR+thrDepth*0.65} L${xe},${cy+bR}`;
+  }
+
+  // Colors
+  const SC='#f97316', FC='rgba(249,115,22,0.20)', BC='#60a5fa', TC='#00d4aa', DC='#52527a', DC2='#8080a8';
+
+  // ── HEAD SHAPE ────────────────────────────────────────
+  let headSVG = '';
+  if (std.head === 'hex') {
+    const chamH = Math.max((hH/2 - bR) * 0.6, 1.5);
+    headSVG = `
+      <polygon points="
+        ${x0},${cy-hH/2+chamH}
+        ${x0+chamH*0.5},${cy-hH/2}
+        ${x0+hW},${cy-bR}
+        ${x0+hW},${cy+bR}
+        ${x0+chamH*0.5},${cy+hH/2}
+        ${x0},${cy+hH/2-chamH}"
+        fill="${FC}" stroke="${SC}" stroke-width="1.3" stroke-linejoin="round"/>
+      <line x1="${x0+hW*0.27}" y1="${cy-hH/2+2}" x2="${x0+hW*0.27}" y2="${cy+hH/2-2}"
+        stroke="${SC}" stroke-width="0.5" opacity="0.20"/>
+      <line x1="${x0+hW*0.6}" y1="${cy-bR*1.12}" x2="${x0+hW*0.6}" y2="${cy+bR*1.12}"
+        stroke="${SC}" stroke-width="0.5" opacity="0.20"/>`;
+  } else if (std.head === 'socket') {
+    const rx_head = 2;
+    headSVG = `
+      <rect x="${x0}" y="${cy-dkR}" width="${hW}" height="${dkR*2}"
+        fill="${FC}" stroke="${SC}" stroke-width="1.3" rx="${rx_head}"/>
+      <rect x="${x0+hW*0.14}" y="${cy-dkR*0.52}" width="${hW*0.52}" height="${dkR*1.04}"
+        fill="rgba(0,0,0,0.22)" stroke="${SC}" stroke-width="0.5" opacity="0.45" rx="1"/>
+      <line x1="${x0+hW*0.14}" y1="${cy}" x2="${x0+hW*0.66}" y2="${cy}"
+        stroke="${SC}" stroke-width="0.7" opacity="0.28"/>`;
+  } else if (std.head === 'stud') {
+    // Left thread zone
+    const lW  = headWidth;
+    const lNT = Math.max(3, Math.floor(lW / pPx));
+    const lPp = lW / lNT;
+    let lTop = `M${x0},${cy-bR}`;
+    let lBot = `M${x0},${cy+bR}`;
+    for (let i = 0; i < lNT; i++) {
+      const xi = x0 + i * lPp;
+      const xp = xi + lPp * 0.42;
+      const xe = Math.min(xi + lPp, x0 + lW);
+      lTop += ` L${xp},${cy-bR-thrDepth*0.65} L${xe},${cy-bR}`;
+      lBot += ` L${xp},${cy+bR+thrDepth*0.65} L${xe},${cy+bR}`;
+    }
+    headSVG = `
+      <rect x="${x0}" y="${cy-bR}" width="${lW}" height="${bR*2}"
+        fill="rgba(249,115,22,0.07)" stroke="none"/>
+      <line x1="${x0}" y1="${cy-bR}" x2="${x0+lW}" y2="${cy-bR}" stroke="${SC}" stroke-width="0.7" opacity="0.35"/>
+      <line x1="${x0}" y1="${cy+bR}" x2="${x0+lW}" y2="${cy+bR}" stroke="${SC}" stroke-width="0.7" opacity="0.35"/>
+      <path d="${lTop}" stroke="${SC}" stroke-width="1.1" fill="none" stroke-linejoin="round"/>
+      <path d="${lBot}" stroke="${SC}" stroke-width="1.1" fill="none" stroke-linejoin="round"/>
+      <line x1="${x0+lW}" y1="${cy-bR}" x2="${x0+lW}" y2="${cy+bR}"
+        stroke="${SC}" stroke-width="0.8" stroke-dasharray="2,1.5" opacity="0.5"/>`;
+  }
+
+  // ── ANNOTATIONS ───────────────────────────────────────
+  // d: diameter — shaft area
+  const annX = shaftStart + shaftW * 0.55;
+  const dAnn = `
+    <line x1="${annX}" y1="${cy-bR-1}" x2="${annX}" y2="${cy-bR-11}" stroke="${BC}" stroke-width="0.6" opacity="0.6"/>
+    <line x1="${annX}" y1="${cy+bR+1}" x2="${annX}" y2="${cy+bR+11}" stroke="${BC}" stroke-width="0.6" opacity="0.6"/>
+    <line x1="${annX}" y1="${cy-bR-10}" x2="${annX}" y2="${cy+bR+10}"
+      stroke="${BC}" stroke-width="1" opacity="0.85"
+      marker-start="url(#ab-s)" marker-end="url(#ab-e)"/>
+    <text x="${annX+4}" y="${cy-1}"
+      font-family="'JetBrains Mono',monospace" font-size="9" fill="${BC}">d=${bolt.d}</text>`;
+
+  // p: pitch — above first tooth
+  const pAnn = pitchPx > 8 ? `
+    <line x1="${thrStart}" y1="${cy-bR-2}" x2="${thrStart}" y2="${cy-bR-13}"
+      stroke="${TC}" stroke-width="0.5" opacity="0.4"/>
+    <line x1="${thrStart+pitchPx}" y1="${cy-bR-2}" x2="${thrStart+pitchPx}" y2="${cy-bR-13}"
+      stroke="${TC}" stroke-width="0.5" opacity="0.4"/>
+    <line x1="${thrStart}" y1="${cy-bR-12}" x2="${thrStart+pitchPx}" y2="${cy-bR-12}"
+      stroke="${TC}" stroke-width="0.8" opacity="0.85"
+      marker-start="url(#at-s)" marker-end="url(#at-e)"/>
+    <text x="${thrStart+pitchPx/2}" y="${cy-bR-14}" text-anchor="middle"
+      font-family="'JetBrains Mono',monospace" font-size="8" fill="${TC}">p=${bolt.p}</text>` : '';
+
+  // head dimension annotation (SW for hex, dk for socket)
+  let hAnn = '';
+  if (std.head === 'hex' && hW > 14) {
+    const ay = cy - hH/2 - 9;
+    hAnn = `
+      <line x1="${x0+3}"  y1="${cy-hH/2}" x2="${x0+3}"  y2="${cy-hH/2-8}" stroke="${DC2}" stroke-width="0.5" opacity="0.4"/>
+      <line x1="${x0+hW-3}" y1="${cy-bR}"  x2="${x0+hW-3}" y2="${cy-hH/2-8}" stroke="${DC2}" stroke-width="0.5" opacity="0.4"/>
+      <line x1="${x0+3}" y1="${ay+1}" x2="${x0+hW-3}" y2="${ay+1}"
+        stroke="${DC2}" stroke-width="0.7" opacity="0.55"
+        marker-start="url(#ad-s)" marker-end="url(#ad-e)"/>
+      <text x="${(x0+x0+hW)/2}" y="${ay-2}" text-anchor="middle"
+        font-family="'JetBrains Mono',monospace" font-size="8" fill="${DC2}">SW${bolt.s}</text>`;
+  } else if (std.head === 'socket' && hW > 10) {
+    const ay = cy - dkR - 9;
+    hAnn = `
+      <line x1="${x0+3}"  y1="${cy-dkR}" x2="${x0+3}"  y2="${cy-dkR-8}" stroke="${DC2}" stroke-width="0.5" opacity="0.4"/>
+      <line x1="${x0+hW-3}" y1="${cy-dkR}" x2="${x0+hW-3}" y2="${cy-dkR-8}" stroke="${DC2}" stroke-width="0.5" opacity="0.4"/>
+      <line x1="${x0+3}" y1="${ay+1}" x2="${x0+hW-3}" y2="${ay+1}"
+        stroke="${DC2}" stroke-width="0.7" opacity="0.55"
+        marker-start="url(#ad-s)" marker-end="url(#ad-e)"/>
+      <text x="${(x0+x0+hW)/2}" y="${ay-2}" text-anchor="middle"
+        font-family="'JetBrains Mono',monospace" font-size="8" fill="${DC2}">dk=${bolt.dk}</text>`;
+  }
+
+  // ── ASSEMBLE SVG ──────────────────────────────────────
+  svg.innerHTML = `
+    <defs>
+      <marker id="ab-s" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+        <path d="M0,4 L8,0 L8,8Z" fill="${BC}"/></marker>
+      <marker id="ab-e" viewBox="0 0 8 8" refX="0" refY="4" markerWidth="4" markerHeight="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8Z" fill="${BC}"/></marker>
+      <marker id="at-s" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+        <path d="M0,4 L8,0 L8,8Z" fill="${TC}"/></marker>
+      <marker id="at-e" viewBox="0 0 8 8" refX="0" refY="4" markerWidth="4" markerHeight="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8Z" fill="${TC}"/></marker>
+      <marker id="ad-s" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+        <path d="M0,4 L8,0 L8,8Z" fill="${DC2}"/></marker>
+      <marker id="ad-e" viewBox="0 0 8 8" refX="0" refY="4" markerWidth="4" markerHeight="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8Z" fill="${DC2}"/></marker>
+    </defs>
+
+    <!-- Watermark size label -->
+    <text x="${W-mx-4}" y="${H/2+14}" text-anchor="end"
+      font-family="'Barlow Condensed',sans-serif" font-size="40" font-weight="700"
+      fill="rgba(249,115,22,0.065)" letter-spacing="4">${curSize}</text>
+
+    <!-- Std label -->
+    <text x="${mx+6}" y="${H-8}"
+      font-family="'JetBrains Mono',monospace" font-size="9"
+      fill="${DC}" opacity="0.55">${STDS[curStd].lbl}</text>
+
+    <!-- Head -->
+    ${headSVG}
+
+    <!-- Shaft -->
+    <rect x="${shaftStart}" y="${cy-bR}" width="${shaftW}" height="${bR*2}"
+      fill="${FC}" stroke="${SC}" stroke-width="1.3"/>
+
+    <!-- Thread zone bg -->
+    <rect x="${thrStart}" y="${cy-bR}" width="${thrW-chf}" height="${bR*2}"
+      fill="rgba(249,115,22,0.075)" stroke="none"/>
+
+    <!-- Thread teeth -->
+    <path d="${pTop}" stroke="${SC}" stroke-width="1.1" fill="none" stroke-linejoin="round"/>
+    <path d="${pBot}" stroke="${SC}" stroke-width="1.1" fill="none" stroke-linejoin="round"/>
+
+    <!-- Thread border lines -->
+    <line x1="${thrStart}" y1="${cy-bR}" x2="${thrEnd-chf}" y2="${cy-bR}"
+      stroke="${SC}" stroke-width="0.6" opacity="0.35"/>
+    <line x1="${thrStart}" y1="${cy+bR}" x2="${thrEnd-chf}" y2="${cy+bR}"
+      stroke="${SC}" stroke-width="0.6" opacity="0.35"/>
+
+    <!-- Thread zone divider dashed -->
+    <line x1="${thrStart}" y1="${cy-bR}" x2="${thrStart}" y2="${cy+bR}"
+      stroke="${SC}" stroke-width="0.8" stroke-dasharray="2,1.5" opacity="0.5"/>
+
+    <!-- Chamfer tip -->
+    <polygon
+      points="${thrEnd-chf},${cy-bR} ${thrEnd},${cy-chf*0.38} ${thrEnd},${cy+chf*0.38} ${thrEnd-chf},${cy+bR}"
+      fill="${FC}" stroke="${SC}" stroke-width="1.2" stroke-linejoin="round"/>
+
+    <!-- Centerline -->
+    <line x1="${x0-4}" y1="${cy}" x2="${thrEnd+12}" y2="${cy}"
+      stroke="${DC}" stroke-width="0.5" stroke-dasharray="5,3" opacity="0.28"/>
+
+    <!-- d annotation -->
+    ${dAnn}
+
+    <!-- p annotation -->
+    ${pAnn}
+
+    <!-- Head dimension annotation -->
+    ${hAnn}
+
+    <!-- As value bottom right -->
+    <text x="${W-mx-4}" y="${H-8}" text-anchor="end"
+      font-family="'JetBrains Mono',monospace" font-size="9"
+      fill="${DC}" opacity="0.6">As = ${bolt.As} mm²</text>
+  `;
+}
+
+/* ════════════════════════════════════════════════════
+   BOOT
+   ════════════════════════════════════════════════════ */
+init();
+</script>
+</body>
+</html>
