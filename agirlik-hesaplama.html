@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ağırlık Hesaplama | MH Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#07070e; --bg2:#0c0c18; --surf1:#101020; --surf2:#17172a; --surf3:#1e1e34;
+  --border:rgba(255,255,255,0.06); --text:#dde1f0; --dim:#52527a; --dim2:#8080a8;
+  --orange:#f97316; --teal:#00d4aa; --blue:#60a5fa; --green:#4ade80; --red:#f87171;
+  --font-h:'Barlow Condensed',sans-serif; --font-m:'JetBrains Mono',monospace; --font-b:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,0.016) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.016) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none}
+/* NAV */
+nav{position:relative;z-index:10;flex-shrink:0;background:rgba(7,7,14,0.92);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;height:52px;gap:20px}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:var(--orange);text-decoration:none}
+.brand em{color:var(--text);font-style:normal}
+.breadcrumb{font-size:12px;color:var(--dim2);font-family:var(--font-m);display:flex;align-items:center;gap:8px}
+.breadcrumb span{color:var(--dim)}
+/* APP LAYOUT — flex, orta sütun sabit genişlik, artan boşluk sağda */
+.app{position:relative;z-index:1;display:flex;flex:1;overflow:hidden}
+.app-spacer{flex:1;min-width:0} /* sol-orta arasında değil, orta-sağ arasında boşluk */
+/* SOL */
+.prof-col{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding-bottom:16px}
+.col-label{font-family:var(--font-h);font-size:13px;letter-spacing:2px;color:#9090c0;text-transform:uppercase;padding:14px 14px 8px}
+.prof-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;background:transparent;
+  border:none;border-left:3px solid transparent;color:var(--dim2);font-family:var(--font-b);font-size:12.5px;
+  cursor:pointer;text-align:left;transition:all .15s}
+.prof-btn:hover{background:var(--surf1);color:var(--text)}
+.prof-btn.active{background:var(--surf1);color:var(--text);font-weight:500;border-left-color:var(--orange)}
+.prof-icon{font-size:16px;width:24px;text-align:center;flex-shrink:0}
+/* ORTA — sabit genişlik, büyük ekranda uzamaz */
+.input-col{width:480px;max-width:480px;flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto;padding:14px 16px;gap:12px;}
+
+/* ── YENİ: Önizleme kartı ── */
+.preview-card{
+  background:#12122a;border:1px solid rgba(249,115,22,.18);
+  border-radius:10px;padding:10px;flex-shrink:0;
+  display:flex;flex-direction:column;gap:8px;
+}
+.preview-svg-wrap{
+  width:100%;height:190px;flex-shrink:0;
+  background:#09090f;border-radius:8px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+#profPreview{width:100%;height:100%;display:block}
+.preview-info{display:flex;flex-direction:column;gap:2px;padding:0 2px}
+.preview-title{font-family:var(--font-h);font-size:15px;font-weight:700;color:var(--orange)}
+.preview-formula{font-family:var(--font-m);font-size:11px;color:#7878a8;line-height:1.7}
+/* Inputs */
+/* Input ızgarası — TEK SÜTUN (alt alta) */
+.inputs-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.inp-group{display:flex;flex-direction:column;gap:5px}
+.inp-label{font-size:14px;color:#c0c0e0;font-family:var(--font-h);letter-spacing:1px;text-transform:uppercase}
+.inp-wrap{display:flex;background:var(--surf2);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .2s}
+.inp-wrap:focus-within{border-color:var(--orange)}
+.inp-wrap input{flex:1;padding:10px 12px;background:transparent;border:none;color:var(--text);
+  font-family:var(--font-m);font-size:15px;font-weight:600;outline:none;-moz-appearance:textfield}
+.inp-wrap input::-webkit-outer-spin-button,.inp-wrap input::-webkit-inner-spin-button{-webkit-appearance:none}
+.inp-unit{padding:0 12px;display:flex;align-items:center;font-family:var(--font-m);font-size:12px;
+  color:var(--dim);background:var(--surf3);border-left:1px solid var(--border)}
+.std-select-group{display:flex;flex-direction:column;gap:5px}
+.std-select-group select{padding:10px 12px;background:var(--surf2);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-family:var(--font-m);font-size:13px;
+  cursor:pointer;outline:none;appearance:none;transition:border-color .2s}
+.std-select-group select:focus{border-color:var(--orange)}
+.row-2col{display:flex;flex-direction:column;gap:10px}
+.mat-select{padding:10px 12px;background:var(--surf2);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:var(--font-b);font-size:13px;cursor:pointer;outline:none;
+  appearance:none;transition:border-color .2s;width:100%}
+.mat-select:focus{border-color:var(--orange)}
+.density-tag{margin-top:4px;font-family:var(--font-m);font-size:11px;color:var(--dim2)}
+.len-row{display:flex;gap:0}
+.len-row .inp-wrap{flex:1;border-radius:8px 0 0 8px}
+.unit-toggle{display:flex}
+.unit-btn{padding:0 14px;background:var(--surf3);border:1px solid var(--border);border-left:none;
+  color:var(--dim2);cursor:pointer;font-family:var(--font-m);font-size:12px;transition:all .15s}
+.unit-btn:last-child{border-radius:0 8px 8px 0}
+.unit-btn.on{background:var(--orange);color:white;border-color:var(--orange)}
+.qty-row{display:flex;align-items:center;gap:0}
+.qty-btn{width:40px;height:42px;background:var(--surf2);border:1px solid var(--border);color:var(--text);
+  font-size:18px;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center}
+.qty-btn:first-child{border-radius:8px 0 0 8px;border-right:none}
+.qty-btn:last-child{border-radius:0 8px 8px 0;border-left:none}
+.qty-btn:hover{background:var(--surf3)}
+.qty-input{flex:1;height:42px;text-align:center;background:var(--surf2);border:1px solid var(--border);
+  color:var(--text);font-family:var(--font-m);font-size:15px;font-weight:600;outline:none;-moz-appearance:textfield}
+.qty-input::-webkit-outer-spin-button,.qty-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.calc-btn{width:100%;padding:14px;background:var(--orange);border:none;border-radius:10px;color:white;
+  font-family:var(--font-h);font-size:18px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.calc-btn:hover{background:#ea6c0d;transform:translateY(-1px);box-shadow:0 6px 24px rgba(249,115,22,.35)}
+.calc-btn:active{transform:translateY(0)}
+.result-strip{display:none;background:var(--surf1);border:1px solid var(--border);border-radius:10px;padding:14px 16px;flex-direction:column;gap:6px}
+.result-strip.show{display:flex}
+.result-label{font-size:12px;color:var(--dim2)}
+.result-vals{display:flex;gap:20px;align-items:baseline}
+.result-main{font-family:var(--font-m);font-size:22px;font-weight:600;color:var(--teal)}
+.result-sub{font-family:var(--font-m);font-size:13px;color:var(--dim2)}
+.add-btn{margin-top:6px;padding:8px 14px;background:var(--surf2);border:1px solid var(--teal);
+  border-radius:7px;color:var(--teal);font-family:var(--font-h);font-size:13px;letter-spacing:1px;
+  cursor:pointer;transition:all .15s;align-self:flex-start}
+.add-btn:hover{background:rgba(0,212,170,.1)}
+/* SAĞ */
+.list-col{background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.list-header{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.list-title{font-family:var(--font-h);font-size:15px;font-weight:700;letter-spacing:1px}
+.clear-btn{font-size:11px;color:var(--dim2);background:transparent;border:none;cursor:pointer;font-family:var(--font-b);padding:4px 8px;border-radius:4px;transition:all .15s}
+.clear-btn:hover{background:rgba(248,113,113,.1);color:var(--red)}
+.list-items{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.list-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--dim);font-size:13px;text-align:center;padding:30px}
+.list-empty-icon{font-size:36px;opacity:.3}
+.list-item{background:var(--surf1);border:1px solid var(--border);border-radius:8px;padding:10px 12px;animation:slideIn .2s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.li-top{display:flex;justify-content:space-between;align-items:flex-start}
+.li-name{font-family:var(--font-m);font-size:12px;color:var(--text);line-height:1.4}
+.li-del{background:transparent;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:0 0 0 8px;line-height:1;transition:color .15s}
+.li-del:hover{color:var(--red)}
+.li-detail{font-size:11px;color:var(--dim2);margin-top:2px}
+.li-weight{font-family:var(--font-m);font-size:14px;font-weight:600;color:var(--teal);margin-top:4px}
+.li-weight-sub{font-size:10px;color:var(--dim2);font-weight:400}
+.list-total{padding:14px;border-top:1px solid var(--border);background:var(--surf1);flex-shrink:0;display:flex;flex-direction:column;gap:4px}
+.total-row{display:flex;justify-content:space-between;align-items:baseline}
+.total-label{font-family:var(--font-h);font-size:13px;letter-spacing:2px;color:var(--dim2);text-transform:uppercase}
+.total-val{font-family:var(--font-m);font-size:24px;font-weight:600;color:var(--teal)}
+.total-items{font-size:11px;color:var(--dim)}
+</style>
+</head>
+<body>
+<nav>
+  <a class="brand" href="index.html">MH<em>Platform</em></a>
+  <div class="breadcrumb"><span>/</span> Ağırlık Hesaplama</div>
+</nav>
+<div class="app">
+  <!-- SOL -->
+  <aside class="prof-col">
+    <p class="col-label">Profil Tipi</p>
+    <div id="profList"></div>
+  </aside>
+  <!-- ORTA -->
+  <div class="input-col">
+    <div class="preview-card">
+      <div class="preview-svg-wrap">
+        <svg id="profPreview" viewBox="0 0 280 175" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="preview-info">
+        <div class="preview-title" id="prevTitle">—</div>
+        <div class="preview-formula" id="prevFormula">—</div>
+      </div>
+    </div>
+    <div id="inputsWrap"></div>
+    <div class="row-2col">
+      <div class="inp-group">
+        <span class="inp-label">Malzeme</span>
+        <select class="mat-select" id="matSelect" onchange="onMat()">
+          <optgroup label="Çelik">
+            <option value="7.85">Çelik / Demir — 7.85</option>
+            <option value="8.00">DKP Sac — 8.00</option>
+            <option value="7.93">Paslanmaz 304 — 7.93</option>
+            <option value="7.98">Paslanmaz 316 — 7.98</option>
+            <option value="7.20">Döküm Çelik — 7.20</option>
+            <option value="7.15">Dökme Demir — 7.15</option>
+          </optgroup>
+          <optgroup label="Alüminyum">
+            <option value="2.70">Alüminyum — 2.70</option>
+            <option value="2.70">Alüminyum 6061 — 2.70</option>
+            <option value="2.80">Alüminyum 7075 — 2.80</option>
+          </optgroup>
+          <optgroup label="Diğer Metaller">
+            <option value="8.96">Bakır — 8.96</option>
+            <option value="8.50">Pirinç — 8.50</option>
+            <option value="8.80">Bronz — 8.80</option>
+            <option value="4.51">Titanyum — 4.51</option>
+            <option value="8.90">Nikel — 8.90</option>
+            <option value="7.13">Çinko — 7.13</option>
+            <option value="11.34">Kurşun — 11.34</option>
+          </optgroup>
+          <optgroup label="Plastik">
+            <option value="1.42">Delrin (POM) — 1.42</option>
+            <option value="1.20">Naylon (PA6) — 1.20</option>
+            <option value="0.96">Polietilen (PE) — 0.96</option>
+            <option value="2.20">PTFE (Teflon) — 2.20</option>
+          </optgroup>
+          <optgroup label="Özel">
+            <option value="custom">Özel yoğunluk gir…</option>
+          </optgroup>
+        </select>
+        <div class="density-tag" id="densityTag">Yoğunluk: 7.85 g/cm³</div>
+      </div>
+      <div class="inp-group" id="customDensWrap" style="display:none">
+        <span class="inp-label">Yoğunluk</span>
+        <div class="inp-wrap">
+          <input type="number" id="customDens" value="7.85" step="0.01" min="0.1">
+          <span class="inp-unit">g/cm³</span>
+        </div>
+      </div>
+    </div>
+    <div class="inp-group" id="lenGroup">
+      <span class="inp-label">Boy (Uzunluk)</span>
+      <div class="len-row">
+        <div class="inp-wrap"><input type="number" id="lenInput" value="1000" min="0"></div>
+        <div class="unit-toggle">
+          <button class="unit-btn on" onclick="setUnit('mm',this)">mm</button>
+          <button class="unit-btn"    onclick="setUnit('m',this)">m</button>
+        </div>
+      </div>
+    </div>
+    <div class="inp-group">
+      <span class="inp-label">Adet</span>
+      <div class="qty-row">
+        <button class="qty-btn" onclick="stepQty(-1)">−</button>
+        <input class="qty-input" type="number" id="qtyInput" value="1" min="1">
+        <button class="qty-btn" onclick="stepQty(1)">+</button>
+      </div>
+    </div>
+    <button class="calc-btn" onclick="calculate()">HESAPLA</button>
+    <div class="result-strip" id="resultStrip">
+      <span class="result-label" id="resultLabel">—</span>
+      <div class="result-vals">
+        <span class="result-main" id="resultMain">—</span>
+        <span class="result-sub"  id="resultSub">—</span>
+      </div>
+      <button class="add-btn" onclick="addToList()">+ Listeye Ekle</button>
+    </div>
+  </div><!-- input-col sonu -->
+  <div class="app-spacer"></div>
+  <!-- SAĞ -->
+  <div class="list-col">
+    <div class="list-header">
+      <span class="list-title">Hesaplamalarım</span>
+      <button class="clear-btn" onclick="clearAll()">Tümünü Sil</button>
+    </div>
+    <div class="list-items" id="listItems">
+      <div class="list-empty" id="listEmpty">
+        <span class="list-empty-icon">📋</span>
+        <span>Henüz hesaplama eklenmedi.<br>Hesapla → Listeye Ekle.</span>
+      </div>
+    </div>
+    <div class="list-total">
+      <div class="total-row">
+        <span class="total-label">Toplam Ağırlık</span>
+        <span class="total-val" id="totalVal">0.000 kg</span>
+      </div>
+      <span class="total-items" id="totalItems">0 kalem · 0 parça</span>
+    </div>
+  </div>
+</div>
+<script>
+// ─── Profil Veritabanı ────────────────────────────────────────
+const PROF = {
+  'kare-boru': {
+    label:'Kare / Dikdörtgen Profil', icon:'⬜',
+    inputs:[
+      {id:'A',label:'A — Genişlik',unit:'mm',default:40},
+      {id:'B',label:'B — Yükseklik',unit:'mm',default:40},
+      {id:'t',label:'t — Et kalınlığı',unit:'mm',default:2},
+    ],
+    area:d=>d.A*d.B-(d.A-2*d.t)*(d.B-2*d.t),
+    labelFn:d=>`${d.A}×${d.B}×${d.t}mm Kare Profil`,
+    formula:'A = A×B − (A−2t)×(B−2t)',
+  },
+  'yuvarlak-boru': {
+    label:'Yuvarlak Boru', icon:'⭕',
+    inputs:[
+      {id:'D',label:'D — Dış çap',unit:'mm',default:50},
+      {id:'t',label:'t — Et kalınlığı',unit:'mm',default:3},
+    ],
+    area:d=>Math.PI/4*(d.D**2-(d.D-2*d.t)**2),
+    labelFn:d=>`Ø${d.D}×${d.t}mm Yuvarlak Boru`,
+    formula:'A = π/4 × (D² − (D−2t)²)',
+  },
+  'dolu-yuvarlak': {
+    label:'Dolu Yuvarlak / Mil', icon:'⚫',
+    inputs:[{id:'D',label:'D — Çap',unit:'mm',default:30}],
+    area:d=>Math.PI/4*d.D**2,
+    labelFn:d=>`Ø${d.D}mm Dolu Yuvarlak`,
+    formula:'A = π/4 × D²',
+  },
+  'dolu-kare': {
+    label:'Dolu Kare / Dikdörtgen', icon:'◼',
+    inputs:[
+      {id:'A',label:'A — Genişlik',unit:'mm',default:40},
+      {id:'B',label:'B — Yükseklik',unit:'mm',default:40},
+    ],
+    area:d=>d.A*d.B,
+    labelFn:d=>`${d.A}×${d.B}mm Dolu`,
+    formula:'A = A × B',
+  },
+  'altikose': {
+    label:'Altıköşe (Hex)', icon:'⬡',
+    inputs:[{id:'S',label:'S — Yüzeyler arası',unit:'mm',default:27}],
+    area:d=>Math.sqrt(3)/2*d.S**2,
+    labelFn:d=>`Hex ${d.S}mm`,
+    formula:'A = (√3/2) × S²',
+  },
+  'kosebent': {
+    label:'Köşebent', icon:'📐',
+    inputs:[
+      {id:'A',label:'A — Uzun kenar',unit:'mm',default:60},
+      {id:'B',label:'B — Kısa kenar',unit:'mm',default:40},
+      {id:'t',label:'t — Et kalınlığı',unit:'mm',default:5},
+    ],
+    area:d=>(d.A+d.B-d.t)*d.t,
+    labelFn:d=>`${d.A}×${d.B}×${d.t}mm Köşebent`,
+    formula:'A = (A + B − t) × t',
+  },
+  'u-profil': {
+    label:'U Profil / Kanal', icon:'⊏',
+    inputs:[
+      {id:'H',label:'H — Yükseklik',unit:'mm',default:100},
+      {id:'B',label:'B — Flanş genişliği',unit:'mm',default:50},
+      {id:'t',label:'t — Et kalınlığı',unit:'mm',default:5},
+    ],
+    area:d=>2*d.B*d.t+(d.H-2*d.t)*d.t,
+    labelFn:d=>`U ${d.H}×${d.B}×${d.t}mm`,
+    formula:'A = 2×B×t + (H−2t)×t',
+  },
+  'lama': {
+    label:'Lama / Düz Çelik', icon:'▬',
+    inputs:[
+      {id:'A',label:'A — Genişlik',unit:'mm',default:50},
+      {id:'t',label:'t — Kalınlık',unit:'mm',default:6},
+    ],
+    area:d=>d.A*d.t,
+    labelFn:d=>`Lama ${d.A}×${d.t}mm`,
+    formula:'A = A × t',
+  },
+  'sac': {
+    label:'Sac / Levha', icon:'📄',
+    inputs:[
+      {id:'A',label:'A — Genişlik',unit:'mm',default:1000},
+      {id:'t',label:'t — Kalınlık',unit:'mm',default:3},
+    ],
+    area:d=>d.A*d.t,
+    labelFn:d=>`Sac ${d.A}×${d.t}mm`,
+    formula:'A = Genişlik × Kalınlık\n(Boy alanından uzunluk girin)',
+  },
+  'ipe': {
+    label:'IPE Profil (Standart)', icon:'𝙄',
+    isStandard:true,
+    stdData:{
+      'IPE 80':{kgm:6.0},'IPE 100':{kgm:8.1},'IPE 120':{kgm:10.4},
+      'IPE 140':{kgm:12.9},'IPE 160':{kgm:15.8},'IPE 180':{kgm:18.8},
+      'IPE 200':{kgm:22.4},'IPE 220':{kgm:26.2},'IPE 240':{kgm:30.7},
+      'IPE 270':{kgm:36.1},'IPE 300':{kgm:42.2},'IPE 330':{kgm:49.1},
+      'IPE 360':{kgm:57.1},'IPE 400':{kgm:66.3},'IPE 450':{kgm:77.6},
+      'IPE 500':{kgm:90.7},'IPE 550':{kgm:106.0},'IPE 600':{kgm:122.0},
+    },
+    labelFn:(d,s)=>s,
+    formula:'Standart S235 çelik\nkg/m tablodan: boy × kg/m',
+  },
+  'heb': {
+    label:'HEB Profil (Standart)', icon:'H',
+    isStandard:true,
+    stdData:{
+      'HEB 100':{kgm:20.4},'HEB 120':{kgm:26.7},'HEB 140':{kgm:33.7},
+      'HEB 160':{kgm:42.6},'HEB 180':{kgm:51.2},'HEB 200':{kgm:61.3},
+      'HEB 220':{kgm:71.5},'HEB 240':{kgm:83.2},'HEB 260':{kgm:93.0},
+      'HEB 280':{kgm:103.0},'HEB 300':{kgm:117.0},'HEB 320':{kgm:127.0},
+      'HEB 340':{kgm:134.0},'HEB 360':{kgm:142.0},'HEB 400':{kgm:155.0},
+      'HEB 450':{kgm:171.0},'HEB 500':{kgm:187.0},'HEB 600':{kgm:212.0},
+    },
+    labelFn:(d,s)=>s,
+    formula:'Standart S235 çelik\nkg/m tablodan: boy × kg/m',
+  },
+};
+
+// ─── Durum ───────────────────────────────────────────────────
+let curProf='kare-boru', unitMode='mm', lastResult=null, listData=[], idCounter=0;
+
+// ─── SVG ÖNİZLEME SİSTEMİ ───────────────────────────────────
+const PW=280, PH=175;
+const DW={x:30,y:24,w:184,h:128}; // çizim penceresi (annotation için boşluk bırakır)
+const FC='rgba(249,115,22,.32)';   // dolgu rengi
+const SC='#f97316';                // kenar rengi
+
+// Yatay ölçü oku
+function hDim(x1,x2,y,txt,col='#60a5fa'){
+  const mx=(x1+x2)/2;
+  return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${col}" stroke-width=".9"/>
+    <polygon points="${x1},${y} ${x1+7},${y-3} ${x1+7},${y+3}" fill="${col}"/>
+    <polygon points="${x2},${y} ${x2-7},${y-3} ${x2-7},${y+3}" fill="${col}"/>
+    <rect x="${mx-txt.length*3}" y="${y-16}" width="${txt.length*6+2}" height="13" fill="#09090f" rx="2"/>
+    <text x="${mx}" y="${y-6}" text-anchor="middle" font-size="10" fill="${col}"
+      font-family="JetBrains Mono,monospace">${txt}</text>`;
+}
+
+// Dikey ölçü oku
+function vDim(y1,y2,x,txt,col='#60a5fa'){
+  const my=(y1+y2)/2;
+  return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${col}" stroke-width=".9"/>
+    <polygon points="${x},${y1} ${x-3},${y1+7} ${x+3},${y1+7}" fill="${col}"/>
+    <polygon points="${x},${y2} ${x-3},${y2-7} ${x+3},${y2-7}" fill="${col}"/>
+    <rect x="${x+5}" y="${my-7}" width="${txt.length*6+4}" height="13" fill="#09090f" rx="2"/>
+    <text x="${x+7}" y="${my+4}" font-size="10" fill="${col}"
+      font-family="JetBrains Mono,monospace">${txt}</text>`;
+}
+
+// Et kalınlığı notu
+function tNote(x,y,txt){
+  return `<text x="${x}" y="${y}" font-size="9.5" fill="#00d4aa"
+    font-family="JetBrains Mono,monospace">${txt}</text>`;
+}
+
+// Yer tutucu
+function ph(t='Ölçüleri giriniz…'){
+  return `<text x="${PW/2}" y="${PH/2}" text-anchor="middle" dominant-baseline="middle"
+    font-size="11" fill="#444468" font-family="DM Sans,sans-serif">${t}</text>`;
+}
+
+// Ölçek hesabı (çizim penceresine sığdır, maks 6px/mm)
+function sc2d(a,b){return Math.min(DW.w/a,DW.h/b,6)}
+
+// ── Çizim Fonksiyonları ──────────────────────────────────────
+
+function dKareBoru(d){
+  const {A,B,t}=d;
+  if(!A||!B||!t) return ph();
+  if(t>=A/2||t>=B/2) return ph('Et kalınlığı çok büyük!');
+  const s=sc2d(A,B), sw=A*s, sh=B*s, st=t*s;
+  const x0=DW.x+(DW.w-sw)/2, y0=DW.y+(DW.h-sh)/2;
+  return `
+    <rect x="${x0}" y="${y0}" width="${sw}" height="${sh}" fill="${FC}" stroke="${SC}" stroke-width="1.8" rx="1"/>
+    <rect x="${x0+st}" y="${y0+st}" width="${sw-2*st}" height="${sh-2*st}"
+      fill="#07070e" stroke="${SC}" stroke-width=".8" stroke-dasharray="3 2" rx="1"/>
+    <line x1="${x0}" y1="${y0+sh/2}" x2="${x0+st}" y2="${y0+sh/2}" stroke="#00d4aa" stroke-width="1.2"/>
+    ${tNote(x0+st+4,y0+sh/2-3,'t='+t+'mm')}
+    ${hDim(x0,x0+sw,y0-12,A+'mm')}
+    ${vDim(y0,y0+sh,x0+sw+14,B+'mm')}`;
+}
+
+function dYuvarlakBoru(d){
+  const {D,t}=d;
+  if(!D||!t) return ph();
+  if(t>=D/2) return ph('Et kalınlığı çok büyük!');
+  const s=Math.min(DW.w/D,DW.h/D,6);
+  const sR=D/2*s, sr=(D/2-t)*s;
+  const cx=DW.x+DW.w/2, cy=DW.y+DW.h/2;
+  return `
+    <circle cx="${cx}" cy="${cy}" r="${sR}" fill="${FC}" stroke="${SC}" stroke-width="1.8"/>
+    <circle cx="${cx}" cy="${cy}" r="${sr}" fill="#07070e" stroke="${SC}" stroke-width=".8" stroke-dasharray="3 2"/>
+    <line x1="${cx-sR}" y1="${cy}" x2="${cx+sR}" y2="${cy}" stroke="#333360" stroke-width=".7" stroke-dasharray="5 3"/>
+    <line x1="${cx}" y1="${cy-sr}" x2="${cx}" y2="${cy-sR}" stroke="#00d4aa" stroke-width="1.2"/>
+    ${tNote(cx+4,cy-sr-4,'t='+t+'mm')}
+    ${hDim(cx-sR,cx+sR,cy+sR+12,'Ø'+D+'mm')}`;
+}
+
+function dDoluYuvarlak(d){
+  const {D}=d;
+  if(!D) return ph();
+  const s=Math.min(DW.w/D,DW.h/D,6);
+  const sR=D/2*s;
+  const cx=DW.x+DW.w/2, cy=DW.y+DW.h/2;
+  return `
+    <circle cx="${cx}" cy="${cy}" r="${sR}" fill="${FC}" stroke="${SC}" stroke-width="1.8"/>
+    <line x1="${cx-sR}" y1="${cy}" x2="${cx+sR}" y2="${cy}" stroke="#333360" stroke-width=".8" stroke-dasharray="5 3"/>
+    ${hDim(cx-sR,cx+sR,cy+sR+12,'Ø'+D+'mm')}`;
+}
+
+function dDoluKare(d){
+  const {A,B}=d;
+  if(!A||!B) return ph();
+  const s=sc2d(A,B), sw=A*s, sh=B*s;
+  const x0=DW.x+(DW.w-sw)/2, y0=DW.y+(DW.h-sh)/2;
+  return `
+    <rect x="${x0}" y="${y0}" width="${sw}" height="${sh}" fill="${FC}" stroke="${SC}" stroke-width="1.8" rx="1"/>
+    ${hDim(x0,x0+sw,y0-12,A+'mm')}
+    ${vDim(y0,y0+sh,x0+sw+14,B+'mm')}`;
+}
+
+function dAltikose(d){
+  const {S}=d;
+  if(!S) return ph();
+  const rFlat=S/2, rVert=S/Math.sqrt(3);
+  const s=Math.min(DW.w/(S*1.16),DW.h/(S*1.16),6);
+  const sRf=rFlat*s, sRv=rVert*s;
+  const cx=DW.x+DW.w/2, cy=DW.y+DW.h/2;
+  const pts=Array.from({length:6},(_,i)=>{
+    const a=Math.PI/6+i*Math.PI/3;
+    return `${cx+sRv*Math.cos(a)},${cy+sRv*Math.sin(a)}`;
+  }).join(' ');
+  return `
+    <polygon points="${pts}" fill="${FC}" stroke="${SC}" stroke-width="1.8"/>
+    <line x1="${cx-sRf}" y1="${cy}" x2="${cx+sRf}" y2="${cy}" stroke="#333360" stroke-width=".7" stroke-dasharray="5 3"/>
+    ${hDim(cx-sRf,cx+sRf,cy+sRv+12,S+'mm (Y/Y)')}`;
+}
+
+function dKosebent(d){
+  const {A,B,t}=d;
+  if(!A||!B||!t||t>=A||t>=B) return ph(!A||!B||!t?undefined:'Et çok büyük!');
+  const md=Math.max(A,B);
+  const s=Math.min(DW.w/md,DW.h/md,5);
+  const sa=A*s, sb=B*s, st=t*s;
+  const x0=DW.x+(DW.w-sa)/2, y0=DW.y+(DW.h-sb)/2;
+  const pts=`${x0},${y0} ${x0+sa},${y0} ${x0+sa},${y0+st} ${x0+st},${y0+st} ${x0+st},${y0+sb} ${x0},${y0+sb}`;
+  return `
+    <polygon points="${pts}" fill="${FC}" stroke="${SC}" stroke-width="1.8"/>
+    <line x1="${x0}" y1="${y0+st/2}" x2="${x0+sa}" y2="${y0+st/2}" stroke="#222244" stroke-width=".8" stroke-dasharray="3 2"/>
+    ${tNote(x0+sa/2-18,y0+st-3,'t='+t+'mm')}
+    ${hDim(x0,x0+sa,y0-12,A+'mm')}
+    ${vDim(y0,y0+sb,x0+sa+14,B+'mm')}`;
+}
+
+function dUProfil(d){
+  const {H:dH,B,t}=d;
+  if(!dH||!B||!t||t>=B||2*t>=dH) return ph(!dH||!B||!t?undefined:'Et çok büyük!');
+  const s=sc2d(B,dH), sh=dH*s, sb=B*s, st=t*s;
+  const x0=DW.x+(DW.w-sb)/2, y0=DW.y+(DW.h-sh)/2;
+  const pts=`${x0},${y0} ${x0+sb},${y0} ${x0+sb},${y0+st} ${x0+st},${y0+st}
+    ${x0+st},${y0+sh-st} ${x0+sb},${y0+sh-st} ${x0+sb},${y0+sh} ${x0},${y0+sh}`;
+  return `
+    <polygon points="${pts}" fill="${FC}" stroke="${SC}" stroke-width="1.8"/>
+    ${tNote(x0+st+6,y0+sh/2+4,'t='+t+'mm')}
+    ${hDim(x0,x0+sb,y0-12,B+'mm')}
+    ${vDim(y0,y0+sh,x0+sb+14,dH+'mm')}`;
+}
+
+function dLama(d){
+  const {A,t}=d;
+  if(!A||!t) return ph();
+  const sW=Math.min(DW.w/A,5);
+  const sw=A*sW, sh=Math.max(t*sW,12);
+  const x0=DW.x+(DW.w-sw)/2, y0=DW.y+(DW.h-sh)/2;
+  return `
+    <rect x="${x0}" y="${y0}" width="${sw}" height="${sh}" fill="${FC}" stroke="${SC}" stroke-width="1.8" rx="1"/>
+    ${hDim(x0,x0+sw,y0-12,A+'mm')}
+    ${vDim(y0,y0+sh,x0+sw+14,t+'mm')}`;
+}
+
+function dIPE(){
+  const sel=document.getElementById('stdSize');
+  if(!sel) return ph('Boyut seçiniz');
+  const size=sel.value;
+  const kgm=PROF['ipe'].stdData[size]?.kgm||0;
+  const num=parseInt(size.split(' ')[1]);
+  const h=num,b=num*0.55,tf=num*0.082,tw=num*0.047;
+  const s=Math.min(DW.w/b,DW.h/h,4);
+  const sh=h*s,sb=b*s,stf=tf*s,stw=tw*s;
+  const x0=DW.x+(DW.w-sb)/2, y0=DW.y+(DW.h-sh)/2;
+  const wx=x0+(sb-stw)/2;
+  return `
+    <rect x="${x0}" y="${y0}" width="${sb}" height="${stf}" fill="${FC}" stroke="${SC}" stroke-width="1.5"/>
+    <rect x="${wx}" y="${y0+stf}" width="${stw}" height="${sh-2*stf}" fill="${FC}" stroke="${SC}" stroke-width="1.5"/>
+    <rect x="${x0}" y="${y0+sh-stf}" width="${sb}" height="${stf}" fill="${FC}" stroke="${SC}" stroke-width="1.5"/>
+    ${hDim(x0,x0+sb,y0-12,Math.round(b)+'mm')}
+    ${vDim(y0,y0+sh,x0+sb+14,num+'mm')}
+    <text x="${PW/2}" y="${PH-3}" text-anchor="middle" font-size="10" fill="#fbbf24"
+      font-family="JetBrains Mono,monospace" font-weight="600">${kgm} kg/m</text>`;
+}
+
+function dHEB(){
+  const sel=document.getElementById('stdSize');
+  if(!sel) return ph('Boyut seçiniz');
+  const size=sel.value;
+  const kgm=PROF['heb'].stdData[size]?.kgm||0;
+  const num=parseInt(size.split(' ')[1]);
+  const h=num,b=num,tf=num*0.10,tw=num*0.065;
+  const s=Math.min(DW.w/b,DW.h/h,3.5);
+  const sh=h*s,sb=b*s,stf=tf*s,stw=tw*s;
+  const x0=DW.x+(DW.w-sb)/2, y0=DW.y+(DW.h-sh)/2;
+  const wx=x0+(sb-stw)/2;
+  return `
+    <rect x="${x0}" y="${y0}" width="${sb}" height="${stf}" fill="${FC}" stroke="${SC}" stroke-width="1.5"/>
+    <rect x="${wx}" y="${y0+stf}" width="${stw}" height="${sh-2*stf}" fill="${FC}" stroke="${SC}" stroke-width="1.5"/>
+    <rect x="${x0}" y="${y0+sh-stf}" width="${sb}" height="${stf}" fill="${FC}" stroke="${SC}" stroke-width="1.5"/>
+    ${hDim(x0,x0+sb,y0-12,num+'mm')}
+    ${vDim(y0,y0+sh,x0+sb+14,num+'mm')}
+    <text x="${PW/2}" y="${PH-3}" text-anchor="middle" font-size="10" fill="#fbbf24"
+      font-family="JetBrains Mono,monospace" font-weight="600">${kgm} kg/m</text>`;
+}
+
+function drawProfileSVG(key,dims){
+  switch(key){
+    case 'kare-boru':     return dKareBoru(dims);
+    case 'yuvarlak-boru': return dYuvarlakBoru(dims);
+    case 'dolu-yuvarlak': return dDoluYuvarlak(dims);
+    case 'dolu-kare':     return dDoluKare(dims);
+    case 'altikose':      return dAltikose(dims);
+    case 'kosebent':      return dKosebent(dims);
+    case 'u-profil':      return dUProfil(dims);
+    case 'lama':          return dLama(dims);
+    case 'sac':           return dLama(dims);
+    case 'ipe':           return dIPE();
+    case 'heb':           return dHEB();
+    default:              return ph();
+  }
+}
+
+function getCurrentDims(){
+  const p=PROF[curProf];
+  if(p.isStandard) return {};
+  const dims={};
+  p.inputs.forEach(inp=>{
+    const el=document.getElementById('inp_'+inp.id);
+    dims[inp.id]=el?parseFloat(el.value)||0:0;
+  });
+  return dims;
+}
+
+function updatePreview(){
+  document.getElementById('profPreview').innerHTML=drawProfileSVG(curProf,getCurrentDims());
+}
+
+// ─── Profil Seçimi ───────────────────────────────────────────
+(function init(){
+  const list=document.getElementById('profList');
+  for(const key in PROF){
+    const p=PROF[key];
+    const btn=document.createElement('button');
+    btn.className='prof-btn'+(key===curProf?' active':'');
+    btn.innerHTML=`<span class="prof-icon">${p.icon}</span>${p.label}`;
+    btn.onclick=()=>selectProf(key);
+    btn.dataset.key=key;
+    list.appendChild(btn);
+  }
+  selectProf(curProf);
+})();
+
+function selectProf(key){
+  curProf=key;
+  document.querySelectorAll('.prof-btn').forEach(b=>b.classList.toggle('active',b.dataset.key===key));
+  const p=PROF[key];
+  document.getElementById('prevTitle').textContent=p.label;
+  document.getElementById('prevFormula').textContent=p.formula;
+
+  const wrap=document.getElementById('inputsWrap');
+  if(p.isStandard){
+    wrap.innerHTML=`
+      <div class="inp-group std-select-group">
+        <span class="inp-label">Profil Boyutu</span>
+        <select id="stdSize">
+          ${Object.keys(p.stdData).map(k=>`<option value="${k}">${k} — ${p.stdData[k].kgm} kg/m</option>`).join('')}
+        </select>
+      </div>`;
+    document.getElementById('matSelect').parentElement.parentElement.style.opacity='0.4';
+  } else {
+    const cols='1fr';
+    wrap.innerHTML=`
+      <div class="inputs-grid" style="grid-template-columns:${cols}">
+        ${p.inputs.map(inp=>`
+          <div class="inp-group">
+            <span class="inp-label">${inp.label}</span>
+            <div class="inp-wrap">
+              <input type="number" id="inp_${inp.id}" value="${inp.default}" min="0" step="0.1">
+              <span class="inp-unit">${inp.unit}</span>
+            </div>
+          </div>`).join('')}
+      </div>`;
+    document.getElementById('matSelect').parentElement.parentElement.style.opacity='1';
+  }
+
+  // Canlı güncelleme için event listener ekle
+  setTimeout(()=>{
+    document.querySelectorAll('#inputsWrap input,#inputsWrap select').forEach(el=>{
+      el.addEventListener('input',updatePreview);
+      el.addEventListener('change',updatePreview);
+    });
+    updatePreview();
+  },10);
+
+  document.getElementById('resultStrip').classList.remove('show');
+  lastResult=null;
+}
+
+// ─── Malzeme ─────────────────────────────────────────────────
+function onMat(){
+  const sel=document.getElementById('matSelect');
+  const cw=document.getElementById('customDensWrap');
+  if(sel.value==='custom'){cw.style.display='block';document.getElementById('densityTag').textContent='Özel yoğunluk';}
+  else{cw.style.display='none';document.getElementById('densityTag').textContent=`Yoğunluk: ${sel.value} g/cm³`;}
+}
+function getDensity(){
+  const sel=document.getElementById('matSelect');
+  return sel.value==='custom'?(parseFloat(document.getElementById('customDens').value)||7.85):parseFloat(sel.value);
+}
+function getMatName(){
+  const sel=document.getElementById('matSelect');
+  return sel.options[sel.selectedIndex].text.split(' —')[0];
+}
+
+// ─── Boy & Birim ─────────────────────────────────────────────
+function setUnit(u,btn){
+  unitMode=u;
+  document.querySelectorAll('.unit-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function getLengthMm(){
+  const v=parseFloat(document.getElementById('lenInput').value)||0;
+  return unitMode==='m'?v*1000:v;
+}
+
+// ─── Adet ────────────────────────────────────────────────────
+function stepQty(delta){
+  const inp=document.getElementById('qtyInput');
+  inp.value=Math.max(1,(parseInt(inp.value)||1)+delta);
+}
+
+// ─── Hesaplama ───────────────────────────────────────────────
+function calculate(){
+  const p=PROF[curProf];
+  const qty=parseInt(document.getElementById('qtyInput').value)||1;
+  const L=getLengthMm();
+  let wpp,itemLabel,matLabel;
+
+  if(p.isStandard){
+    const size=document.getElementById('stdSize').value;
+    const kgm=p.stdData[size].kgm;
+    wpp=kgm*L/1000;
+    itemLabel=p.labelFn({},size);
+    matLabel='S235 Yapısal Çelik';
+  } else {
+    const dims={};let valid=true;
+    p.inputs.forEach(inp=>{
+      const v=parseFloat(document.getElementById('inp_'+inp.id).value);
+      if(!v||v<=0)valid=false;
+      dims[inp.id]=v;
+    });
+    if(!valid||L<=0){alert('Lütfen tüm ölçüleri ve boyu doğru girin.');return;}
+    if(dims.t&&dims.A&&dims.t>=dims.A/2){alert('Et kalınlığı çok büyük!');return;}
+    if(dims.t&&dims.B&&dims.t>=dims.B/2){alert('Et kalınlığı çok büyük!');return;}
+    const area=p.area(dims);
+    wpp=area*L*getDensity()/1_000_000;
+    itemLabel=p.labelFn(dims);
+    matLabel=getMatName();
+  }
+
+  const tw=wpp*qty;
+  const lenD=L>=1000?`${(L/1000).toFixed(3)}m`:`${L}mm`;
+  lastResult={label:itemLabel,mat:matLabel,weightPerPiece:wpp,qty,totalWeight:tw,L:lenD};
+
+  const strip=document.getElementById('resultStrip');
+  strip.classList.add('show');
+  document.getElementById('resultLabel').textContent=`${itemLabel} · ${matLabel} · L=${lenD} · ${qty} adet`;
+  document.getElementById('resultMain').textContent=`${tw.toFixed(3)} kg`;
+  document.getElementById('resultSub').textContent=qty>1?`(${wpp.toFixed(3)} kg/adet)`:'';
+}
+
+// ─── Liste ───────────────────────────────────────────────────
+function addToList(){
+  if(!lastResult)return;
+  listData.push({id:++idCounter,...lastResult});
+  renderList();
+}
+function removeItem(id){listData=listData.filter(x=>x.id!==id);renderList();}
+function clearAll(){
+  if(listData.length&&!confirm('Tüm hesaplamalar silinecek. Emin misiniz?'))return;
+  listData=[];renderList();
+}
+function renderList(){
+  const container=document.getElementById('listItems');
+  const empty=document.getElementById('listEmpty');
+  if(!listData.length){
+    container.innerHTML='';container.appendChild(empty);
+    document.getElementById('totalVal').textContent='0.000 kg';
+    document.getElementById('totalItems').textContent='0 kalem · 0 parça';
+    return;
+  }
+  const tw=listData.reduce((s,x)=>s+x.totalWeight,0);
+  const tp=listData.reduce((s,x)=>s+x.qty,0);
+  document.getElementById('totalVal').textContent=`${tw.toFixed(3)} kg`;
+  document.getElementById('totalItems').textContent=`${listData.length} kalem · ${tp} parça`;
+  container.innerHTML=listData.map(item=>`
+    <div class="list-item" id="li-${item.id}">
+      <div class="li-top">
+        <span class="li-name">${item.label}</span>
+        <button class="li-del" onclick="removeItem(${item.id})" title="Sil">✕</button>
+      </div>
+      <div class="li-detail">${item.mat} · L=${item.L} · ${item.qty} adet</div>
+      <div class="li-weight">
+        ${item.totalWeight.toFixed(3)} kg
+        ${item.qty>1?`<span class="li-weight-sub">  ${item.weightPerPiece.toFixed(3)} kg/adet</span>`:''}
+      </div>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
