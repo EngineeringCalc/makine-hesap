@@ -51,13 +51,13 @@ nav {
 }
 .brand {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 20px; letter-spacing: 3px;
+  font-size: var(--fz-20); letter-spacing: 3px;
   color: var(--orange); text-decoration: none;
   display: flex; align-items: center; gap: 8px;
 }
 .brand em { color: var(--text); font-style: normal; }
 .nav-tag {
-  font-size: 11px; color: var(--dim2);
+  font-size: var(--fz-11); color: var(--dim2);
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -70,26 +70,26 @@ nav {
 }
 .hero-eyebrow {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px; color: var(--orange);
+  font-size: var(--fz-11); color: var(--orange);
   letter-spacing: 3px; text-transform: uppercase;
   margin-bottom: 20px;
 }
 .hero-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(48px, 8vw, 80px);
+  font-size: clamp(72px, 8vw, 120px);
   letter-spacing: 4px; line-height: 1;
   color: var(--text); margin-bottom: 20px;
 }
 .hero-title span { color: var(--orange); }
 .hero-sub {
-  font-size: 15px; color: var(--dim2); line-height: 1.7;
+  font-size: var(--fz-15); color: var(--dim2); line-height: 1.7;
   max-width: 520px; margin: 0 auto 40px;
 }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
   background: var(--surf2); border: 1px solid var(--border);
   border-radius: 100px; padding: 8px 18px;
-  font-size: 12px; color: var(--teal);
+  font-size: var(--fz-12); color: var(--teal);
   font-family: 'JetBrains Mono', monospace;
 }
 .hero-badge::before { content:''; width:7px; height:7px;
@@ -107,7 +107,7 @@ nav {
 }
 .section-label {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px; letter-spacing: 3px;
+  font-size: var(--fz-11); letter-spacing: 3px;
   color: var(--dim); text-transform: uppercase;
   margin-bottom: 20px;
   display: flex; align-items: center; gap: 12px;
@@ -138,7 +138,7 @@ nav {
   background: var(--card-accent, var(--dim));
   opacity: 0.6; transition: opacity .2s;
 }
-.card:hover { border-color: var(--card-accent,var(--dim));
+.card:hover { border-color: var(--card-accent,var(--dim));  
   transform: translateY(-2px);
   box-shadow: 0 12px 40px rgba(0,0,0,.4); }
 .card:hover::before { opacity:1; }
@@ -151,16 +151,16 @@ nav {
   width: 42px; height: 42px; border-radius: 10px;
   background: rgba(255,255,255,0.04);
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px; margin-bottom: 16px;
+  font-size: var(--fz-20); margin-bottom: 16px;
 }
 .card-name {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 18px; font-weight: 700;
+  font-size: var(--fz-18); font-weight: 700;
   letter-spacing: .5px; margin-bottom: 6px;
   color: var(--text);
 }
 .card-desc {
-  font-size: 12px; color: var(--dim2); line-height: 1.6;
+  font-size: var(--fz-12); color: var(--dim2); line-height: 1.6;
   margin-bottom: 20px;
 }
 .card-foot {
@@ -169,10 +169,10 @@ nav {
 }
 .card-std {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px; color: var(--dim);
+  font-size: var(--fz-10); color: var(--dim);
 }
 .badge {
-  font-size: 10px; font-family: 'JetBrains Mono', monospace;
+  font-size: var(--fz-10); font-family: 'JetBrains Mono', monospace;
   padding: 3px 8px; border-radius: 4px;
   font-weight: 600; letter-spacing: .5px;
 }
@@ -194,7 +194,7 @@ footer {
   border-top: 1px solid var(--border);
   padding: 24px 32px;
   text-align: center;
-  font-size: 12px; color: var(--dim);
+  font-size: var(--fz-12); color: var(--dim);
   font-family: 'JetBrains Mono', monospace;
 }
 </style>
@@ -213,7 +213,7 @@ footer {
     Makine mühendisleri için açık kaynak hesaplama araçları.
     Diş standartları, konveyör, redüktör, dişli hesapları ve daha fazlası.
   </p>
-  <span class="hero-badge">3 araç yayında</span>
+  <span class="hero-badge">4 araç yayında</span>
 </div>
 
 <div class="grid-section">
@@ -301,6 +301,22 @@ footer {
         <span class="badge badge-soon">YAKINDA</span>
       </div>
     </div>
+
+
+    <a class="card-link" href="tolerans.html">
+      <div class="card active" style="--card-accent:#a78bfa">
+        <div class="card-icon">📏</div>
+        <div class="card-name">ISO Toleranslar</div>
+        <p class="card-desc">
+          Çap girin, delik veya mil seçin — ES/EI, maks/min boyutlar,
+          IT değeri ve H7/g6 · H7/k6 · H7/p6 gibi hazır uyum analizleri.
+        </p>
+        <div class="card-foot">
+          <span class="card-std">ISO 286-1</span>
+          <span class="badge badge-live">CANLI</span>
+        </div>
+      </div>
+    </a>
 
     <a class="card-link" href="civata.html">
       <div class="card active" style="--card-accent:#00d4aa">
