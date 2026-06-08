@@ -4,32 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cıvata Sıkma Torku — MH Platform</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mh-tokens.css">
   <style>
     /* ── DESIGN TOKENS ─────────────────────────────────── */
-    :root {
-      --bg:     #07070e;
-      --bg2:    #0c0c18;
-      --surf1:  #101020;
-      --surf2:  #17172a;
-      --surf3:  #1e1e34;
-      --border: rgba(255,255,255,0.06);
-      --text:   #dde1f0;
-      --dim:    #52527a;
-      --dim2:   #8080a8;
-      --accent: #f97316;
-      --teal:   #00d4aa;
-      --blue:   #60a5fa;
-      --yellow: #fbbf24;
-      --green:  #4ade80;
-      --red:    #f87171;
-      --purple: #a78bfa;
-      --font-h: 'Barlow Condensed', sans-serif;
-      --font-m: 'JetBrains Mono', monospace;
-      --font-b: 'DM Sans', sans-serif;
-    }
+
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow: hidden; }
@@ -66,12 +44,12 @@
     }
     .brand {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 18px; letter-spacing: 3px;
+      font-size: var(--fz-18); letter-spacing: 3px;
       color: var(--accent); text-decoration: none;
     }
     .brand em { color: var(--text); font-style: normal; }
     .breadcrumb {
-      font-size: 12px; color: var(--dim2);
+      font-size: var(--fz-12); color: var(--dim2);
       font-family: var(--font-m);
       display: flex; align-items: center; gap: 8px;
     }
@@ -97,7 +75,7 @@
 
     .sec-label {
       font-family: var(--font-h);
-      font-size: 13px; letter-spacing: 2px;
+      font-size: var(--fz-13); letter-spacing: 2px;
       color: #9090c0; text-transform: uppercase;
       padding: 14px 14px 8px;
     }
@@ -108,7 +86,7 @@
       background: transparent;
       border: none; border-left: 3px solid transparent;
       color: var(--dim2);
-      font-family: var(--font-b); font-size: 12.5px;
+      font-family: var(--font-b); font-size: calc(12.5px * var(--fz));
       cursor: pointer; text-align: left;
       transition: all 0.15s;
     }
@@ -122,7 +100,7 @@
       border-radius: 50%; flex-shrink: 0;
     }
     .sb-btn .sb-info { display: flex; flex-direction: column; }
-    .sb-btn .sb-sub { font-size: 10px; color: var(--dim); margin-top: 1px; }
+    .sb-btn .sb-sub { font-size: var(--fz-10); color: var(--dim); margin-top: 1px; }
     .sb-btn.active .sb-sub { color: var(--dim2); }
 
     .sb-divider { height: 1px; background: var(--border); margin: 12px 14px; }
@@ -133,7 +111,7 @@
       background: transparent;
       border: none; border-left: 3px solid transparent;
       color: var(--dim2);
-      font-family: var(--font-m); font-size: 13px;
+      font-family: var(--font-m); font-size: var(--fz-13);
       cursor: pointer; text-align: left;
       transition: all 0.15s;
     }
@@ -142,7 +120,7 @@
       background: var(--surf1); color: var(--text);
       font-weight: 600; border-left-color: var(--accent);
     }
-    .sz-btn .sz-as { font-size: 10px; color: var(--dim); }
+    .sz-btn .sz-as { font-size: var(--fz-10); color: var(--dim); }
     .sz-btn.active .sz-as { color: var(--dim2); }
 
     /* ── MAIN CONTENT ──────────────────────────────────── */
@@ -162,15 +140,15 @@
       justify-content: space-between; gap: 8px;
     }
     .page-title {
-      font-family: var(--font-h); font-size: 20px;
+      font-family: var(--font-h); font-size: var(--fz-20);
       font-weight: 700; letter-spacing: 1px;
     }
     .page-sub {
-      font-size: 11px; color: var(--dim2);
+      font-size: var(--fz-11); color: var(--dim2);
       font-family: var(--font-m); margin-top: 3px;
     }
     .size-badge {
-      font-family: var(--font-m); font-size: 24px;
+      font-family: var(--font-m); font-size: var(--fz-24);
       font-weight: 600; color: var(--accent); line-height: 1;
     }
 
@@ -197,11 +175,11 @@
       justify-content: space-between; margin-bottom: 10px;
     }
     .sec-ttl {
-      font-family: var(--font-h); font-size: 13px;
+      font-family: var(--font-h); font-size: var(--fz-13);
       letter-spacing: 2px; color: #9090c0; text-transform: uppercase;
     }
     .sec-tag {
-      font-family: var(--font-m); font-size: 11px; color: var(--dim2);
+      font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2);
     }
 
     /* ── GRADE BUTTONS ─────────────────────────────────── */
@@ -222,8 +200,8 @@
       display: flex; flex-direction: column;
       align-items: center; gap: 3px;
     }
-    .g-btn .g-num { font-size: 13px; font-weight: 600; }
-    .g-btn .g-rm  { font-size: 9px; color: var(--dim); }
+    .g-btn .g-num { font-size: var(--fz-13); font-weight: 600; }
+    .g-btn .g-rm  { font-size: var(--fz-9); color: var(--dim); }
     .g-btn:hover  { background: var(--surf3); color: var(--text); }
     .g-btn.active {
       border-color: var(--gc);
@@ -250,8 +228,8 @@
       display: flex; flex-direction: column;
       align-items: center; gap: 2px;
     }
-    .mu-btn .mu-v { font-size: 14px; font-weight: 600; }
-    .mu-btn .mu-d { font-size: 9px; color: var(--dim); }
+    .mu-btn .mu-v { font-size: var(--fz-14); font-weight: 600; }
+    .mu-btn .mu-d { font-size: var(--fz-9); color: var(--dim); }
     .mu-btn:hover { background: var(--surf3); color: var(--text); }
     .mu-btn.active {
       border-color: var(--teal);
@@ -273,17 +251,17 @@
       padding: 12px 14px;
     }
     .res-lbl {
-      font-family: var(--font-h); font-size: 11px;
+      font-family: var(--font-h); font-size: var(--fz-11);
       letter-spacing: 1.5px; color: var(--dim2);
       text-transform: uppercase;
     }
     .res-val {
-      font-family: var(--font-m); font-size: 22px;
+      font-family: var(--font-m); font-size: var(--fz-22);
       font-weight: 600; color: var(--teal);
       margin: 4px 0 2px;
     }
     .res-val.blue { color: var(--blue); }
-    .res-unit { font-family: var(--font-m); font-size: 11px; color: var(--dim2); }
+    .res-unit { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); }
 
     /* ── INFO NOTE ─────────────────────────────────────── */
     .info-box {
@@ -293,12 +271,11 @@
       border: 1px solid rgba(251,191,36,0.2);
       border-radius: 8px;
       color: #f0cc80;
-      font-size: 11px; line-height: 1.75;
+      font-size: var(--fz-11); line-height: 1.75;
     }
     .info-box strong { color: var(--yellow); font-family: var(--font-m); }
 
     /* ── SPACER & RIGHT PANEL ──────────────────────────── */
-    .spacer { flex: 1; }
 
     .right-panel {
       background: var(--bg2);
@@ -314,7 +291,7 @@
       justify-content: space-between; flex-shrink: 0;
     }
     .rp-title {
-      font-family: var(--font-h); font-size: 15px;
+      font-family: var(--font-h); font-size: var(--fz-15);
       font-weight: 700; letter-spacing: 1px;
     }
     .rp-body { flex: 1; overflow-y: auto; }
@@ -327,7 +304,7 @@
       border-bottom: 1px solid var(--border);
     }
     .spec-grp-title {
-      font-family: var(--font-h); font-size: 11px;
+      font-family: var(--font-h); font-size: var(--fz-11);
       letter-spacing: 2px; color: var(--dim2);
       text-transform: uppercase; margin-bottom: 8px;
     }
@@ -335,27 +312,27 @@
       display: flex; justify-content: space-between;
       align-items: baseline; padding: 4px 0;
     }
-    .spec-name { font-family: var(--font-b); font-size: 12px; color: var(--dim2); }
-    .spec-val  { font-family: var(--font-m); font-size: 13px; font-weight: 600; color: var(--text); }
-    .spec-val.teal  { color: var(--teal); font-size: 15px; }
+    .spec-name { font-family: var(--font-b); font-size: var(--fz-12); color: var(--dim2); display: flex; align-items: center; gap: 5px; }
+    .spec-val  { font-family: var(--font-m); font-size: var(--fz-13); font-weight: 600; color: var(--text); }
+    .spec-val.teal  { color: var(--teal); font-size: var(--fz-15); }
     .spec-val.blue  { color: var(--blue); }
     .spec-val.ylw   { color: var(--yellow); }
 
     /* ── MU COMPARISON TABLE ───────────────────────────── */
     .mu-tbl { width: 100%; border-collapse: collapse; }
     .mu-tbl th {
-      font-family: var(--font-h); font-size: 11px; letter-spacing: 1px;
+      font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 1px;
       color: var(--dim2); text-transform: uppercase;
       padding: 6px 16px; text-align: left;
       border-bottom: 1px solid var(--border);
     }
     .mu-tbl td {
-      font-family: var(--font-m); font-size: 12px;
+      font-family: var(--font-m); font-size: var(--fz-12);
       color: var(--text); padding: 7px 16px;
     }
     .mu-tbl tr:not(:last-child) td { border-bottom: 1px solid rgba(255,255,255,0.03); }
     .mu-tbl tr.sel td   { background: rgba(0,212,170,0.05); }
-    .mu-tbl tr.sel .ma-v { color: var(--teal); font-weight: 600; font-size: 14px; }
+    .mu-tbl tr.sel .ma-v { color: var(--teal); font-weight: 600; font-size: var(--fz-14); }
     .mu-tbl tr.sel .mu-l { color: var(--teal); }
 
     /* ── EMPTY STATE ───────────────────────────────────── */
@@ -365,11 +342,11 @@
       gap: 10px; padding: 32px; text-align: center;
     }
     .empty-st .ei { font-size: 28px; opacity: 0.22; }
-    .empty-st p   { font-family: var(--font-m); font-size: 11px; color: var(--dim); line-height: 1.75; }
+    .empty-st p   { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim); line-height: 1.75; }
 
     /* ── BADGE CHIPS ───────────────────────────────────── */
     .chip {
-      font-family: var(--font-m); font-size: 10px;
+      font-family: var(--font-m); font-size: var(--fz-10);
       padding: 3px 8px; border-radius: 4px;
       font-weight: 600; letter-spacing: 0.5px;
     }
@@ -380,10 +357,39 @@
 
     /* Formula block */
     .formula-block {
-      font-family: var(--font-m); font-size: 10px;
+      font-family: var(--font-m); font-size: var(--fz-10);
       color: var(--dim2); line-height: 2;
     }
     .formula-block .hi { color: var(--teal); }
+
+    /* ── TOOLTIPS ──────────────────────────────────────── */
+    .tip-i {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 13px; height: 13px; flex-shrink: 0;
+      border-radius: 50%;
+      border: 1px solid var(--dim);
+      color: var(--dim);
+      font-family: var(--font-m);
+      font-size: 8px; font-style: normal;
+      cursor: help; line-height: 1;
+      transition: border-color 0.15s, color 0.15s;
+      user-select: none;
+    }
+    .tip-i:hover { border-color: var(--teal); color: var(--teal); }
+
+    .global-tip {
+      position: fixed; display: none;
+      max-width: 210px;
+      padding: 9px 13px;
+      background: var(--surf2);
+      border: 1px solid rgba(0,212,170,0.22);
+      border-radius: 8px;
+      font-family: var(--font-b);
+      font-size: var(--fz-11); color: var(--dim2); line-height: 1.6;
+      z-index: 9999; pointer-events: none;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+      white-space: pre-line;
+    }
   </style>
 </head>
 <body>
@@ -404,10 +410,6 @@
   <aside class="sidebar">
     <div class="sec-label">Standart</div>
 
-    <button class="sb-btn active" data-std="iso" onclick="selStd(this)">
-      <span class="dot" style="background:#60a5fa"></span>
-      <div class="sb-info">ISO 898-1<span class="sb-sub">Hex Cıvata</span></div>
-    </button>
     <button class="sb-btn" data-std="din931" onclick="selStd(this)">
       <span class="dot" style="background:#a78bfa"></span>
       <div class="sb-info">DIN 931 / 933<span class="sb-sub">Hex Cıvata</span></div>
@@ -507,7 +509,6 @@
     </div>
   </main>
 
-  <div class="spacer"></div>
 
   <!-- ─── RIGHT PANEL ───────────────────────────────── -->
   <aside class="right-panel">
@@ -569,7 +570,7 @@ const GRADES = {
 };
 
 const STDS = {
-  iso:    {lbl:'ISO 898-1',   head:'hex',    cls:'iso',  name:'Altıköşe Cıvata (ISO 4014/4017)'},
+
   din931: {lbl:'DIN 931/933', head:'hex',    cls:'din',  name:'Altıköşe Cıvata (DIN)'},
   din912: {lbl:'DIN 912',     head:'socket', cls:'teal', name:'Silindir Başlı Allen Cıvata'},
   din976: {lbl:'DIN 976',     head:'stud',   cls:'org',  name:'Şaplı Cıvata / Rötör'},
@@ -585,7 +586,7 @@ const MU_LABELS = {
 /* ════════════════════════════════════════════════════
    STATE
    ════════════════════════════════════════════════════ */
-let curStd   = 'iso';
+let curStd   = 'din931';
 let curSize  = 'M12';
 let curGrade = '8.8';
 let curMu    = 0.10;
@@ -741,31 +742,31 @@ function renderPanel(bolt, gp, calc) {
     <div class="spec-grp">
       <div class="spec-grp-title">Geometrik Parametreler</div>
       <div class="spec-row">
-        <span class="spec-name">d — Anma Çapı</span>
+        <span class="spec-name">d — Anma Çapı ${t('d')}</span>
         <span class="spec-val blue">${bolt.d} mm</span>
       </div>
       <div class="spec-row">
-        <span class="spec-name">p — Diş Adımı</span>
+        <span class="spec-name">p — Diş Adımı ${t('p')}</span>
         <span class="spec-val">${bolt.p} mm</span>
       </div>
       <div class="spec-row">
-        <span class="spec-name">d₂ — Flank Çapı</span>
+        <span class="spec-name">d₂ — Flank Çapı ${t('d2')}</span>
         <span class="spec-val">${bolt.d2.toFixed(3)} mm</span>
       </div>
       <div class="spec-row">
-        <span class="spec-name">d₃ — Dip Çapı</span>
+        <span class="spec-name">d₃ — Dip Çapı ${t('d3')}</span>
         <span class="spec-val">${bolt.d3.toFixed(3)} mm</span>
       </div>
       <div class="spec-row">
-        <span class="spec-name">As — Gerilim Alanı</span>
+        <span class="spec-name">As — Gerilim Alanı ${t('As')}</span>
         <span class="spec-val ylw">${bolt.As} mm²</span>
       </div>
       <div class="spec-row">
-        <span class="spec-name">${dimLabel.split(' (')[0]}</span>
+        <span class="spec-name">${dimLabel.split(' (')[0]} ${t(std.head === 'socket' ? 'dk' : 's')}</span>
         <span class="spec-val">${std.head === 'socket' ? bolt.dk : bolt.s} mm</span>
       </div>
       <div class="spec-row">
-        <span class="spec-name">DKm — Ort. Oturma Çapı</span>
+        <span class="spec-name">DKm — Ort. Oturma Çapı ${t('DKm')}</span>
         <span class="spec-val">${calc.DKm.toFixed(1)} mm</span>
       </div>
     </div>
@@ -774,24 +775,24 @@ function renderPanel(bolt, gp, calc) {
     <div class="spec-grp">
       <div class="spec-grp-title">Malzeme Özellikleri — Sınıf ${curGrade}</div>
       <div class="spec-row">
-        <span class="spec-name">Rp0.2 — Akma Sınırı</span>
+        <span class="spec-name">Rp0.2 — Akma Sınırı ${t('Rp')}</span>
         <span class="spec-val" style="color:${gcol}">${gp.Rp} MPa</span>
       </div>
       <div class="spec-row">
-        <span class="spec-name">Rm — Çekme Mukavemeti</span>
+        <span class="spec-name">Rm — Çekme Mukavemeti ${t('Rm')}</span>
         <span class="spec-val" style="color:${gcol}">${gp.Rm} MPa</span>
       </div>
       <div class="spec-row">
-        <span class="spec-name">Sp — İspat Yükü Gerilmesi</span>
+        <span class="spec-name">Sp — İspat Yükü Gerilmesi ${t('Sp')}</span>
         <span class="spec-val">${gp.Sp} MPa</span>
       </div>
       <div class="spec-row">
-        <span class="spec-name">ν — Kullanım Faktörü</span>
+        <span class="spec-name">ν — Kullanım Faktörü ${t('nu')}</span>
         <span class="spec-val">0.90</span>
       </div>
       <div class="spec-row">
         <span class="spec-name">Standart</span>
-        <span class="spec-val" style="font-size:11px;color:var(--dim2)">${gp.std}</span>
+        <span class="spec-val" style="font-size: var(--fz-11);color:var(--dim2)">${gp.std}</span>
       </div>
     </div>
 
@@ -799,23 +800,23 @@ function renderPanel(bolt, gp, calc) {
     <div class="spec-grp">
       <div class="spec-grp-title">Hesap Sonuçları (μ = ${curMu.toFixed(2)})</div>
       <div class="spec-row">
-        <span class="spec-name">FM — Ön Yükleme Kuvveti</span>
+        <span class="spec-name">FM — Ön Yükleme Kuvveti ${t('FM')}</span>
         <span class="spec-val blue">${calc.FM.toFixed(2)} kN</span>
       </div>
       <div class="spec-row">
         <span class="spec-name">FM — Ön Yükleme Kuvveti</span>
-        <span class="spec-val" style="color:var(--dim2);font-size:11px">${(calc.FM * 1000).toFixed(0)} N</span>
+        <span class="spec-val" style="color:var(--dim2);font-size: var(--fz-11)">${(calc.FM * 1000).toFixed(0)} N</span>
       </div>
       <div class="spec-row">
-        <span class="spec-name">MG — Diş Torku</span>
+        <span class="spec-name">MG — Diş Torku ${t('MG')}</span>
         <span class="spec-val">${calc.MG.toFixed(1)} N·m</span>
       </div>
       <div class="spec-row">
-        <span class="spec-name">MK — Oturma Torku</span>
+        <span class="spec-name">MK — Oturma Torku ${t('MK')}</span>
         <span class="spec-val">${calc.MK.toFixed(1)} N·m</span>
       </div>
       <div class="spec-row">
-        <span class="spec-name">MA — Toplam Sıkma Torku</span>
+        <span class="spec-name">MA — Toplam Sıkma Torku ${t('MA')}</span>
         <span class="spec-val teal">${calc.MA.toFixed(1)} N·m</span>
       </div>
     </div>
@@ -833,7 +834,7 @@ function renderPanel(bolt, gp, calc) {
           ${muRows.map(r => `
             <tr class="${r.mu === curMu ? 'sel' : ''}">
               <td class="mu-l">${r.mu.toFixed(2)}</td>
-              <td style="color:var(--dim);font-size:10px">${MU_LABELS[r.mu.toFixed(2)]}</td>
+              <td style="color:var(--dim);font-size: var(--fz-10)">${MU_LABELS[r.mu.toFixed(2)]}</td>
               <td>${r.FM.toFixed(2)}</td>
               <td class="ma-v">${r.MA.toFixed(1)}</td>
             </tr>`).join('')}
@@ -976,6 +977,12 @@ function drawBolt() {
 
   // ── ANNOTATIONS ───────────────────────────────────────
   // d: diameter — shaft area
+  // ── SVG Yazı Boyutları ──────────────────────────────────
+  const SF = {
+    ann:  13,   // d=, p=, SW= ölçü yazıları  (eskiden 8–9)
+    lbl:  13,   // ISO / As= köşe etiketleri   (eskiden 9)
+    wm:   60,   // filigran M12                (eskiden 40)
+  };
   const annX = shaftStart + shaftW * 0.55;
   const dAnn = `
     <line x1="${annX}" y1="${cy-bR-1}" x2="${annX}" y2="${cy-bR-11}" stroke="${BC}" stroke-width="0.6" opacity="0.6"/>
@@ -984,7 +991,7 @@ function drawBolt() {
       stroke="${BC}" stroke-width="1" opacity="0.85"
       marker-start="url(#ab-s)" marker-end="url(#ab-e)"/>
     <text x="${annX+4}" y="${cy-1}"
-      font-family="'JetBrains Mono',monospace" font-size="9" fill="${BC}">d=${bolt.d}</text>`;
+      font-family="'JetBrains Mono',monospace" font-size="${SF.ann}" fill="${BC}">d=${bolt.d}</text>`;
 
   // p: pitch — above first tooth
   const pAnn = pitchPx > 8 ? `
@@ -996,7 +1003,7 @@ function drawBolt() {
       stroke="${TC}" stroke-width="0.8" opacity="0.85"
       marker-start="url(#at-s)" marker-end="url(#at-e)"/>
     <text x="${thrStart+pitchPx/2}" y="${cy-bR-14}" text-anchor="middle"
-      font-family="'JetBrains Mono',monospace" font-size="8" fill="${TC}">p=${bolt.p}</text>` : '';
+      font-family="'JetBrains Mono',monospace" font-size="${SF.ann}" fill="${TC}">p=${bolt.p}</text>` : '';
 
   // head dimension annotation (SW for hex, dk for socket)
   let hAnn = '';
@@ -1009,7 +1016,7 @@ function drawBolt() {
         stroke="${DC2}" stroke-width="0.7" opacity="0.55"
         marker-start="url(#ad-s)" marker-end="url(#ad-e)"/>
       <text x="${(x0+x0+hW)/2}" y="${ay-2}" text-anchor="middle"
-        font-family="'JetBrains Mono',monospace" font-size="8" fill="${DC2}">SW${bolt.s}</text>`;
+        font-family="'JetBrains Mono',monospace" font-size="${SF.ann}" fill="${DC2}">SW${bolt.s}</text>`;
   } else if (std.head === 'socket' && hW > 10) {
     const ay = cy - dkR - 9;
     hAnn = `
@@ -1019,7 +1026,7 @@ function drawBolt() {
         stroke="${DC2}" stroke-width="0.7" opacity="0.55"
         marker-start="url(#ad-s)" marker-end="url(#ad-e)"/>
       <text x="${(x0+x0+hW)/2}" y="${ay-2}" text-anchor="middle"
-        font-family="'JetBrains Mono',monospace" font-size="8" fill="${DC2}">dk=${bolt.dk}</text>`;
+        font-family="'JetBrains Mono',monospace" font-size="${SF.ann}" fill="${DC2}">dk=${bolt.dk}</text>`;
   }
 
   // ── ASSEMBLE SVG ──────────────────────────────────────
@@ -1039,15 +1046,7 @@ function drawBolt() {
         <path d="M0,0 L8,4 L0,8Z" fill="${DC2}"/></marker>
     </defs>
 
-    <!-- Watermark size label -->
-    <text x="${W-mx-4}" y="${H/2+14}" text-anchor="end"
-      font-family="'Barlow Condensed',sans-serif" font-size="40" font-weight="700"
-      fill="rgba(249,115,22,0.065)" letter-spacing="4">${curSize}</text>
 
-    <!-- Std label -->
-    <text x="${mx+6}" y="${H-8}"
-      font-family="'JetBrains Mono',monospace" font-size="9"
-      fill="${DC}" opacity="0.55">${STDS[curStd].lbl}</text>
 
     <!-- Head -->
     ${headSVG}
@@ -1092,11 +1091,78 @@ function drawBolt() {
     <!-- Head dimension annotation -->
     ${hAnn}
 
-    <!-- As value bottom right -->
-    <text x="${W-mx-4}" y="${H-8}" text-anchor="end"
-      font-family="'JetBrains Mono',monospace" font-size="9"
-      fill="${DC}" opacity="0.6">As = ${bolt.As} mm²</text>
+
   `;
+}
+
+/* ════════════════════════════════════════════════════
+   TOOLTIP ENGINE
+   ════════════════════════════════════════════════════ */
+(function () {
+  let box = null;
+
+  function getBox() {
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'global-tip';
+      document.body.appendChild(box);
+    }
+    return box;
+  }
+
+  function place(e) {
+    const b = getBox();
+    const bw = b.offsetWidth, bh = b.offsetHeight;
+    const vw = window.innerWidth,  vh = window.innerHeight;
+    let x = e.clientX + 14,  y = e.clientY - bh - 10;
+    if (x + bw > vw - 8) x = e.clientX - bw - 14;
+    if (y < 8)            y = e.clientY + 18;
+    b.style.left = x + 'px';
+    b.style.top  = y + 'px';
+  }
+
+  document.addEventListener('mouseover', function (e) {
+    const el = e.target.closest('[data-tip]');
+    if (!el) { if (box) box.style.display = 'none'; return; }
+    const b = getBox();
+    b.textContent = el.dataset.tip;
+    b.style.display = 'block';
+    place(e);
+  });
+
+  document.addEventListener('mousemove', function (e) {
+    if (box && box.style.display !== 'none') {
+      if (!e.target.closest('[data-tip]')) box.style.display = 'none';
+      else place(e);
+    }
+  });
+})();
+
+/* ════════════════════════════════════════════════════
+   TOOLTIP CONTENT
+   ════════════════════════════════════════════════════ */
+const TIPS = {
+  d:   'Cıvatanın nominal (isim) çapı. Dış diş tepelerinin dışından ölçülen teorik değerdir.',
+  p:   'İki ardışık diş tepesi arasındaki eksenel mesafe.\nKaba adım, aynı çap için ince adıma göre daha büyüktür.',
+  d2:  'Diş profilinin flanklarının geçtiği hayali silindirin çapı.\nVDI 2230\'da sürtünme kolu olarak kullanılır.',
+  d3:  'Erkek diş kökündeki minimum çap.\nGerilim alanı As, d₂ ve d₃ kullanılarak hesaplanır.',
+  As:  'Çekme ve ön yükleme hesabında kullanılan eşdeğer kesit alanı.\nAs = π/4 × ((d₂ + d₃) / 2)²',
+  s:   'Altıköşe başın yüzeyler arası mesafesi (anahtar ağzı).\nISO 4014/4017 ve DIN 931/933\'e göre tanımlıdır.',
+  dk:  'DIN 912 silindir başlı cıvatada kafa çapı.\nDKm hesabında dış ölçü olarak kullanılır.',
+  DKm: 'Cıvata başı oturma yüzeyinin ortalama çapı.\nHex:  DKm = (s + 1.1d) / 2\nDIN 912: DKm = (dk + 1.1d) / 2',
+  Rp:  'Malzemede %0,2 kalıcı uzamaya neden olan gerilme değeri.\nISO 898-1\'de her sınıf için sabit; çapa göre değişmez (8.8 hariç d>16).',
+  Rm:  'Malzemenin kopmadan önce taşıyabileceği maksimum gerilme (nominal).\nMukavemet sınıfının adını belirleyen değerdir.',
+  Sp:  'Cıvatada kalıcı uzama oluşturmaksızın uygulanabilecek maksimum gerilme.\nHer zaman Sp < Rp0.2.',
+  nu:  'Montaj torkunda torsiyonel gerilmenin eksenel yükü azaltmasını hesaba katan faktör.\nVDI 2230\'da ν = 0.90 olarak alınır.',
+  FM:  'Sıkma işlemi sonrası cıvatada kalan eksenel gerilme kuvveti.\nFM = ν × Sp × As',
+  MG:  'Diş flanklarındaki sürtünmeden ve sarmal açısından kaynaklanan tork bileşeni.\nMG = FM × (p/2π + μ × d₂/√3)',
+  MK:  'Cıvata başı veya somunun oturma yüzeyindeki sürtünmeden kaynaklanan tork bileşeni.\nMK = FM × μ × DKm / 2',
+  MA:  'Anahtara uygulanması gereken toplam sıkma torku.\nMA = MG + MK',
+};
+
+function t(key) {
+  const txt = TIPS[key];
+  return txt ? `<i class="tip-i" data-tip="${txt}">i</i>` : '';
 }
 
 /* ════════════════════════════════════════════════════
