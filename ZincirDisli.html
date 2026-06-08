@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zincir-Dişli Hesabı — MH Platform</title>
+  <link rel="stylesheet" href="mh-tokens.css">
+  <style>
+    :root { --dim: #52527a; --dim2: #8080a8; --sc-color: #60a5fa; --sc-bg: rgba(96,165,250,0.12); }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--font-b);
+      display: flex; flex-direction: column;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(7,7,14,0.92); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 20px; height: 52px; gap: 20px; flex-shrink: 0;
+    }
+    .brand { font-family: var(--font-logo); font-size: var(--fz-18); letter-spacing: 3px; color: var(--accent); text-decoration: none; }
+    .brand em { color: var(--text); font-style: normal; }
+    .breadcrumb { font-size: var(--fz-12); color: var(--dim2); font-family: var(--font-m); display: flex; align-items: center; gap: 8px; }
+    .breadcrumb .sep { color: var(--dim); }
+
+    /* ── APP ── */
+    .app { display: flex; flex: 1; overflow: hidden; position: relative; z-index: 1; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--bg2); border-right: 1px solid var(--border);
+      width: 200px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto; padding-bottom: 16px;
+    }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .std-toggle { display: flex; gap: 5px; padding: 10px 10px 4px; flex-shrink: 0; }
+    .std-btn {
+      flex: 1; padding: 7px 4px;
+      background: var(--surf2); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--dim2); font-family: var(--font-h);
+      font-size: var(--fz-12); font-weight: 700; letter-spacing: 0.5px;
+      cursor: pointer; transition: all 0.15s; text-align: center;
+    }
+    .std-btn:hover { background: var(--surf3); color: var(--text); }
+    .std-btn.active { background: var(--sc-bg); border-color: var(--sc-color); color: var(--sc-color); }
+
+    .sec-label {
+      font-family: var(--font-h); font-size: var(--fz-11);
+      letter-spacing: 2px; color: #9090c0; text-transform: uppercase;
+      padding: 10px 14px 5px; flex-shrink: 0;
+    }
+    .sz-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; padding: 7px 14px;
+      background: transparent; border: none; border-left: 3px solid transparent;
+      color: var(--dim2); font-family: var(--font-m); font-size: var(--fz-13);
+      cursor: pointer; text-align: left; transition: all 0.15s;
+    }
+    .sz-btn:hover { background: var(--surf1); color: var(--text); }
+    .sz-btn.active { background: var(--surf1); color: var(--text); font-weight: 600; border-left-color: var(--sc-color); }
+    .sz-btn .sz-as { font-size: var(--fz-10); color: var(--dim); }
+    .sz-btn.active .sz-as { color: var(--dim2); }
+
+    /* ── CONTENT ── */
+    .content {
+      width: 480px; max-width: 480px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto; border-right: 1px solid var(--border);
+    }
+    .content::-webkit-scrollbar { width: 3px; }
+    .content::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .page-hdr {
+      padding: 13px 16px 11px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 8px; flex-shrink: 0;
+    }
+    .page-title { font-family: var(--font-h); font-size: var(--fz-20); font-weight: 700; letter-spacing: 1px; }
+    .page-sub { font-size: var(--fz-11); color: var(--dim2); font-family: var(--font-m); margin-top: 3px; }
+    .chain-badge { font-family: var(--font-m); font-size: var(--fz-22); font-weight: 600; color: var(--sc-color); line-height: 1; flex-shrink: 0; }
+
+    /* ── PREVIEW  (400px) ── */
+    .preview-wrap { padding: 10px 16px 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .preview-box { background: var(--surf1); border: 1px solid var(--border); border-radius: 10px; height: 400px; overflow: hidden; }
+    .preview-box svg { width: 100%; height: 100%; }
+
+    /* ── SECTIONS ── */
+    .section { padding: 11px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .sec-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+    .sec-ttl { font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 2px; color: #9090c0; text-transform: uppercase; }
+    .sec-tag { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); }
+
+    /* ── INPUTS ── */
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .inp-g { display: flex; flex-direction: column; gap: 4px; }
+    .inp-label {
+      font-family: var(--font-h); font-size: var(--fz-13);
+      letter-spacing: 1px; color: #c0c0e0; text-transform: uppercase;
+      display: flex; align-items: center; gap: 0;
+    }
+    .opt-bdg {
+      font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim);
+      padding: 2px 5px; background: var(--surf3); border-radius: 3px; margin-left: 6px;
+    }
+    .inp-wrap {
+      display: flex; background: var(--surf2);
+      border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; transition: border-color 0.2s;
+    }
+    .inp-wrap:focus-within { border-color: var(--accent); }
+    .inp-wrap input {
+      flex: 1; padding: 10px 12px;
+      background: transparent; border: none;
+      color: var(--text); font-family: var(--font-m);
+      font-size: var(--fz-15); font-weight: 600;
+      outline: none; min-width: 0;
+      -moz-appearance: textfield;
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .inp-sfx {
+      padding: 0 11px; display: flex; align-items: center;
+      font-family: var(--font-m); font-size: var(--fz-12);
+      color: var(--dim); background: var(--surf3);
+      border-left: 1px solid var(--border); flex-shrink: 0; white-space: nowrap;
+    }
+    .inp-hint { font-family: var(--font-m); font-size: var(--fz-10); color: var(--dim2); min-height: 15px; }
+
+    /* ── RATIO STRIP ── */
+    .ratio-strip {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 4px 10px; padding: 8px 12px;
+      background: var(--surf1); border-radius: 8px; margin-top: 10px;
+    }
+    .rl { font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 1px; color: var(--dim2); text-transform: uppercase; }
+    .rv { font-family: var(--font-m); font-size: var(--fz-14); font-weight: 600; }
+    .rv.acc { color: var(--accent); }
+    .rv.bl  { color: var(--blue); }
+    .rsep   { color: var(--dim); font-size: var(--fz-11); }
+
+    /* ── GEO MODE ── */
+    .geo-toggle { display: flex; gap: 6px; margin-bottom: 9px; }
+    .geo-btn {
+      flex: 1; padding: 8px;
+      background: var(--surf2); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--dim2); font-family: var(--font-h);
+      font-size: var(--fz-12); font-weight: 700; letter-spacing: 0.5px;
+      cursor: pointer; text-align: center; transition: all 0.15s;
+    }
+    .geo-btn:hover { background: var(--surf3); color: var(--text); }
+    .geo-btn.active { background: rgba(0,212,170,0.10); border-color: var(--teal); color: var(--teal); }
+
+    /* ── CALC BTN ── */
+    .calc-btn {
+      display: block; width: calc(100% - 32px);
+      margin: 12px 16px; padding: 14px;
+      background: var(--accent); border: none; border-radius: 10px;
+      color: white; font-family: var(--font-h);
+      font-size: var(--fz-18); font-weight: 700; letter-spacing: 2px;
+      cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    }
+    .calc-btn:hover { background: #ea6c0d; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(249,115,22,0.35); }
+    .calc-btn:active { transform: translateY(0); }
+
+    /* ── RESULTS ── */
+    .result-area { padding: 0 16px 12px; display: none; flex-shrink: 0; }
+    .result-area.visible { display: block; animation: fadeUp 0.2s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+
+    .res-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .res-card { background: var(--surf1); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+    .res-lbl { font-family: var(--font-h); font-size: var(--fz-10); letter-spacing: 1.5px; color: var(--dim2); text-transform: uppercase; }
+    .res-val { font-family: var(--font-m); font-size: var(--fz-20); font-weight: 600; margin: 3px 0 2px; }
+    .res-unt { font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim2); line-height: 1.4; }
+    .res-unt.warn { color: var(--yellow); }
+    .c-acc    { color: var(--accent); }
+    .c-teal   { color: var(--teal); }
+    .c-blue   { color: var(--blue); }
+    .c-ylw    { color: var(--yellow); }
+    .c-purple { color: var(--purple); }
+    .c-pink   { color: var(--pink); }
+
+    /* ── INFO BOX ── */
+    .info-box {
+      margin: 0 16px 14px; padding: 12px 14px;
+      background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.15);
+      border-radius: 8px; color: #90b8f0;
+      font-size: var(--fz-11); line-height: 1.75; flex-shrink: 0;
+    }
+    .fml-ttl { font-family: var(--font-h); letter-spacing: 1px; font-size: var(--fz-11); display: block; margin-bottom: 6px; }
+    .fml { font-family: var(--font-m); font-size: var(--fz-10); color: var(--dim2); line-height: 2.2; }
+    .fml .hi { color: var(--teal); }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel {
+      background: var(--bg2); border-left: 1px solid var(--border);
+      width: 300px; flex-shrink: 0;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .rp-hdr {
+      padding: 12px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      justify-content: space-between; flex-shrink: 0;
+    }
+    .rp-title { font-family: var(--font-h); font-size: var(--fz-15); font-weight: 700; letter-spacing: 1px; }
+    .rp-body { flex: 1; overflow-y: auto; }
+    .rp-body::-webkit-scrollbar { width: 3px; }
+    .rp-body::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .chain-id-blk {
+      padding: 14px 16px 12px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: baseline; gap: 10px;
+    }
+    .chain-id   { font-family: var(--font-m); font-size: var(--fz-26); font-weight: 600; color: var(--sc-color); }
+    .chain-stag { font-family: var(--font-h); font-size: var(--fz-11); color: var(--dim2); letter-spacing: 1px; }
+
+    .spec-grp { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    .spec-grp-ttl { font-family: var(--font-h); font-size: var(--fz-10); letter-spacing: 2px; color: var(--dim2); text-transform: uppercase; margin-bottom: 7px; }
+    .spec-row { display: flex; justify-content: space-between; align-items: baseline; padding: 3px 0; }
+    .spec-nm  { font-family: var(--font-b); font-size: var(--fz-12); color: var(--dim2); }
+    .spec-vl  { font-family: var(--font-m); font-size: var(--fz-13); font-weight: 600; color: var(--text); }
+    .spec-vl.tl { color: var(--teal); }
+    .spec-vl.bl { color: var(--blue); }
+    .spec-vl.yl { color: var(--yellow); }
+    .spec-vl.ac { color: var(--accent); }
+    .spec-vl.sc { color: var(--sc-color); font-size: var(--fz-15); }
+
+    .a-bar { height: 4px; border-radius: 2px; background: var(--surf3); margin: 7px 0 4px; overflow: hidden; }
+    .a-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--teal), var(--blue)); }
+    .a-bar-lbl { display: flex; justify-content: space-between; }
+    .a-bar-lbl span { font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim); }
+    .a-bar-lbl .mid { color: var(--teal); }
+
+    .chip { font-family: var(--font-m); font-size: var(--fz-10); padding: 3px 8px; border-radius: 4px; font-weight: 600; letter-spacing: 0.5px; }
+    .chip.iso  { background: rgba(96,165,250,0.12);  color: #60a5fa; border: 1px solid rgba(96,165,250,0.25); }
+    .chip.ansi { background: rgba(249,115,22,0.12);  color: #f97316; border: 1px solid rgba(249,115,22,0.25); }
+
+    .empty-st { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:32px; text-align:center; }
+    .empty-st .ei { font-size: 28px; opacity: 0.22; }
+    .empty-st p { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); line-height: 1.75; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="brand">MH<em>Platform</em></a>
+  <div class="breadcrumb">
+    <span>Hesaplama Araçları</span>
+    <span class="sep">/</span>
+    <span>Zincir-Dişli Hesabı</span>
+  </div>
+</nav>
+
+<div class="app">
+
+<!-- ── LEFT SIDEBAR ─────────────────────────────── -->
+<aside class="sidebar">
+  <div class="std-toggle">
+    <button class="std-btn active" data-std="iso"  onclick="selStd('iso')">ISO/DIN</button>
+    <button class="std-btn"        data-std="ansi" onclick="selStd('ansi')">ANSI</button>
+  </div>
+  <div class="sec-label" id="std-label">ISO/DIN B SERİSİ</div>
+  <div id="chain-list"></div>
+</aside>
+
+<!-- ── MAIN CONTENT ──────────────────────────────── -->
+<main class="content">
+
+  <div class="page-hdr">
+    <div>
+      <div class="page-title">ZİNCİR-DİŞLİ HESABI</div>
+      <div class="page-sub" id="page-sub">DIN 8187 / ISO 606 · DIN 8188</div>
+    </div>
+    <div class="chain-badge" id="chain-badge" style="display:none"></div>
+  </div>
+
+  <!-- SVG Preview -->
+  <div class="preview-wrap">
+    <div class="preview-box">
+      <svg id="chain-svg" viewBox="0 0 448 400" xmlns="http://www.w3.org/2000/svg">
+        <text x="224" y="205" text-anchor="middle"
+          style="font-family:var(--font-m);font-size:var(--fz-12);fill:var(--dim)">← Zincir adımı seçin</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Dişli Parametreleri -->
+  <div class="section">
+    <div class="sec-hdr">
+      <div class="sec-ttl">Dişli Parametreleri</div>
+      <div class="sec-tag" id="i-tag" style="display:none">i = <span id="i-live">—</span></div>
+    </div>
+    <div class="input-row">
+      <div class="inp-g">
+        <div class="inp-label">Sürücü z₁</div>
+        <div class="inp-wrap">
+          <input type="number" id="z1" value="17" min="6" max="150" oninput="onInput()">
+          <span class="inp-sfx">diş</span>
+        </div>
+        <div class="inp-hint" id="d1-hint">&nbsp;</div>
+      </div>
+      <div class="inp-g">
+        <div class="inp-label">Tahrik z₂</div>
+        <div class="inp-wrap">
+          <input type="number" id="z2" value="34" min="6" max="300" oninput="onInput()">
+          <span class="inp-sfx">diş</span>
+        </div>
+        <div class="inp-hint" id="d2-hint">&nbsp;</div>
+      </div>
+    </div>
+    <div class="ratio-strip" id="ratio-strip" style="display:none">
+      <span class="rl">İletim Oranı</span>
+      <span class="rv acc" id="rv-i">—</span>
+      <span class="rsep">·</span>
+      <span class="rl">d₁</span>
+      <span class="rv bl" id="rv-d1">—</span>
+      <span class="rsep">/</span>
+      <span class="rl">d₂</span>
+      <span class="rv bl" id="rv-d2">—</span>
+    </div>
+  </div>
+
+  <!-- Çalışma Parametreleri -->
+  <div class="section">
+    <div class="sec-hdr">
+      <div class="sec-ttl">Çalışma Parametreleri</div>
+    </div>
+    <div class="input-row">
+      <div class="inp-g">
+        <div class="inp-label">Giriş Devri n₁</div>
+        <div class="inp-wrap">
+          <input type="number" id="n1" value="1450" min="1" max="10000" oninput="onInput()">
+          <span class="inp-sfx">rpm</span>
+        </div>
+      </div>
+      <div class="inp-g">
+        <div class="inp-label">Güç P <span class="opt-bdg">OPSİYONEL</span></div>
+        <div class="inp-wrap">
+          <input type="number" id="power" placeholder="—" min="0" max="10000" oninput="onInput()">
+          <span class="inp-sfx">kW</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Geometri -->
+  <div class="section">
+    <div class="sec-hdr">
+      <div class="sec-ttl">Geometri</div>
+      <div class="sec-tag" id="geo-rec">&nbsp;</div>
+    </div>
+    <div class="geo-toggle">
+      <button class="geo-btn active" data-mode="a2lp" onclick="setGeoMode(this)">Aks Mes. a → Lp</button>
+      <button class="geo-btn"        data-mode="lp2a" onclick="setGeoMode(this)">Halka Say. Lp → a</button>
+    </div>
+    <div class="inp-g">
+      <div class="inp-label" id="geo-label">Aks Mesafesi a</div>
+      <div class="inp-wrap">
+        <input type="number" id="geo-input" min="0" oninput="onInput()">
+        <span class="inp-sfx" id="geo-unit">mm</span>
+      </div>
+      <div class="inp-hint" id="geo-hint">&nbsp;</div>
+    </div>
+  </div>
+
+  <!-- HESAPLA -->
+  <button class="calc-btn" onclick="calculate()">HESAPLA</button>
+
+  <!-- SONUÇLAR -->
+  <div class="result-area" id="result-area">
+    <div class="res-grid" style="margin-bottom:8px">
+      <div class="res-card">
+        <div class="res-lbl">İletim Oranı</div>
+        <div class="res-val c-acc" id="r-i">—</div>
+        <div class="res-unt">i = z₂/z₁</div>
+      </div>
+      <div class="res-card">
+        <div class="res-lbl">Zincir Hızı</div>
+        <div class="res-val c-teal" id="r-v">—</div>
+        <div class="res-unt">m/s</div>
+      </div>
+      <div class="res-card">
+        <div class="res-lbl">Çıkış Devri n₂</div>
+        <div class="res-val c-blue" id="r-n2">—</div>
+        <div class="res-unt">rpm</div>
+      </div>
+    </div>
+    <div class="res-grid" id="res-row2">
+      <div class="res-card">
+        <div class="res-lbl">Halka Sayısı</div>
+        <div class="res-val c-ylw" id="r-lp">—</div>
+        <div class="res-unt" id="r-lp-note"></div>
+      </div>
+      <div class="res-card">
+        <div class="res-lbl">Aks Mesafesi</div>
+        <div class="res-val c-purple" id="r-a">—</div>
+        <div class="res-unt" id="r-a-note">mm</div>
+      </div>
+      <div class="res-card" id="res-f-card" style="display:none">
+        <div class="res-lbl">Tahrik Kuvveti</div>
+        <div class="res-val c-pink" id="r-f">—</div>
+        <div class="res-unt">N</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORMÜLLER -->
+  <div class="info-box">
+    <span class="fml-ttl">FORMÜLLER &amp; NOTLAR</span>
+    <div class="fml">
+      <span class="hi">d</span> = p / sin(π/z) &nbsp;[mm — adım çemberi çapı]<br>
+      <span class="hi">v</span> = p · z₁ · n₁ / 60 000 &nbsp;[m/s — zincir hızı]<br>
+      <span class="hi">Lp</span> = 2a/p + (z₁+z₂)/2 + ((z₂−z₁)/2π)² · (p/a)<br>
+      <span class="hi">a</span> &nbsp;= (p/4) · [K + √(K²−8M²)] &nbsp;&nbsp;K = Lp−(z₁+z₂)/2, M = (z₂−z₁)/2π<br>
+      <span class="hi">F</span> &nbsp;= P · 1000 / v &nbsp;[N — tahrik kuvveti, P girilmişse]
+    </div>
+  </div>
+
+</main>
+
+<!-- ── RIGHT PANEL ─────────────────────────────── -->
+<aside class="right-panel">
+  <div class="rp-hdr">
+    <div class="rp-title">ZİNCİR VERİLERİ</div>
+    <div id="rp-chip"></div>
+  </div>
+  <div class="rp-body" id="rp-body">
+    <div class="empty-st">
+      <div class="ei">⛓</div>
+      <p>Sol panelden bir<br>zincir adımı seçin.<br>ISO/DIN veya ANSI<br>boyut verileri burada<br>görünecek.</p>
+    </div>
+  </div>
+</aside>
+
+</div><!-- .app -->
+
+<script>
+/* ══════════════════════════════════════════════
+   ZİNCİR-DİŞLİ VERİ + HESAP
+   DIN 8187 / ISO 606 · ANSI B29.1
+══════════════════════════════════════════════ */
+
+const CD = {
+  iso: {
+    label:'ISO/DIN B SERİSİ', sub:'DIN 8187 / ISO 606',
+    color:'#60a5fa', bg:'rgba(96,165,250,0.12)',
+    chip:'iso', chipLbl:'ISO',
+    chains:{
+      '06B':{ p:9.525,  b1:5.72,  d1:6.35,  d2:3.28,  Q:8.9,   q:0.41 },
+      '08B':{ p:12.700, b1:7.75,  d1:8.51,  d2:4.45,  Q:17.8,  q:0.70 },
+      '10B':{ p:15.875, b1:9.65,  d1:10.16, d2:5.08,  Q:22.2,  q:0.93 },
+      '12B':{ p:19.050, b1:11.68, d1:12.07, d2:5.72,  Q:28.9,  q:1.15 },
+      '16B':{ p:25.400, b1:17.02, d1:15.88, d2:8.28,  Q:60.0,  q:2.71 },
+      '20B':{ p:31.750, b1:19.56, d1:19.05, d2:10.19, Q:95.0,  q:3.70 },
+      '24B':{ p:38.100, b1:25.40, d1:25.40, d2:14.63, Q:160.0, q:5.97 },
+      '28B':{ p:44.450, b1:30.99, d1:27.94, d2:15.90, Q:200.0, q:7.77 },
+      '32B':{ p:50.800, b1:30.99, d1:29.21, d2:17.81, Q:250.0, q:10.04 },
+      '40B':{ p:63.500, b1:38.10, d1:39.37, d2:22.89, Q:355.0, q:16.35 },
+      '48B':{ p:76.200, b1:45.72, d1:48.26, d2:29.24, Q:560.0, q:25.00 }
+    }
+  },
+  ansi:{
+    label:'ANSI B29.1', sub:'ANSI / ASME B29.1',
+    color:'#f97316', bg:'rgba(249,115,22,0.12)',
+    chip:'ansi', chipLbl:'ANSI',
+    chains:{
+      '#25': { p:6.350,  b1:3.18,  d1:3.30,  d2:2.31,  Q:3.1,   q:0.17, inch:'1/4"'   },
+      '#35': { p:9.525,  b1:4.78,  d1:5.08,  d2:3.59,  Q:8.0,   q:0.37, inch:'3/8"'   },
+      '#40': { p:12.700, b1:7.92,  d1:7.92,  d2:3.97,  Q:14.1,  q:0.62, inch:'1/2"'   },
+      '#41': { p:12.700, b1:6.35,  d1:7.77,  d2:3.59,  Q:6.7,   q:0.45, inch:'1/2" L' },
+      '#50': { p:15.875, b1:9.53,  d1:10.16, d2:5.09,  Q:21.8,  q:0.97, inch:'5/8"'   },
+      '#60': { p:19.050, b1:12.70, d1:11.91, d2:5.95,  Q:31.1,  q:1.50, inch:'3/4"'   },
+      '#80': { p:25.400, b1:15.87, d1:15.87, d2:7.94,  Q:55.6,  q:2.60, inch:'1"'     },
+      '#100':{ p:31.750, b1:19.05, d1:19.05, d2:9.54,  Q:86.7,  q:3.91, inch:'1-1/4"' },
+      '#120':{ p:38.100, b1:25.40, d1:22.23, d2:11.11, Q:124.5, q:5.62, inch:'1-1/2"' },
+      '#140':{ p:44.450, b1:25.40, d1:25.40, d2:12.71, Q:169.0, q:7.52, inch:'1-3/4"' },
+      '#160':{ p:50.800, b1:31.75, d1:28.58, d2:14.29, Q:222.4, q:10.15, inch:'2"'    }
+    }
+  }
+};
+
+/* ── STATE ── */
+let curStd  = 'iso';
+let curKey  = null;
+let geoMode = 'a2lp';
+
+/* ── INIT ── */
+(function init(){
+  applyColors('iso');
+  document.getElementById('rp-chip').innerHTML =
+    '<span class="chip iso">ISO</span>';
+  renderList();
+  pickChain('16B');
+})();
+
+function applyColors(std){
+  const c = CD[std];
+  const r = document.documentElement;
+  r.style.setProperty('--sc-color', c.color);
+  r.style.setProperty('--sc-bg',    c.bg);
+}
+
+/* ── STANDARD SELECTION ── */
+function selStd(std){
+  if(curStd === std) return;
+  const prevP = curKey ? CD[curStd].chains[curKey].p : null;
+  curStd = std;
+
+  document.querySelectorAll('.std-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.std === std));
+
+  const cfg = CD[std];
+  applyColors(std);
+  document.getElementById('std-label').textContent = cfg.label;
+  document.getElementById('page-sub').textContent  = cfg.sub;
+  document.getElementById('rp-chip').innerHTML =
+    `<span class="chip ${cfg.chip}">${cfg.chipLbl}</span>`;
+
+  /* Pick closest pitch */
+  let best = Object.keys(cfg.chains)[0];
+  if(prevP){
+    let minD = Infinity;
+    Object.entries(cfg.chains).forEach(([k,c])=>{
+      const d = Math.abs(c.p - prevP);
+      if(d < minD){ minD=d; best=k; }
+    });
+  }
+  curKey = null;
+  renderList();
+  pickChain(best);
+}
+
+/* ── CHAIN LIST ── */
+function renderList(){
+  document.getElementById('chain-list').innerHTML =
+    Object.entries(CD[curStd].chains).map(([k,c])=>
+      `<button class="sz-btn${k===curKey?' active':''}"
+         data-chain="${k}" onclick="pickChain('${k}')">
+         <span>${k}</span>
+         <span class="sz-as">${c.p.toFixed(3)} mm</span>
+       </button>`
+    ).join('');
+}
+
+function pickChain(key){
+  curKey = key;
+  document.querySelectorAll('#chain-list .sz-btn').forEach(b=>
+    b.classList.toggle('active', b.dataset.chain === key));
+  const badge = document.getElementById('chain-badge');
+  badge.textContent = key;
+  badge.style.display = 'block';
+  updateGeoHint();
+  updateRightPanel();
+  updateSVG();
+}
+
+/* ── GEO MODE ── */
+function setGeoMode(btn){
+  geoMode = btn.dataset.mode;
+  document.querySelectorAll('.geo-btn').forEach(b=>
+    b.classList.toggle('active', b.dataset.mode === geoMode));
+  if(geoMode === 'a2lp'){
+    document.getElementById('geo-label').textContent = 'Aks Mesafesi a';
+    document.getElementById('geo-unit').textContent  = 'mm';
+  } else {
+    document.getElementById('geo-label').textContent = 'Halka Sayısı Lp';
+    document.getElementById('geo-unit').textContent  = 'adet';
+  }
+  document.getElementById('geo-input').value = '';
+  updateGeoHint();
+}
+
+function updateGeoHint(){
+  if(!curKey) return;
+  const p  = CD[curStd].chains[curKey].p;
+  const z1 = parseInt(document.getElementById('z1').value)  || 17;
+  const z2 = parseInt(document.getElementById('z2').value)  || 34;
+  const aO = 40*p;
+
+  if(geoMode === 'a2lp'){
+    document.getElementById('geo-hint').textContent =
+      `Önerilen: ${aO.toFixed(0)} mm (40p) · Maks: ${(80*p).toFixed(0)} mm`;
+    document.getElementById('geo-rec').textContent =
+      `40p = ${aO.toFixed(0)} mm`;
+    if(!document.getElementById('geo-input').value)
+      document.getElementById('geo-input').placeholder = aO.toFixed(0);
+  } else {
+    const Lp_e = 2*(aO/p)+(z1+z2)/2+Math.pow((z2-z1)/(2*Math.PI),2)*(p/aO);
+    const Lp_even = Math.ceil(Lp_e/2)*2;
+    document.getElementById('geo-hint').textContent =
+      `40p aks mes. için Lp ≈ ${Lp_even} (çift sayı tercih edilir)`;
+    document.getElementById('geo-rec').textContent = '';
+    if(!document.getElementById('geo-input').value)
+      document.getElementById('geo-input').placeholder = String(Lp_even);
+  }
+}
+
+/* ── REAL-TIME UPDATE ── */
+function onInput(){
+  if(!curKey) return;
+  const z1 = parseInt(document.getElementById('z1').value);
+  const z2 = parseInt(document.getElementById('z2').value);
+  const c  = CD[curStd].chains[curKey];
+
+  if(z1 >= 6 && z2 >= 6){
+    const i  = z2/z1;
+    const d1 = c.p / Math.sin(Math.PI/z1);
+    const d2 = c.p / Math.sin(Math.PI/z2);
+    document.getElementById('i-tag').style.display = '';
+    document.getElementById('i-live').textContent  = i.toFixed(3);
+    document.getElementById('ratio-strip').style.display = '';
+    document.getElementById('rv-i').textContent  = i.toFixed(3);
+    document.getElementById('rv-d1').textContent = `⌀${d1.toFixed(1)}`;
+    document.getElementById('rv-d2').textContent = `⌀${d2.toFixed(1)}`;
+    document.getElementById('d1-hint').textContent = `d₁ = ⌀${d1.toFixed(2)} mm`;
+    document.getElementById('d2-hint').textContent = `d₂ = ⌀${d2.toFixed(2)} mm`;
+  } else {
+    document.getElementById('i-tag').style.display = 'none';
+    document.getElementById('ratio-strip').style.display = 'none';
+  }
+  updateGeoHint();
+  updateSVG();
+}
+
+/* ══════════════════════════════════════════════
+   SVG ÇİZİMİ  —  gerçek zamanlı
+   Tüm metin stilleri CSS token'larına bağlı:
+   font-family: var(--font-h / --font-m)
+   font-size:   var(--fz-*)
+   fill:        var(--text / --accent / --blue / --dim / --dim2)
+══════════════════════════════════════════════ */
+function updateSVG(){
+  if(!curKey) return;
+  const c  = CD[curStd].chains[curKey];
+  const z1v = parseInt(document.getElementById('z1').value);
+  const z2v = parseInt(document.getElementById('z2').value);
+  if(!z1v || !z2v || z1v < 6 || z2v < 6) return;
+
+  const VW=448, VH=400;
+
+  /* Hangi dişli büyük? Her zaman büyük sağa */
+  const isZ1small = z1v <= z2v;
+  const zL = isZ1small ? z1v : z2v;  /* sol (küçük) */
+  const zR = isZ1small ? z2v : z1v;  /* sağ (büyük) */
+  const lblL = isZ1small ? 'SÜRÜCÜ' : 'TAHRİK';
+  const lblR = isZ1small ? 'TAHRİK' : 'SÜRÜCÜ';
+  /* z₁ her zaman SÜRÜCÜ'nün yanında, z₂ TAHRİK'in yanında */
+  const subL = isZ1small ? 'z\u2081' : 'z\u2082';
+  const subR = isZ1small ? 'z\u2082' : 'z\u2081';
+
+  /* Adım çemberi yarıçapları (mm) */
+  const RL = c.p / (2*Math.sin(Math.PI/zL));
+  const RR = c.p / (2*Math.sin(Math.PI/zR));
+
+  /* Diş yüksekliği (görsel yaklaşım) */
+  const TH = Math.max(c.d1*0.28, c.p*0.08);
+
+  /* Ölçek hesabı — VH=400 için cap=8 */
+  const availW = VW-60, availH = VH-60;
+  const sH = (availH/2-4) / (RR+TH);
+  const dispCD = Math.max(RL+RR+2*c.p, (RL+RR)*1.45);
+  const sW = availW / (RL+RR+dispCD+2*TH);
+  const s  = Math.min(sH, sW, 8);
+
+  const rL = RL*s, rR = RR*s, th = TH*s;
+  const cy = VH/2+2;
+  const cxL = 30 + rL + th + 2;
+  const cxR = VW - 30 - rR - th - 2;
+  const dx  = cxR - cxL;
+
+  /* Teğet geometrisi */
+  const sinA = Math.min((rR-rL)/dx, 0.92);
+  const cosA = Math.sqrt(1-sinA*sinA);
+
+  /* Teğet noktaları */
+  const P = {
+    lu:{ x:cxL-rL*sinA, y:cy-rL*cosA },
+    ll:{ x:cxL-rL*sinA, y:cy+rL*cosA },
+    ru:{ x:cxR-rR*sinA, y:cy-rR*cosA },
+    rl:{ x:cxR-rR*sinA, y:cy+rR*cosA }
+  };
+
+  /* Büyük yay flag (sağ dişli ≥180°) */
+  const arcFlagR = sinA > 0.01 ? 1 : 0;
+
+  /* Dişli silüeti */
+  function sprPath(cx, cy, rp, z, th){
+    const ra = rp+th, rb = Math.max(rp-th*0.28, rp*0.55);
+    const n  = Math.min(z,42)*2;
+    let d='';
+    for(let i=0;i<n;i++){
+      const a=(2*Math.PI*i/n)-Math.PI/2;
+      const r=(i%2===0)?ra:rb;
+      const x=(cx+r*Math.cos(a)).toFixed(2);
+      const y=(cy+r*Math.sin(a)).toFixed(2);
+      d+=(i===0?`M${x} ${y}`:`L${x} ${y}`);
+    }
+    return d+'Z';
+  }
+
+  const f=n=>n.toFixed(2);
+  let sv = `<svg viewBox="0 0 ${VW} ${VH}" xmlns="http://www.w3.org/2000/svg">`;
+
+  /* ── Zincir (arkada, hardcoded — geometrik element) ── */
+  sv+=`<line x1="${f(P.lu.x)}" y1="${f(P.lu.y)}" x2="${f(P.ru.x)}" y2="${f(P.ru.y)}"
+    stroke="rgba(0,212,170,0.5)" stroke-width="2.5"/>`;
+  sv+=`<line x1="${f(P.ll.x)}" y1="${f(P.ll.y)}" x2="${f(P.rl.x)}" y2="${f(P.rl.y)}"
+    stroke="rgba(0,212,170,0.5)" stroke-width="2.5"/>`;
+  sv+=`<path d="M${f(P.lu.x)} ${f(P.lu.y)} A${f(rL)} ${f(rL)} 0 0 0 ${f(P.ll.x)} ${f(P.ll.y)}"
+    fill="none" stroke="rgba(0,212,170,0.5)" stroke-width="2.5"/>`;
+  sv+=`<path d="M${f(P.ru.x)} ${f(P.ru.y)} A${f(rR)} ${f(rR)} 0 ${arcFlagR} 1 ${f(P.rl.x)} ${f(P.rl.y)}"
+    fill="none" stroke="rgba(0,212,170,0.5)" stroke-width="2.5"/>`;
+
+  /* ── Dişliler (hardcoded — geometrik element) ── */
+  sv+=`<path d="${sprPath(cxL,cy,rL,zL,th)}"
+    fill="rgba(249,115,22,0.18)" stroke="#f97316" stroke-width="0.9" stroke-linejoin="round"/>`;
+  sv+=`<circle cx="${f(cxL)}" cy="${f(cy)}" r="${f(rL*0.42)}"
+    fill="rgba(249,115,22,0.10)" stroke="#f97316" stroke-width="0.5" opacity="0.7"/>`;
+  sv+=`<line x1="${f(cxL-7)}" y1="${f(cy)}" x2="${f(cxL+7)}" y2="${f(cy)}" stroke="#f97316" stroke-width="1.2" opacity="0.4"/>`;
+  sv+=`<line x1="${f(cxL)}" y1="${f(cy-7)}" x2="${f(cxL)}" y2="${f(cy+7)}" stroke="#f97316" stroke-width="1.2" opacity="0.4"/>`;
+
+  sv+=`<path d="${sprPath(cxR,cy,rR,zR,th)}"
+    fill="rgba(249,115,22,0.18)" stroke="#f97316" stroke-width="0.9" stroke-linejoin="round"/>`;
+  sv+=`<circle cx="${f(cxR)}" cy="${f(cy)}" r="${f(rR*0.35)}"
+    fill="rgba(249,115,22,0.10)" stroke="#f97316" stroke-width="0.5" opacity="0.7"/>`;
+  sv+=`<line x1="${f(cxR-7)}" y1="${f(cy)}" x2="${f(cxR+7)}" y2="${f(cy)}" stroke="#f97316" stroke-width="1.2" opacity="0.4"/>`;
+  sv+=`<line x1="${f(cxR)}" y1="${f(cy-7)}" x2="${f(cxR)}" y2="${f(cy+7)}" stroke="#f97316" stroke-width="1.2" opacity="0.4"/>`;
+
+  /* ── Etiketler: CSS token'larına bağlı style="" ile ──
+     font-family → var(--font-h) / var(--font-m)
+     font-size   → var(--fz-13) / var(--fz-12)
+     fill        → var(--text)  / var(--accent)          */
+  const topL = Math.max(18, cy-rL-th-22);
+  const topR = Math.max(18, cy-rR-th-22);
+
+  sv+=`<text x="${f(cxL)}" y="${topL}" text-anchor="middle">
+    <tspan style="font-family:var(--font-h);font-size:var(--fz-13);font-weight:700;fill:var(--text);letter-spacing:1.5px">${lblL}</tspan
+    ><tspan dx="6" style="font-family:var(--font-m);font-size:var(--fz-14);font-weight:600;fill:var(--accent)">${subL}</tspan>
+  </text>`;
+  sv+=`<text x="${f(cxR)}" y="${topR}" text-anchor="middle">
+    <tspan style="font-family:var(--font-h);font-size:var(--fz-13);font-weight:700;fill:var(--text);letter-spacing:1.5px">${lblR}</tspan
+    ><tspan dx="6" style="font-family:var(--font-m);font-size:var(--fz-14);font-weight:600;fill:var(--accent)">${subR}</tspan>
+  </text>`;
+
+  /* ── z değerleri (dişlinin içinde) — font-size dinamik (px) ── */
+  const fsL = Math.min(Math.max(rL*0.36,9),16).toFixed(1);
+  const fsR = Math.min(Math.max(rR*0.30,9),16).toFixed(1);
+  sv+=`<text x="${f(cxL)}" y="${f(cy)}" text-anchor="middle" dominant-baseline="middle"
+    style="font-family:var(--font-m);font-size:${fsL}px;font-weight:600;fill:var(--accent)" opacity="0.85">z${zL}</text>`;
+  sv+=`<text x="${f(cxR)}" y="${f(cy)}" text-anchor="middle" dominant-baseline="middle"
+    style="font-family:var(--font-m);font-size:${fsR}px;font-weight:600;fill:var(--accent)" opacity="0.85">z${zR}</text>`;
+
+  /* ── d₁ ölçü çizgisi (sol dişlinin altında) ── */
+  const dimY = cy + rL + th + 10;
+  if(dimY < VH-16){
+    sv+=`<line x1="${f(cxL-rL)}" y1="${dimY}" x2="${f(cxL+rL)}" y2="${dimY}"
+      stroke="#60a5fa" stroke-width="0.8"/>`;
+    sv+=`<line x1="${f(cxL-rL)}" y1="${dimY-4}" x2="${f(cxL-rL)}" y2="${dimY+4}"
+      stroke="#60a5fa" stroke-width="0.8"/>`;
+    sv+=`<line x1="${f(cxL+rL)}" y1="${dimY-4}" x2="${f(cxL+rL)}" y2="${dimY+4}"
+      stroke="#60a5fa" stroke-width="0.8"/>`;
+    sv+=`<text x="${f(cxL)}" y="${dimY+12}" text-anchor="middle"
+      style="font-family:var(--font-m);font-size:var(--fz-9);fill:var(--blue)">⌀${(RL*2).toFixed(1)}</text>`;
+  }
+
+  /* ── Aks mesafesi göstergesi (üstte kesikli çizgi) ── */
+  const cdY = Math.max(topR-10, 4);
+  if(cdY > 3 && cdY < cy-rR-th-4){
+    sv+=`<line x1="${f(cxL)}" y1="${f(cdY)}" x2="${f(cxR)}" y2="${f(cdY)}"
+      stroke="rgba(255,255,255,0.8)" stroke-width="1" stroke-dasharray="4,3"/>`;
+    sv+=`<line x1="${f(cxL)}" y1="${f(cy-rL-th)}" x2="${f(cxL)}" y2="${f(cdY)}"
+      stroke="rgba(255,255,255,0.8)" stroke-width="1"/>`;
+    sv+=`<line x1="${f(cxR)}" y1="${f(cy-rR-th)}" x2="${f(cxR)}" y2="${f(cdY)}"
+      stroke="rgba(255,255,255,0.8)" stroke-width="1"/>`;
+    sv+=`<text x="${f((cxL+cxR)/2)}" y="${cdY-3}" text-anchor="middle"
+      style="font-family:var(--font-h);font-size:var(--fz-15);fill:var(--dim2);letter-spacing:1px">A</text>`;
+  }
+
+  sv+='</svg>';
+  document.getElementById('chain-svg').innerHTML = sv;
+}
+
+/* ══════════════════════════════════════════════
+   HESAPLAMA
+══════════════════════════════════════════════ */
+function calculate(){
+  if(!curKey){ alert('Lütfen önce bir zincir adımı seçin.'); return; }
+
+  const c  = CD[curStd].chains[curKey];
+  const p  = c.p;
+  const z1 = parseInt(document.getElementById('z1').value);
+  const z2 = parseInt(document.getElementById('z2').value);
+  const n1 = parseFloat(document.getElementById('n1').value);
+  const P  = parseFloat(document.getElementById('power').value) || 0;
+  const gv = parseFloat(document.getElementById('geo-input').value);
+
+  if(!z1 || !z2 || z1 < 6 || z2 < 6 || !n1 || !gv){
+    alert('Lütfen tüm zorunlu alanları doldurun.');
+    return;
+  }
+
+  const i  = z2/z1;
+  const n2 = n1*z1/z2;
+  const v  = (p*z1*n1)/60000;
+
+  let Lp, a_calc, wasOdd=false;
+  const B = (z2-z1)/(2*Math.PI);
+
+  if(geoMode === 'a2lp'){
+    const a = gv;
+    const Lp_raw = 2*(a/p)+(z1+z2)/2+B*B*(p/a);
+    let Lp_round = Math.round(Lp_raw);
+    wasOdd = (Lp_round % 2 !== 0);
+    if(wasOdd) Lp_round++;
+    Lp = Lp_round;
+    const K = Lp-(z1+z2)/2;
+    const disc = K*K-8*B*B;
+    if(disc < 0){ alert('Geometri hatası: aks mesafesi çok küçük.'); return; }
+    a_calc = (p/4)*(K+Math.sqrt(disc));
+  } else {
+    let Lp_in = Math.round(gv);
+    wasOdd = (Lp_in % 2 !== 0);
+    if(wasOdd){ Lp_in++; document.getElementById('geo-input').value = Lp_in; }
+    Lp = Lp_in;
+    const K = Lp-(z1+z2)/2;
+    const disc = K*K-8*B*B;
+    if(disc < 0){ alert('Geometri hatası: Lp değeri çok küçük.'); return; }
+    a_calc = (p/4)*(K+Math.sqrt(disc));
+  }
+
+  const a_adj = a_calc*0.997;
+  const F = (P>0 && v>0) ? (P*1000/v) : null;
+
+  document.getElementById('r-i').textContent  = i.toFixed(3);
+  document.getElementById('r-v').textContent  = v.toFixed(3);
+  document.getElementById('r-n2').textContent = n2.toFixed(1);
+  document.getElementById('r-lp').textContent = Lp;
+
+  const lpNote = document.getElementById('r-lp-note');
+  if(wasOdd){
+    lpNote.textContent = '⚠ tek sayıdan çift sayıya yuvarlandı';
+    lpNote.className   = 'res-unt warn';
+  } else {
+    lpNote.textContent = 'çift halka — offset bağlantı gerekmez';
+    lpNote.className   = 'res-unt';
+  }
+
+  document.getElementById('r-a').textContent      = a_adj.toFixed(1);
+  document.getElementById('r-a-note').textContent = 'mm  (−0.3% sarkma payı)';
+
+  const fCard = document.getElementById('res-f-card');
+  const row2  = document.getElementById('res-row2');
+  if(F !== null){
+    document.getElementById('r-f').textContent = Math.round(F).toLocaleString('tr');
+    fCard.style.display = '';
+    row2.style.gridTemplateColumns = '1fr 1fr 1fr';
+  } else {
+    fCard.style.display = 'none';
+    row2.style.gridTemplateColumns = '1fr 1fr';
+  }
+
+  document.getElementById('result-area').classList.add('visible');
+}
+
+/* ══════════════════════════════════════════════
+   SAĞ PANEL
+══════════════════════════════════════════════ */
+function updateRightPanel(){
+  if(!curKey) return;
+  const c   = CD[curStd].chains[curKey];
+  const cfg = CD[curStd];
+  const p   = c.p;
+
+  const inchRow = c.inch
+    ? `<div class="spec-row">
+         <span class="spec-nm">Adım (inç)</span>
+         <span class="spec-vl">${c.inch}</span>
+       </div>`
+    : '';
+
+  document.getElementById('rp-body').innerHTML = `
+    <div class="chain-id-blk">
+      <span class="chain-id">${curKey}</span>
+      <span class="chain-stag">${cfg.label}</span>
+    </div>
+
+    <div class="spec-grp">
+      <div class="spec-grp-ttl">Boyutlar</div>
+      <div class="spec-row">
+        <span class="spec-nm">Adım p</span>
+        <span class="spec-vl sc">${p.toFixed(3)} mm</span>
+      </div>
+      ${inchRow}
+      <div class="spec-row">
+        <span class="spec-nm">İç Genişlik b₁</span>
+        <span class="spec-vl">${c.b1.toFixed(2)} mm</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-nm">Makaracık Çapı d₁</span>
+        <span class="spec-vl bl">${c.d1.toFixed(2)} mm</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-nm">Pim Çapı d₂</span>
+        <span class="spec-vl">${c.d2.toFixed(2)} mm</span>
+      </div>
+    </div>
+
+    <div class="spec-grp">
+      <div class="spec-grp-ttl">Mukavemet &amp; Ağırlık</div>
+      <div class="spec-row">
+        <span class="spec-nm">Min. Kırılma Yükü Q</span>
+        <span class="spec-vl ac">${c.Q.toFixed(1)} kN</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-nm">Zincir Ağırlığı q</span>
+        <span class="spec-vl yl">${c.q.toFixed(2)} kg/m</span>
+      </div>
+    </div>
+
+    <div class="spec-grp">
+      <div class="spec-grp-ttl">Aks Mesafesi Önerisi</div>
+      <div class="spec-row">
+        <span class="spec-nm">Minimum  (30p)</span>
+        <span class="spec-vl">${(30*p).toFixed(0)} mm</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-nm">Optimum  (40p) ★</span>
+        <span class="spec-vl tl">${(40*p).toFixed(0)} mm</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-nm">Maksimum (80p)</span>
+        <span class="spec-vl">${(80*p).toFixed(0)} mm</span>
+      </div>
+      <div class="a-bar"><div class="a-bar-fill"></div></div>
+      <div class="a-bar-lbl">
+        <span>30p</span><span class="mid">40p ★</span><span>80p</span>
+      </div>
+    </div>
+
+    <div class="spec-grp">
+      <div class="spec-grp-ttl">Diş Sayısı Önerileri</div>
+      <div class="spec-row">
+        <span class="spec-nm">Sürücü z₁ (önerilen min)</span>
+        <span class="spec-vl">17 diş</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-nm">Sürücü z₁ (mutlak min)</span>
+        <span class="spec-vl">9 diş</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-nm">Maks. iletim oranı</span>
+        <span class="spec-vl">7 : 1</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-nm">Halka sayısı</span>
+        <span class="spec-vl">Çift tercih edilir</span>
+      </div>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
