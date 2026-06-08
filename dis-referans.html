@@ -4,29 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Diş Referans Tablosu | MH Platform</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mh-tokens.css">
 <style>
-/* ─── Design Tokens ─────────────────────────────────────── */
-:root {
-  --bg:      #07070e;
-  --bg2:     #0c0c18;
-  --surf1:   #101020;
-  --surf2:   #17172a;
-  --surf3:   #1e1e34;
-  --border:  rgba(255,255,255,0.06);
-  --text:    #dde1f0;
-  --dim:     #52527a;
-  --dim2:    #8080a8;
-  --orange:  #f97316;
-  --teal:    #00d4aa;
-  --blue:    #60a5fa;
-  --yellow:  #fbbf24;
-  --font-h:  'Barlow Condensed', sans-serif;
-  --font-m:  'JetBrains Mono', monospace;
-  --font-b:  'DM Sans', sans-serif;
-}
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 
@@ -60,13 +39,13 @@ nav {
 }
 .brand {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 18px; letter-spacing: 3px;
+  font-size: var(--fz-18); letter-spacing: 3px;
   color: var(--orange); text-decoration: none;
   display: flex; align-items: center; gap: 6px;
 }
 .brand em { color: var(--text); font-style: normal; }
 .breadcrumb {
-  font-size: 12px; color: var(--dim2);
+  font-size: var(--fz-12); color: var(--dim2);
   font-family: var(--font-m);
   display: flex; align-items: center; gap: 8px;
 }
@@ -91,7 +70,7 @@ nav {
 
 .sb-label {
   font-family: var(--font-h);
-  font-size: 10px; letter-spacing: 2.5px;
+  font-size: var(--fz-10); letter-spacing: 2.5px;
   color: var(--dim); text-transform: uppercase;
   padding: 16px 16px 8px;
 }
@@ -102,7 +81,7 @@ nav {
   background: transparent; border: none;
   border-left: 3px solid transparent;
   color: var(--dim2); font-family: var(--font-b);
-  font-size: 13px; cursor: pointer;
+  font-size: var(--fz-13); cursor: pointer;
   text-align: left; transition: all .16s;
 }
 .type-btn:hover { background: var(--surf1); color: var(--text); }
@@ -123,38 +102,14 @@ select {
   width: 100%; padding: 9px 10px;
   background: var(--surf2); border: 1px solid var(--border);
   border-radius: 8px; color: var(--text);
-  font-family: var(--font-m); font-size: 13px;
+  font-family: var(--font-m); font-size: var(--fz-13);
   cursor: pointer; appearance: none; outline: none;
   transition: border-color .2s;
 }
 select:focus { border-color: var(--orange); }
 
-/* Slider */
-.sl-header {
-  display: flex; justify-content: space-between;
-  align-items: center; margin-bottom: 8px;
-}
-.sl-lbl {
-  font-family: var(--font-h); font-size: 10px;
-  letter-spacing: 1.5px; color: var(--dim2); text-transform: uppercase;
-}
-.sl-val {
-  font-family: var(--font-m); font-size: 13px;
-  color: var(--teal); font-weight: 600;
-}
-input[type=range] {
-  -webkit-appearance: none; width: 100%;
-  height: 3px; background: var(--surf3); border-radius: 2px; outline: none;
-}
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 15px; height: 15px;
-  border-radius: 50%; background: var(--teal); cursor: pointer;
-  transition: transform .15s;
-}
-input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
-
 /* ─── MAIN ──────────────────────────────────────────────── */
-.main { display: flex; flex-direction: column; overflow: hidden; }
+.main { display: flex; flex-direction: column; overflow: hidden; max-width: 670px; }
 
 /* Thread header */
 .t-header {
@@ -165,20 +120,20 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
   flex-wrap: wrap;
 }
 .t-name {
-  font-family: var(--font-h); font-size: 20px; font-weight: 700;
+  font-family: var(--font-h); font-size: var(--fz-20); font-weight: 700;
   letter-spacing: .8px; color: var(--tc, var(--text)); transition: color .2s;
 }
 .t-std {
-  font-family: var(--font-m); font-size: 11px;
+  font-family: var(--font-m); font-size: var(--fz-11);
   color: var(--dim2); background: var(--surf2);
   padding: 3px 8px; border-radius: 4px;
 }
-.t-note { font-size: 12px; color: var(--dim2); flex: 1; line-height: 1.5; }
+.t-note { font-size: var(--fz-12); color: var(--dim2); flex: 1; line-height: 1.5; }
 
 /* Content area */
 .content-area {
   display: grid;
-  grid-template-columns: 1fr 250px;
+  grid-template-columns: 420px 250px;
   flex: 1; overflow: hidden;
 }
 
@@ -194,7 +149,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
   padding: 13px 16px; background: transparent; border: none;
   border-bottom: 2px solid transparent;
   color: var(--dim2); font-family: var(--font-b);
-  font-size: 13px; cursor: pointer; transition: all .18s;
+  font-size: var(--fz-13); cursor: pointer; transition: all .18s;
   position: relative; top: 1px;
 }
 .tab-btn.on { color: var(--text); border-bottom-color: var(--orange); }
@@ -203,41 +158,38 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
 .tab-pane { display: none; flex: 1; overflow-y: auto; padding: 16px 20px; }
 .tab-pane.on { display: block; }
 
-/* Data table (reused across tabs) */
+/* Data table */
 .dtable {
-  width: 100%; border-collapse: collapse; font-size: 13px;
+  width: 100%; border-collapse: collapse; font-size: var(--fz-13);
 }
 .dtable tr { border-bottom: 1px solid var(--border); }
 .dtable tr:nth-child(even) td { background: var(--surf1); }
 .dtable td { padding: 9px 12px; }
 .dtable .lc { color: var(--dim2); width: 46%; }
+.dtable .lc small { display: block; font-size: 10px; color: var(--dim); margin-top: 2px; font-family: var(--font-m); letter-spacing: .3px; }
 .dtable .vc {
   font-family: var(--font-m); text-align: right;
   color: var(--text); font-weight: 500;
 }
 .dtable .uc {
   color: var(--dim); font-family: var(--font-m);
-  font-size: 11px; padding-left: 6px; width: 44px;
+  font-size: var(--fz-11); padding-left: 6px; width: 44px;
 }
-.hi-teal  { color: var(--teal) !important; font-size: 15px !important; }
+.hi-teal  { color: var(--teal) !important; font-size: var(--fz-15) !important; }
 .hi-blue  { color: var(--blue) !important; }
 .hi-amber { color: var(--yellow) !important; }
+.hi-na    { color: var(--dim) !important; font-size: var(--fz-11) !important; }
 
-/* Info boxes */
+/* Info box */
 .info-box {
   margin-top: 14px; padding: 14px;
-  border-radius: 8px; font-size: 12px; line-height: 1.75;
+  border-radius: 8px; font-size: var(--fz-12); line-height: 1.75;
   white-space: pre-line;
 }
 .info-amber {
   background: rgba(251,191,36,.07);
   border: 1px solid rgba(251,191,36,.2);
   color: #f0cc80;
-}
-.info-teal {
-  background: rgba(0,212,170,.06);
-  border: 1px solid rgba(0,212,170,.15);
-  color: #80ddc5;
 }
 
 /* ─── PROFILE PANEL ─────────────────────────────────────── */
@@ -248,7 +200,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
   overflow: hidden;
 }
 .profile-lbl {
-  font-family: var(--font-h); font-size: 10px;
+  font-family: var(--font-h); font-size: var(--fz-10);
   letter-spacing: 2.5px; color: var(--dim);
   text-align: center; text-transform: uppercase; margin-bottom: 12px;
 }
@@ -274,8 +226,6 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <p class="sb-label">Diş Standardı</p>
-
-    <!-- Thread type buttons rendered by JS -->
     <div id="typeList"></div>
 
     <div class="sb-sep"></div>
@@ -283,19 +233,6 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
     <p class="sb-label">Boyut</p>
     <div class="sb-section">
       <select id="sizeSelect" onchange="updateDisplay()"></select>
-    </div>
-
-    <div class="sb-sep"></div>
-
-    <p class="sb-label">3D Baskı — Katman Yüksekliği</p>
-    <div class="sb-section">
-      <div class="sl-header">
-        <span class="sl-lbl">Layer Height</span>
-        <span class="sl-val" id="layerVal">0.20 mm</span>
-      </div>
-      <input type="range" id="layerSlider"
-             min="0.10" max="0.35" step="0.05" value="0.20"
-             oninput="onLayer(this.value)">
     </div>
   </aside>
 
@@ -317,52 +254,61 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
         <div class="tab-bar">
           <button class="tab-btn on" onclick="setTab('props',this)">Özellikler</button>
           <button class="tab-btn"    onclick="setTab('sw',this)">SolidWorks</button>
-          <button class="tab-btn"    onclick="setTab('print',this)">3D Baskı</button>
         </div>
 
         <!-- TAB: Özellikler -->
         <div id="tab-props" class="tab-pane on">
           <table class="dtable">
-            <tr><td class="lc">Diş tipi</td>     <td class="vc" id="pk_kind">—</td>    <td class="uc"></td></tr>
-            <tr><td class="lc">Profil</td>        <td class="vc" id="pk_profile">—</td> <td class="uc"></td></tr>
-            <tr><td class="lc">Diş açısı</td>    <td class="vc" id="pk_angle">—</td>   <td class="uc">°</td></tr>
-            <tr><td class="lc">Hatve (Pitch)</td> <td class="vc hi-teal" id="pk_pitch">—</td><td class="uc">mm</td></tr>
-            <tr><td class="lc">İnç/tur (TPI)</td><td class="vc" id="pk_tpi">—</td>    <td class="uc">TPI</td></tr>
-            <tr><td class="lc">Dış çap — Major</td><td class="vc" id="pk_major">—</td><td class="uc">mm</td></tr>
-            <tr><td class="lc">Hatve çapı</td>    <td class="vc" id="pk_pd">—</td>     <td class="uc">mm</td></tr>
-            <tr><td class="lc">İç çap — Minor</td><td class="vc" id="pk_minor">—</td> <td class="uc">mm</td></tr>
-            <tr><td class="lc">Diş yüksekliği</td><td class="vc" id="pk_height">—</td><td class="uc">mm</td></tr>
-            <tr><td class="lc">Matkap çapı (%75)</td><td class="vc hi-blue" id="pk_drill">—</td><td class="uc">mm</td></tr>
+            <tr><td class="lc">Diş tipi</td>
+                <td class="vc" id="pk_kind">—</td><td class="uc"></td></tr>
+            <tr><td class="lc">Profil</td>
+                <td class="vc" id="pk_profile">—</td><td class="uc"></td></tr>
+            <tr><td class="lc">Diş açısı</td>
+                <td class="vc" id="pk_angle">—</td><td class="uc">°</td></tr>
+            <tr><td class="lc">Hatve (Pitch)</td>
+                <td class="vc hi-teal" id="pk_pitch">—</td><td class="uc">mm</td></tr>
+            <tr><td class="lc">İnç/tur (TPI)</td>
+                <td class="vc" id="pk_tpi">—</td><td class="uc">TPI</td></tr>
+            <tr><td class="lc">Dış çap — Major</td>
+                <td class="vc" id="pk_major">—</td><td class="uc">mm</td></tr>
+            <tr><td class="lc">Hatve çapı</td>
+                <td class="vc" id="pk_pd">—</td><td class="uc">mm</td></tr>
+            <tr><td class="lc">İç çap — Minor</td>
+                <td class="vc" id="pk_minor">—</td><td class="uc">mm</td></tr>
+            <tr><td class="lc">Diş yüksekliği</td>
+                <td class="vc" id="pk_height">—</td><td class="uc">mm</td></tr>
+            <tr><td class="lc" id="pk_drill_lbl">Tavsiye matkap çapı</td>
+                <td class="vc hi-blue" id="pk_drill">—</td><td class="uc">mm</td></tr>
+            <tr><td class="lc">Min. angajman uzunluğu
+                  <small>çelik–çelik / alüm. için ×1.5</small></td>
+                <td class="vc" id="pk_engage">—</td><td class="uc">mm</td></tr>
+            <tr><td class="lc">Serbest geçiş çapı
+                  <small id="pk_clear_std">ISO 273, orta priz</small></td>
+                <td class="vc" id="pk_clear">—</td><td class="uc">mm</td></tr>
           </table>
         </div>
 
         <!-- TAB: SolidWorks -->
         <div id="tab-sw" class="tab-pane">
           <table class="dtable">
-            <tr><td class="lc">SW Standard</td>           <td class="vc hi-amber" id="sw_std">—</td>   <td class="uc"></td></tr>
-            <tr><td class="lc">SW Thread Type</td>        <td class="vc" id="sw_type">—</td>  <td class="uc"></td></tr>
-            <tr><td class="lc">Boyut</td>                 <td class="vc hi-amber" id="sw_size">—</td>  <td class="uc"></td></tr>
-            <tr><td class="lc">Helix Adımı (Pitch)</td>   <td class="vc hi-teal" id="sw_pitch">—</td> <td class="uc"></td></tr>
-            <tr><td class="lc">Helix Dönüş (16mm)</td>    <td class="vc" id="sw_turns">—</td> <td class="uc"></td></tr>
-            <tr><td class="lc">Profil Açısı</td>          <td class="vc hi-amber" id="sw_angle">—</td><td class="uc"></td></tr>
-            <tr><td class="lc">Profil Yüksekliği</td>     <td class="vc" id="sw_height">—</td><td class="uc"></td></tr>
-            <tr><td class="lc">Swept Cut profil tabanı</td><td class="vc" id="sw_base">—</td> <td class="uc"></td></tr>
+            <tr><td class="lc">SW Standard</td>
+                <td class="vc hi-amber" id="sw_std">—</td><td class="uc"></td></tr>
+            <tr><td class="lc">SW Thread Type</td>
+                <td class="vc" id="sw_type">—</td><td class="uc"></td></tr>
+            <tr><td class="lc">Boyut</td>
+                <td class="vc hi-amber" id="sw_size">—</td><td class="uc"></td></tr>
+            <tr><td class="lc">Helix Adımı (Pitch)</td>
+                <td class="vc hi-teal" id="sw_pitch">—</td><td class="uc"></td></tr>
+            <tr><td class="lc">Helix Dönüş (16 mm)</td>
+                <td class="vc" id="sw_turns">—</td><td class="uc"></td></tr>
+            <tr><td class="lc">Profil Açısı</td>
+                <td class="vc hi-amber" id="sw_angle">—</td><td class="uc"></td></tr>
+            <tr><td class="lc">Profil Yüksekliği</td>
+                <td class="vc" id="sw_height">—</td><td class="uc"></td></tr>
+            <tr><td class="lc">Swept Cut profil tabanı</td>
+                <td class="vc" id="sw_base">—</td><td class="uc"></td></tr>
           </table>
           <div class="info-box info-amber" id="sw_note"></div>
-        </div>
-
-        <!-- TAB: 3D Baskı -->
-        <div id="tab-print" class="tab-pane">
-          <table class="dtable">
-            <tr><td class="lc">Önerilen delik çapı</td>    <td class="vc hi-teal" id="pr_hole">—</td>   <td class="uc">mm</td></tr>
-            <tr><td class="lc">İç diş offset</td>          <td class="vc" id="pr_ic">—</td>    <td class="uc"></td></tr>
-            <tr><td class="lc">Dış diş offset</td>         <td class="vc" id="pr_dis">—</td>   <td class="uc"></td></tr>
-            <tr><td class="lc">Katman yüksekliği</td>       <td class="vc" id="pr_layer">—</td> <td class="uc"></td></tr>
-            <tr><td class="lc">Dolgu oranı (Infill)</td>    <td class="vc" id="pr_infill">—</td><td class="uc"></td></tr>
-            <tr><td class="lc">Min. duvar kalınlığı</td>    <td class="vc" id="pr_wall">—</td>  <td class="uc"></td></tr>
-            <tr><td class="lc">Matkap / Kılavuz</td>        <td class="vc" id="pr_drill">—</td> <td class="uc"></td></tr>
-          </table>
-          <div class="info-box info-teal" id="pr_note"></div>
         </div>
       </div>
 
@@ -376,115 +322,119 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
   </main>
 </div><!-- app -->
 
-<!-- ═══════════════════════════════════════════════════════════ -->
 <script>
-// ─── Thread Database ─────────────────────────────────────────
+// ─── Thread Database ─────────────────────────────────────────────────────────
+// drill   : standart tablolardan alınan tavsiye matkap çapı (mm)
+// clearance: serbest geçiş deliği (ISO 273 orta priz, cıvata tiplerine özgü)
+// drillStd: matkap referans standardı
+// threadClass: 'fastener' | 'pipe' | 'motion'
+
 const T = {
   "Metrik (M)": {
     std:"ISO 68-1 / DIN 13", angle:60, kind:"Silindirik",
     profile:"60° üçgen (ISO)", swStd:"ISO", swType:"Machine Thread",
-    color:"#4da6ff",
+    color:"#4da6ff", drillStd:"DIN 336", threadClass:"fastener",
     note:"En yaygın endüstri standardı. Hole Wizard'da doğrudan seçilebilir.",
     sizes:{
-      "M3":  {p:0.50, dMaj:3.000,  dP:2.675,  dMin:2.459},
-      "M4":  {p:0.70, dMaj:4.000,  dP:3.545,  dMin:3.242},
-      "M5":  {p:0.80, dMaj:5.000,  dP:4.480,  dMin:4.134},
-      "M6":  {p:1.00, dMaj:6.000,  dP:5.350,  dMin:4.917},
-      "M8":  {p:1.25, dMaj:8.000,  dP:7.188,  dMin:6.647},
-      "M10": {p:1.50, dMaj:10.000, dP:9.026,  dMin:8.376},
-      "M12": {p:1.75, dMaj:12.000, dP:10.863, dMin:10.106},
-      "M14": {p:2.00, dMaj:14.000, dP:12.701, dMin:11.835},
-      "M16": {p:2.00, dMaj:16.000, dP:14.701, dMin:13.835},
-      "M20": {p:2.50, dMaj:20.000, dP:18.376, dMin:17.294},
-      "M24": {p:3.00, dMaj:24.000, dP:22.051, dMin:20.752},
-      "M30": {p:3.50, dMaj:30.000, dP:27.727, dMin:26.211},
-      "M36": {p:4.00, dMaj:36.000, dP:33.402, dMin:31.670},
-      "M42": {p:4.50, dMaj:42.000, dP:39.077, dMin:37.129},
+      "M3":  {p:0.50, dMaj:3.000,  dP:2.675,  dMin:2.459,  drill:2.5,  clearance:3.4},
+      "M4":  {p:0.70, dMaj:4.000,  dP:3.545,  dMin:3.242,  drill:3.3,  clearance:4.5},
+      "M5":  {p:0.80, dMaj:5.000,  dP:4.480,  dMin:4.134,  drill:4.2,  clearance:5.5},
+      "M6":  {p:1.00, dMaj:6.000,  dP:5.350,  dMin:4.917,  drill:5.0,  clearance:6.6},
+      "M8":  {p:1.25, dMaj:8.000,  dP:7.188,  dMin:6.647,  drill:6.8,  clearance:9.0},
+      "M10": {p:1.50, dMaj:10.000, dP:9.026,  dMin:8.376,  drill:8.5,  clearance:11.0},
+      "M12": {p:1.75, dMaj:12.000, dP:10.863, dMin:10.106, drill:10.2, clearance:13.5},
+      "M14": {p:2.00, dMaj:14.000, dP:12.701, dMin:11.835, drill:12.0, clearance:15.5},
+      "M16": {p:2.00, dMaj:16.000, dP:14.701, dMin:13.835, drill:14.0, clearance:17.5},
+      "M20": {p:2.50, dMaj:20.000, dP:18.376, dMin:17.294, drill:17.5, clearance:22.0},
+      "M24": {p:3.00, dMaj:24.000, dP:22.051, dMin:20.752, drill:21.0, clearance:26.0},
+      "M30": {p:3.50, dMaj:30.000, dP:27.727, dMin:26.211, drill:26.5, clearance:33.0},
+      "M36": {p:4.00, dMaj:36.000, dP:33.402, dMin:31.670, drill:32.0, clearance:39.0},
+      "M42": {p:4.50, dMaj:42.000, dP:39.077, dMin:37.129, drill:37.5, clearance:45.0},
     }
   },
   "G — BSP Düz": {
     std:"ISO 228 / DIN 259", angle:55, kind:"Silindirik (paralel)",
     profile:"55° Whitworth", swStd:"BSP", swType:"BSPP Straight (G)",
-    color:"#44dd88",
-    note:"Pnömatik/hidrolik bağlantılar. Festo, SMC, Parker. SW'de BSP yoksa Helix+Swept Cut.",
+    color:"#44dd88", drillStd:"ISO 228", threadClass:"pipe",
+    note:"Pnömatik/hidrolik bağlantılar. Festo, SMC, Parker. CAD'de BSP yoksa Helix+Swept Cut.",
     sizes:{
-      "G1/8": {p:0.907, tpi:28, dMaj:9.728,  dP:9.147,  dMin:8.566},
-      "G1/4": {p:1.337, tpi:19, dMaj:13.157, dP:12.301, dMin:11.445},
-      "G3/8": {p:1.337, tpi:19, dMaj:16.662, dP:15.806, dMin:14.950},
-      "G1/2": {p:1.814, tpi:14, dMaj:20.955, dP:19.793, dMin:18.631},
-      "G3/4": {p:1.814, tpi:14, dMaj:26.441, dP:25.279, dMin:24.117},
-      "G1":   {p:2.309, tpi:11, dMaj:33.249, dP:31.770, dMin:30.291},
-      "G1¼":  {p:2.309, tpi:11, dMaj:41.910, dP:40.431, dMin:38.952},
-      "G1½":  {p:2.309, tpi:11, dMaj:47.803, dP:46.324, dMin:44.845},
-      "G2":   {p:2.309, tpi:11, dMaj:59.614, dP:58.135, dMin:56.656},
+      "G1/8": {p:0.907, tpi:28, dMaj:9.728,  dP:9.147,  dMin:8.566,  drill:8.8},
+      "G1/4": {p:1.337, tpi:19, dMaj:13.157, dP:12.301, dMin:11.445, drill:11.5},
+      "G3/8": {p:1.337, tpi:19, dMaj:16.662, dP:15.806, dMin:14.950, drill:15.0},
+      "G1/2": {p:1.814, tpi:14, dMaj:20.955, dP:19.793, dMin:18.631, drill:18.9},
+      "G3/4": {p:1.814, tpi:14, dMaj:26.441, dP:25.279, dMin:24.117, drill:24.3},
+      "G1":   {p:2.309, tpi:11, dMaj:33.249, dP:31.770, dMin:30.291, drill:30.5},
+      "G1¼":  {p:2.309, tpi:11, dMaj:41.910, dP:40.431, dMin:38.952, drill:39.2},
+      "G1½":  {p:2.309, tpi:11, dMaj:47.803, dP:46.324, dMin:44.845, drill:45.0},
+      "G2":   {p:2.309, tpi:11, dMaj:59.614, dP:58.135, dMin:56.656, drill:57.0},
     }
   },
   "R/Rc — BSP Konik": {
     std:"ISO 7 / DIN 2999", angle:55, kind:"Konik 1:16",
     profile:"55° Whitworth", swStd:"BSP", swType:"BSPT Tapered (R/Rc)",
-    color:"#ff9944",
+    color:"#ff9944", drillStd:"ISO 7", threadClass:"pipe",
     note:"R = dış konik, Rc = iç konik. Sızdırmazlık diş geometrisiyle sağlanır.",
     sizes:{
-      "R1/8": {p:0.907, tpi:28, dMaj:9.728,  dP:9.147,  dMin:8.566},
-      "R1/4": {p:1.337, tpi:19, dMaj:13.157, dP:12.301, dMin:11.445},
-      "R3/8": {p:1.337, tpi:19, dMaj:16.662, dP:15.806, dMin:14.950},
-      "R1/2": {p:1.814, tpi:14, dMaj:20.955, dP:19.793, dMin:18.631},
-      "R3/4": {p:1.814, tpi:14, dMaj:26.441, dP:25.279, dMin:24.117},
-      "R1":   {p:2.309, tpi:11, dMaj:33.249, dP:31.770, dMin:30.291},
-      "R1¼":  {p:2.309, tpi:11, dMaj:41.910, dP:40.431, dMin:38.952},
-      "R1½":  {p:2.309, tpi:11, dMaj:47.803, dP:46.324, dMin:44.845},
+      "R1/8": {p:0.907, tpi:28, dMaj:9.728,  dP:9.147,  dMin:8.566,  drill:8.8},
+      "R1/4": {p:1.337, tpi:19, dMaj:13.157, dP:12.301, dMin:11.445, drill:11.5},
+      "R3/8": {p:1.337, tpi:19, dMaj:16.662, dP:15.806, dMin:14.950, drill:15.0},
+      "R1/2": {p:1.814, tpi:14, dMaj:20.955, dP:19.793, dMin:18.631, drill:19.0},
+      "R3/4": {p:1.814, tpi:14, dMaj:26.441, dP:25.279, dMin:24.117, drill:24.5},
+      "R1":   {p:2.309, tpi:11, dMaj:33.249, dP:31.770, dMin:30.291, drill:30.7},
+      "R1¼":  {p:2.309, tpi:11, dMaj:41.910, dP:40.431, dMin:38.952, drill:39.2},
+      "R1½":  {p:2.309, tpi:11, dMaj:47.803, dP:46.324, dMin:44.845, drill:45.0},
     }
   },
   "Tr — Trapez": {
     std:"ISO 2904 / DIN 103", angle:30, kind:"Silindirik",
     profile:"30° Trapez", swStd:"ISO", swType:"Acme / Trapez Thread",
-    color:"#bb88ff",
+    color:"#bb88ff", drillStd:"DIN 103", threadClass:"motion",
     note:"Hareket vidaları (CNC, pres, kriko). Tek veya çift hatveli olabilir.",
     sizes:{
-      "Tr8x1.5":{p:1.5, dMaj:8.0,  dP:7.25,  dMin:6.20},
-      "Tr10x2": {p:2.0, dMaj:10.0, dP:9.00,  dMin:7.50},
-      "Tr12x3": {p:3.0, dMaj:12.0, dP:10.50, dMin:8.50},
-      "Tr16x4": {p:4.0, dMaj:16.0, dP:14.00, dMin:11.50},
-      "Tr20x4": {p:4.0, dMaj:20.0, dP:18.00, dMin:15.50},
-      "Tr24x5": {p:5.0, dMaj:24.0, dP:21.50, dMin:18.50},
-      "Tr28x5": {p:5.0, dMaj:28.0, dP:25.50, dMin:22.50},
-      "Tr32x6": {p:6.0, dMaj:32.0, dP:29.00, dMin:25.00},
-      "Tr40x7": {p:7.0, dMaj:40.0, dP:36.50, dMin:32.50},
+      "Tr8×1.5": {p:1.5, dMaj:8.0,  dP:7.25,  dMin:6.20,  drill:6.5},
+      "Tr10×2":  {p:2.0, dMaj:10.0, dP:9.00,  dMin:7.50,  drill:8.0},
+      "Tr12×3":  {p:3.0, dMaj:12.0, dP:10.50, dMin:8.50,  drill:9.0},
+      "Tr16×4":  {p:4.0, dMaj:16.0, dP:14.00, dMin:11.50, drill:12.0},
+      "Tr20×4":  {p:4.0, dMaj:20.0, dP:18.00, dMin:15.50, drill:16.0},
+      "Tr24×5":  {p:5.0, dMaj:24.0, dP:21.50, dMin:18.50, drill:19.0},
+      "Tr28×5":  {p:5.0, dMaj:28.0, dP:25.50, dMin:22.50, drill:23.0},
+      "Tr32×6":  {p:6.0, dMaj:32.0, dP:29.00, dMin:25.00, drill:26.0},
+      "Tr40×7":  {p:7.0, dMaj:40.0, dP:36.50, dMin:32.50, drill:33.0},
     }
   },
   "UNC — Amerikan Kaba": {
     std:"ASME B1.1", angle:60, kind:"Silindirik",
     profile:"60° üçgen (UN)", swStd:"ANSI", swType:"Machine Thread UNC",
-    color:"#ff6655",
+    color:"#ff6655", drillStd:"ASME B1.1", threadClass:"fastener",
     note:"Amerikan menşeli makine ve ekipmanlar. ISO metrik ile boyut uyumsuz, profil benzer.",
     sizes:{
-      "#4-40":   {p:0.635,tpi:40,dMaj:2.845, dP:2.525, dMin:2.257},
-      "#6-32":   {p:0.794,tpi:32,dMaj:3.505, dP:3.124, dMin:2.794},
-      "#8-32":   {p:0.794,tpi:32,dMaj:4.166, dP:3.785, dMin:3.454},
-      "#10-24":  {p:1.058,tpi:24,dMaj:4.826, dP:4.310, dMin:3.912},
-      "1/4-20":  {p:1.270,tpi:20,dMaj:6.350, dP:5.537, dMin:4.978},
-      "5/16-18": {p:1.411,tpi:18,dMaj:7.938, dP:7.034, dMin:6.401},
-      "3/8-16":  {p:1.588,tpi:16,dMaj:9.525, dP:8.494, dMin:7.798},
-      "1/2-13":  {p:1.954,tpi:13,dMaj:12.700,dP:11.430,dMin:10.584},
-      "5/8-11":  {p:2.309,tpi:11,dMaj:15.875,dP:14.376,dMin:13.361},
-      "3/4-10":  {p:2.540,tpi:10,dMaj:19.050,dP:17.399,dMin:16.307},
-      "1-8":     {p:3.175,tpi:8, dMaj:25.400,dP:23.338,dMin:22.051},
+      "#4-40":   {p:0.635,tpi:40, dMaj:2.845, dP:2.525, dMin:2.257, drill:2.2,  clearance:3.3},
+      "#6-32":   {p:0.794,tpi:32, dMaj:3.505, dP:3.124, dMin:2.794, drill:2.7,  clearance:3.9},
+      "#8-32":   {p:0.794,tpi:32, dMaj:4.166, dP:3.785, dMin:3.454, drill:3.4,  clearance:4.5},
+      "#10-24":  {p:1.058,tpi:24, dMaj:4.826, dP:4.310, dMin:3.912, drill:3.8,  clearance:5.1},
+      "1/4-20":  {p:1.270,tpi:20, dMaj:6.350, dP:5.537, dMin:4.978, drill:5.1,  clearance:6.9},
+      "5/16-18": {p:1.411,tpi:18, dMaj:7.938, dP:7.034, dMin:6.401, drill:6.5,  clearance:8.7},
+      "3/8-16":  {p:1.588,tpi:16, dMaj:9.525, dP:8.494, dMin:7.798, drill:8.0,  clearance:10.5},
+      "1/2-13":  {p:1.954,tpi:13, dMaj:12.700,dP:11.430,dMin:10.584,drill:10.7, clearance:13.5},
+      "5/8-11":  {p:2.309,tpi:11, dMaj:15.875,dP:14.376,dMin:13.361,drill:13.5, clearance:17.0},
+      "3/4-10":  {p:2.540,tpi:10, dMaj:19.050,dP:17.399,dMin:16.307,drill:16.5, clearance:20.0},
+      "1-8":     {p:3.175,tpi:8,  dMaj:25.400,dP:23.338,dMin:22.051,drill:22.0, clearance:27.0},
     }
   },
   "NPT — Konik Boru": {
     std:"ASME B1.20.1", angle:60, kind:"Konik 1:16",
     profile:"60° üçgen", swStd:"ANSI", swType:"Pipe Thread NPT",
-    color:"#ffcc44",
+    color:"#ffcc44", drillStd:"ASME B1.20.1", threadClass:"pipe",
     note:"ABD boru standardı. Avrupa'da G/R yerine bazı US ekipmanlarda karşılaşılır.",
     sizes:{
-      "NPT 1/8":{p:0.941,tpi:27,  dMaj:10.287,dP:9.489, dMin:8.732},
-      "NPT 1/4":{p:1.270,tpi:20,  dMaj:13.716,dP:12.487,dMin:11.431},
-      "NPT 3/8":{p:1.270,tpi:20,  dMaj:17.145,dP:15.926,dMin:14.860},
-      "NPT 1/2":{p:1.814,tpi:14,  dMaj:21.336,dP:19.772,dMin:18.321},
-      "NPT 3/4":{p:1.814,tpi:14,  dMaj:26.670,dP:25.117,dMin:23.666},
-      "NPT 1":  {p:2.209,tpi:11.5,dMaj:33.401,dP:31.461,dMin:29.694},
-      "NPT 1¼": {p:2.209,tpi:11.5,dMaj:41.910,dP:39.952,dMin:38.100},
-      "NPT 1½": {p:2.209,tpi:11.5,dMaj:47.803,dP:45.845,dMin:44.000},
+      "NPT 1/8": {p:0.941, tpi:27,   dMaj:10.287,dP:9.489, dMin:8.732,  drill:8.9},
+      "NPT 1/4": {p:1.270, tpi:20,   dMaj:13.716,dP:12.487,dMin:11.431, drill:11.1},
+      "NPT 3/8": {p:1.270, tpi:20,   dMaj:17.145,dP:15.926,dMin:14.860, drill:14.3},
+      "NPT 1/2": {p:1.814, tpi:14,   dMaj:21.336,dP:19.772,dMin:18.321, drill:18.3},
+      "NPT 3/4": {p:1.814, tpi:14,   dMaj:26.670,dP:25.117,dMin:23.666, drill:23.4},
+      "NPT 1":   {p:2.209, tpi:11.5, dMaj:33.401,dP:31.461,dMin:29.694, drill:29.4},
+      "NPT 1¼":  {p:2.209, tpi:11.5, dMaj:41.910,dP:39.952,dMin:38.100, drill:37.5},
+      "NPT 1½":  {p:2.209, tpi:11.5, dMaj:47.803,dP:45.845,dMin:44.000, drill:43.5},
     }
   },
 };
@@ -508,11 +458,9 @@ function buildTypeList() {
 
 function selectType(name) {
   curType = name;
-  // Update buttons
   document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
   [...document.querySelectorAll('.type-btn')]
     .find(b => b.textContent.trim() === name)?.classList.add('active');
-  // Populate size list
   const td = T[name];
   const sel = document.getElementById('sizeSelect');
   sel.innerHTML = '';
@@ -532,15 +480,11 @@ function setTab(id, btn) {
   btn.classList.add('on');
 }
 
-// ─── Layer slider ─────────────────────────────────────────────
-function onLayer(v) {
-  document.getElementById('layerVal').textContent = parseFloat(v).toFixed(2) + ' mm';
-  updateDisplay();
-}
-
 // ─── Helpers ─────────────────────────────────────────────────
-const set = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
-const tH  = (angle, p) => p / (2 * Math.tan(angle * Math.PI / 360));
+const set    = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
+const tH     = (angle, p) => p / (2 * Math.tan(angle * Math.PI / 360));
+// Drill display: show 2 decimals only when needed (e.g. 10.75), else 1 decimal
+const fmtD   = v => { const s = v.toFixed(2); return s.endsWith('0') ? v.toFixed(1) : s; };
 
 // ─── Main update ──────────────────────────────────────────────
 function updateDisplay() {
@@ -556,10 +500,6 @@ function updateDisplay() {
   const angle = td.angle;
   const h     = tH(angle, p);
   const tpi   = sd.tpi ?? (25.4 / p).toFixed(1);
-  const drill = (dMaj - 0.75 * p).toFixed(3);
-  const lh    = parseFloat(document.getElementById('layerSlider').value);
-  const off   = lh <= 0.15 ? 0.15 : lh <= 0.20 ? 0.20 : 0.30;
-  const icD   = (dMin + off).toFixed(3);
   const turns = (16 / p).toFixed(1);
   const baseW = (p * 0.75).toFixed(3);
 
@@ -569,7 +509,7 @@ function updateDisplay() {
   document.getElementById('tStd').textContent  = td.std;
   document.getElementById('tNote').textContent = td.note;
 
-  // Properties
+  // ── Properties tab ──────────────────────────────────────────
   set('pk_kind',    td.kind);
   set('pk_profile', td.profile);
   set('pk_angle',   angle);
@@ -579,9 +519,40 @@ function updateDisplay() {
   set('pk_pd',      dP.toFixed(3));
   set('pk_minor',   dMin.toFixed(3));
   set('pk_height',  h.toFixed(3));
-  set('pk_drill',   drill);
 
-  // SolidWorks
+  // Drill — standard value from database
+  const drillLblEl = document.getElementById('pk_drill_lbl');
+  if (drillLblEl) drillLblEl.innerHTML =
+    `Tavsiye matkap çapı<small>${td.drillStd}</small>`;
+  set('pk_drill', fmtD(sd.drill));
+
+  // Engagement length
+  let engageText;
+  if (td.threadClass === 'pipe') {
+    engageText = 'Tam angajman';
+  } else if (td.threadClass === 'motion') {
+    engageText = `≥ ${(dMaj * 1.5).toFixed(1)}`;
+  } else {
+    engageText = `≥ ${(dMaj * 1.0).toFixed(1)}`;
+  }
+  set('pk_engage', engageText);
+
+  // Clearance hole (fastener threads only)
+  const clearEl    = document.getElementById('pk_clear');
+  const clearStdEl = document.getElementById('pk_clear_std');
+  if (sd.clearance) {
+    if (clearEl) { clearEl.textContent = fmtD(sd.clearance); clearEl.className = 'vc hi-blue'; }
+    if (clearStdEl) {
+      clearStdEl.textContent = td.threadClass === 'fastener' && curType.includes('UNC')
+        ? 'ASME B18.2.8, orta priz'
+        : 'ISO 273, orta priz';
+    }
+  } else {
+    if (clearEl) { clearEl.textContent = '—'; clearEl.className = 'vc hi-na'; }
+    if (clearStdEl) clearStdEl.textContent = 'cıvata dişlerine özgü';
+  }
+
+  // ── SolidWorks tab ──────────────────────────────────────────
   set('sw_std',    td.swStd);
   set('sw_type',   td.swType);
   set('sw_size',   size);
@@ -608,25 +579,7 @@ function updateDisplay() {
   }
   document.getElementById('sw_note').textContent = swNote;
 
-  // 3D Print
-  set('pr_hole',   'Ø ' + icD);
-  set('pr_ic',     `+${off.toFixed(2)} mm  (iç diş delik büyütme)`);
-  set('pr_dis',    `−${off.toFixed(2)} mm  (dış diş çap küçültme)`);
-  set('pr_layer',  '0.15 – 0.20 mm');
-  set('pr_infill', '≥ %40');
-  set('pr_wall',   '≥ 3 mm  (min. 3 çevre)');
-  set('pr_drill',  `Ø ${drill} mm uç ile kılavuz çek`);
-
-  let prNote = `Önerilen malzeme: PETG veya ABS  (PLA kırılgan, yük altında çatlar).\n` +
-               `Sızdırmazlık için baskı sonrası PTFE bant sar.`;
-  if (curType.includes('G —') || curType.includes('BSP')) {
-    prNote += `\nG diş paralel → conta veya PTFE bant gerekli.`;
-  } else if (curType.includes('R/Rc') || curType.includes('NPT')) {
-    prNote += `\nKonik diş → vidalandıkça sıkışır, PTFE bant önerilir.`;
-  }
-  document.getElementById('pr_note').textContent = prNote;
-
-  // SVG profile
+  // ── SVG profile ─────────────────────────────────────────────
   drawProfile(angle, p, h, td.color, curType.includes('Tr'));
 }
 
@@ -642,7 +595,7 @@ function drawProfile(angle, pitch, h, color, isTrap) {
 
   const dim   = '#3a3a5a';
   const dim2  = '#4a4a7a';
-  const alpha = color + '28';  // transparent fill
+  const alpha = color + '28';
 
   let out = '';
 
@@ -690,10 +643,8 @@ function drawProfile(angle, pitch, h, color, isTrap) {
   out += `<text x="${hx-4}" y="${by-hPx/2+15}" text-anchor="end"
            font-family="JetBrains Mono,monospace" font-size="8.5" fill="#00d4aa">mm</text>`;
 
-  // Angle label at tip of first tooth
-  const tipX = isTrap ? MX + pPx * 0.5 : MX + pPx * 0.5;
-  const tipY = by - hPx;
-  out += `<text x="${tipX}" y="${tipY - 8}" text-anchor="middle"
+  // Angle label
+  out += `<text x="${MX + pPx * 0.5}" y="${by - hPx - 8}" text-anchor="middle"
            font-family="Barlow Condensed,sans-serif" font-size="14" font-weight="700"
            fill="#fbbf24">${angle}°</text>`;
 
@@ -703,7 +654,7 @@ function drawProfile(angle, pitch, h, color, isTrap) {
   out += `<text x="${W-12}" y="${by-hPx+4}" text-anchor="end" font-size="8"
            font-family="DM Sans,sans-serif" fill="${dim2}">⌀ min</text>`;
 
-  // Profile label bottom
+  // Profile label
   const td = T[curType];
   out += `<text x="${W/2}" y="${H-6}" text-anchor="middle" font-size="9"
            font-family="Barlow Condensed,sans-serif" letter-spacing="1"
