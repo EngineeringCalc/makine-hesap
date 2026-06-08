@@ -1,0 +1,63 @@
+/* ═══════════════════════════════════════════════════════
+   mh-tokens.css  —  MH Platform Ortak Tasarım Değerleri
+   Bu dosyayı değiştirince tüm sayfalar güncellenir.
+   ═══════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500&display=swap');
+
+:root {
+
+  /* ─── Arka plan & Yüzey ─────────────────────────── */
+  --bg:     #07070e;
+  --bg2:    #0c0c18;
+  --surf1:  #101020;
+  --surf2:  #17172a;
+  --surf3:  #1e1e34;
+  --border: rgba(255,255,255,0.06);
+
+  /* ─── Metin ─────────────────────────────────────── */
+  --text:   #dde1f0;
+  --dim:    #dde1f0;
+  --dim2:   #dde1f0;
+
+  /* ─── Vurgu Renkleri ─────────────────────────────── */
+  --orange: #f97316;
+  --accent: #f97316;   /* civata.html --accent uyumu */
+  --teal:   #00d4aa;
+  --blue:   #60a5fa;
+  --yellow: #fbbf24;
+  --green:  #4ade80;
+  --red:    #f87171;
+  --purple: #a78bfa;
+  --pink:   #f472b6;
+
+  /* ─── Fontlar ────────────────────────────────────────
+     Sadece bu satırları değiştirerek tüm sayfalardaki
+     yazı tipini güncelleyebilirsin.                   */
+  --font-h:    'Barlow Condensed', sans-serif;  /* Başlıklar */
+  --font-m:    'JetBrains Mono', monospace;     /* Sayılar   */
+  --font-b:    'DM Sans', sans-serif;           /* Gövde     */
+  --font-logo: 'Bebas Neue', sans-serif;        /* Logo      */
+
+  /* ─── Font Boyutu Çarpanı ────────────────────────────
+     1.0 = orijinal  |  1.5 = %50 büyük  (şu anki değser)
+     Tüm sayfalarda boyutu değiştirmek için sadece
+     bu tek değeri düzenle:                             */
+  --fz: 1.2;
+
+  /* ─── Ölçeklenmiş Font Boyutları ─────────────────── */
+  --fz-9:  calc( 9px * var(--fz));   /*  9 → 13.5px */
+  --fz-10: calc(10px * var(--fz));   /* 10 →   15px */
+  --fz-11: calc(11px * var(--fz));   /* 11 → 16.5px */
+  --fz-12: calc(12px * var(--fz));   /* 12 →   18px */
+  --fz-13: calc(13px * var(--fz));   /* 13 → 19.5px */
+  --fz-14: calc(14px * var(--fz));   /* 14 →   21px */
+  --fz-15: calc(15px * var(--fz));   /* 15 → 22.5px */
+  --fz-18: calc(18px * var(--fz));   /* 18 →   27px */
+  --fz-20: calc(20px * var(--fz));   /* 20 →   30px */
+  --fz-22: calc(22px * var(--fz));   /* 22 →   33px */
+  --fz-24: calc(24px * var(--fz));   /* 24 →   36px */
+  --fz-26: calc(26px * var(--fz));   /* 26 →   39px */
+  --fz-28: calc(28px * var(--fz));   /* 28 →   42px */
+
+}
