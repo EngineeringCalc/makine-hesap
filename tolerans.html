@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISO Toleranslar | MH Platform</title>
+<link rel="stylesheet" href="mh-tokens.css">
+<style>
+
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-b);
+  display: flex; flex-direction: column;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none; z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(7,7,14,0.92); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 20px; height: 52px; gap: 20px; flex-shrink: 0;
+}
+.brand { font-family: 'Bebas Neue', sans-serif; font-size: var(--fz-18); letter-spacing: 3px; color: var(--orange); text-decoration: none; }
+.brand em { color: var(--text); font-style: normal; }
+.breadcrumb { font-size: var(--fz-12); color: var(--dim2); font-family: var(--font-m); display: flex; align-items: center; gap: 8px; }
+.breadcrumb .sep { color: var(--dim); }
+
+/* ── APP SHELL ── */
+.app { display: flex; flex: 1; overflow: hidden; position: relative; z-index: 1; }
+
+/* ── LEFT SIDEBAR ── */
+.sidebar {
+  background: var(--bg2); border-right: 1px solid var(--border);
+  width: 200px; flex-shrink: 0;
+  display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 16px;
+}
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+.sec-label {
+  font-family: var(--font-h); font-size: var(--fz-13); letter-spacing: 2px;
+  color: #9090c0; text-transform: uppercase; padding: 14px 14px 8px;
+}
+.sb-divider { height: 1px; background: var(--border); margin: 8px 14px; }
+
+.hs-toggle {
+  display: flex; margin: 0 14px 4px;
+  background: var(--surf1); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden;
+}
+.hs-btn {
+  flex: 1; padding: 10px 0; background: transparent; border: none;
+  color: var(--dim2); font-family: var(--font-h); font-size: var(--fz-14);
+  font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all 0.15s;
+}
+.hs-btn.on-hole { background: rgba(96,165,250,0.15); color: var(--blue); }
+.hs-btn.on-shaft { background: rgba(249,115,22,0.15); color: var(--orange); }
+
+.letter-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 4px; padding: 0 14px;
+}
+.ltr-btn {
+  padding: 8px 4px; background: var(--surf1); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--dim2); font-family: var(--font-m);
+  font-size: var(--fz-12); font-weight: 600; cursor: pointer; text-align: center;
+  transition: all 0.15s;
+}
+.ltr-btn:hover { background: var(--surf2); color: var(--text); }
+.ltr-btn.sel-hole { background: rgba(96,165,250,0.14); border-color: var(--blue); color: var(--blue); }
+.ltr-btn.sel-shaft { background: rgba(249,115,22,0.14); border-color: var(--orange); color: var(--orange); }
+
+.it-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 4px; padding: 0 14px;
+}
+.it-btn {
+  padding: 7px 2px; background: var(--surf1); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--dim2); font-family: var(--font-m);
+  font-size: var(--fz-11); font-weight: 600; cursor: pointer; text-align: center;
+  transition: all 0.15s;
+}
+.it-btn:hover { background: var(--surf2); color: var(--text); }
+.it-btn.sel { background: rgba(0,212,170,0.12); border-color: var(--teal); color: var(--teal); }
+
+/* ── MAIN CONTENT ── */
+.content {
+  width: 480px; max-width: 480px; flex-shrink: 0;
+  display: flex; flex-direction: column; overflow-y: auto;
+  border-right: 1px solid var(--border);
+}
+.content::-webkit-scrollbar { width: 3px; }
+.content::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+.page-hdr {
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-shrink: 0;
+}
+.page-title { font-family: var(--font-h); font-size: var(--fz-20); font-weight: 700; letter-spacing: 1px; }
+.page-sub { font-size: var(--fz-11); color: var(--dim2); font-family: var(--font-m); margin-top: 3px; }
+.tol-badge { font-family: var(--font-m); font-size: var(--fz-26); font-weight: 600; line-height: 1; }
+
+.section { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.sec-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.sec-ttl { font-family: var(--font-h); font-size: var(--fz-13); letter-spacing: 2px; color: #9090c0; text-transform: uppercase; }
+.sec-tag { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); }
+
+.dia-wrap {
+  display: flex; background: var(--surf2); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden; transition: border-color 0.2s; margin-bottom: 10px;
+}
+.dia-wrap:focus-within { border-color: var(--orange); }
+.dia-wrap input {
+  flex: 1; padding: 11px 14px; background: transparent; border: none;
+  color: var(--text); font-family: var(--font-m); font-size: var(--fz-20); font-weight: 600;
+  outline: none; -moz-appearance: textfield;
+}
+.dia-wrap input::-webkit-outer-spin-button,
+.dia-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.dia-unit {
+  padding: 0 14px; display: flex; align-items: center;
+  font-family: var(--font-m); font-size: var(--fz-13); color: var(--dim2);
+  background: var(--surf3); border-left: 1px solid var(--border);
+}
+
+.quick-sizes { display: flex; flex-wrap: wrap; gap: 5px; }
+.qs {
+  padding: 5px 9px; background: var(--surf1); border: 1px solid var(--border);
+  border-radius: 5px; color: var(--dim2); font-family: var(--font-m);
+  font-size: var(--fz-11); cursor: pointer; transition: all 0.15s;
+}
+.qs:hover { background: var(--surf2); color: var(--text); }
+.qs.on { background: rgba(249,115,22,0.12); border-color: rgba(249,115,22,0.4); color: var(--orange); }
+
+.svg-wrap { padding: 0 16px 12px; border-bottom: 1px solid var(--border); }
+.svg-box { background: var(--surf1); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+#tolSvg { width: 100%; height: 200px; display: block; }
+
+.res-tbl { width: 100%; border-collapse: collapse; font-size: var(--fz-13); }
+.res-tbl tr { border-bottom: 1px solid var(--border); }
+.res-tbl tr:nth-child(even) td { background: var(--surf1); }
+.res-tbl td { padding: 9px 12px; }
+.res-tbl .lc { color: var(--dim2); width: 48%; }
+.res-tbl .vc { font-family: var(--font-m); text-align: right; color: var(--text); font-weight: 500; }
+.res-tbl .uc { color: var(--dim); font-family: var(--font-m); font-size: var(--fz-10); padding-left: 4px; width: 34px; }
+.hi-b { color: var(--blue) !important; }
+.hi-t { color: var(--teal) !important; font-size: var(--fz-15) !important; }
+.hi-a { color: var(--yellow) !important; }
+.hi-g { color: var(--green) !important; }
+.hi-r { color: var(--red) !important; }
+
+.info-strip {
+  margin: 10px 16px 0; padding: 10px 14px;
+  background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.18);
+  border-radius: 8px; font-size: var(--fz-11); color: #d4b066; line-height: 1.75;
+}
+
+/* ── RIGHT PANEL ── */
+.right-panel {
+  background: var(--bg2); border-left: 1px solid var(--border);
+  width: 320px; flex-shrink: 0;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.rp-hdr {
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.rp-title { font-family: var(--font-h); font-size: var(--fz-15); font-weight: 700; letter-spacing: 1px; }
+.rp-body { flex: 1; overflow-y: auto; }
+.rp-body::-webkit-scrollbar { width: 3px; }
+.rp-body::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+.fit-display {
+  padding: 12px 16px 10px; border-bottom: 1px solid var(--border);
+}
+.fit-code-big { font-family: var(--font-m); font-size: var(--fz-24); font-weight: 600; margin-bottom: 8px; }
+.fit-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 5px;
+  font-family: var(--font-m); font-size: var(--fz-11); font-weight: 600; letter-spacing: 0.5px;
+}
+.fb-clr { background: rgba(0,212,170,0.12); color: var(--teal); border: 1px solid rgba(0,212,170,0.25); }
+.fb-trn { background: rgba(251,191,36,0.12); color: var(--yellow); border: 1px solid rgba(251,191,36,0.25); }
+.fb-int { background: rgba(248,113,113,0.12); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+
+.fit-limits {
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.flc {
+  background: var(--surf1); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+}
+.flc-lbl { font-family: var(--font-h); font-size: var(--fz-10); letter-spacing: 1.5px; color: var(--dim2); text-transform: uppercase; }
+.flc-val { font-family: var(--font-m); font-size: var(--fz-18); font-weight: 600; margin: 4px 0 2px; }
+.flc-unit { font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim2); }
+
+.fit-dims { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+.fd-row { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; }
+.fd-lbl { font-size: var(--fz-12); color: var(--dim2); font-family: var(--font-b); }
+.fd-val { font-family: var(--font-m); font-size: var(--fz-13); font-weight: 600; }
+
+.fits-section { padding: 10px 16px 14px; }
+.fits-cat {
+  font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 1.5px;
+  color: var(--dim2); text-transform: uppercase;
+  margin-bottom: 6px; margin-top: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.fits-cat::after { content:''; flex:1; height:1px; background: var(--border); }
+
+.fit-row { display: flex; flex-direction: column; gap: 3px; margin-bottom: 2px; }
+.fit-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; background: var(--surf1); border: 1px solid var(--border);
+  border-radius: 6px; cursor: pointer; transition: all 0.15s; width: 100%; text-align: left;
+}
+.fit-btn:hover { border-color: rgba(255,255,255,0.14); background: var(--surf2); }
+.fit-btn.on { border-color: var(--orange); background: rgba(249,115,22,0.07); }
+.fit-code-sm { font-family: var(--font-m); font-size: var(--fz-13); font-weight: 600; color: var(--text); }
+.fit-desc-sm { font-size: var(--fz-11); color: var(--dim2); }
+.fit-chip {
+  font-family: var(--font-m); font-size: var(--fz-9); padding: 2px 6px; border-radius: 3px;
+  font-weight: 600; letter-spacing: 0.5px; flex-shrink: 0;
+}
+.fc-clr { background: rgba(0,212,170,0.1); color: var(--teal); }
+.fc-trn { background: rgba(251,191,36,0.1); color: var(--yellow); }
+.fc-int { background: rgba(248,113,113,0.1); color: var(--red); }
+
+.chip { font-family: var(--font-m); font-size: var(--fz-10); padding: 3px 8px; border-radius: 4px; font-weight: 600; letter-spacing: .5px; }
+.chip-iso { background: rgba(96,165,250,0.12); color: var(--blue); border: 1px solid rgba(96,165,250,0.25); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="brand">MH<em>Platform</em></a>
+  <div class="breadcrumb">
+    <span>Hesaplama Araçları</span>
+    <span class="sep">/</span>
+    <span>ISO Toleranslar</span>
+  </div>
+</nav>
+
+<div class="app">
+
+  <!-- ── LEFT SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sec-label">Parça Tipi</div>
+    <div class="hs-toggle">
+      <button class="hs-btn on-hole" id="holeBtn" onclick="setPart('hole')">DELİK</button>
+      <button class="hs-btn" id="shaftBtn" onclick="setPart('shaft')">MİL</button>
+    </div>
+
+    <div class="sb-divider"></div>
+    <div class="sec-label">Tolerans Harfi</div>
+    <div class="letter-grid" id="letterGrid"></div>
+
+    <div class="sb-divider"></div>
+    <div class="sec-label">IT Sınıfı</div>
+    <div class="it-grid" id="itGrid"></div>
+  </aside>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="content">
+
+    <div class="page-hdr">
+      <div>
+        <div class="page-title">ISO TOLERANSLAR</div>
+        <div class="page-sub">ISO 286-1 · Limit ve Uyumlar Sistemi</div>
+      </div>
+      <div class="tol-badge" id="tolBadge" style="color:var(--blue)">H7</div>
+    </div>
+
+    <!-- Diameter -->
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-ttl">Anma Çapı</div>
+        <div class="sec-tag" id="rangeTag"></div>
+      </div>
+      <div class="dia-wrap">
+        <input type="number" id="diaInput" value="20" min="0.1" max="500" step="0.5">
+        <span class="dia-unit">mm</span>
+      </div>
+      <div class="quick-sizes" id="quickSizes"></div>
+    </div>
+
+    <!-- SVG Tolerance Zone Diagram -->
+    <div class="svg-wrap">
+      <div class="svg-box">
+        <svg id="tolSvg" viewBox="0 0 448 200" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-ttl">Tolerans Değerleri</div>
+        <span class="chip chip-iso">ISO 286-1</span>
+      </div>
+      <table class="res-tbl">
+        <tr><td class="lc">Tolerans Kodu</td>       <td class="vc hi-a" id="r_code">—</td>  <td class="uc"></td></tr>
+        <tr><td class="lc">Anma Çapı</td>           <td class="vc"      id="r_nom">—</td>   <td class="uc">mm</td></tr>
+        <tr><td class="lc">IT Toleransı</td>         <td class="vc hi-t" id="r_it">—</td>   <td class="uc">µm</td></tr>
+        <tr><td class="lc" id="lbl_upper">Üst Sapma (ES)</td> <td class="vc hi-b" id="r_upper">—</td><td class="uc">µm</td></tr>
+        <tr><td class="lc" id="lbl_lower">Alt Sapma (EI)</td> <td class="vc hi-b" id="r_lower">—</td><td class="uc">µm</td></tr>
+        <tr><td class="lc">Maksimum Çap</td>         <td class="vc hi-t" id="r_dmax">—</td>  <td class="uc">mm</td></tr>
+        <tr><td class="lc">Minimum Çap</td>          <td class="vc hi-t" id="r_dmin">—</td>  <td class="uc">mm</td></tr>
+      </table>
+      <div class="info-strip">
+        ⚡ Sağ panelden bir uyum seçerek delik + mil toleranslarını birlikte görüntüleyin.
+      </div>
+    </div>
+
+  </main>
+
+
+  <!-- ── RIGHT PANEL ── -->
+  <aside class="right-panel">
+    <div class="rp-hdr">
+      <div class="rp-title">UYUM ANALİZİ</div>
+      <span class="chip chip-iso" id="rpStd">ISO Fits</span>
+    </div>
+    <div class="rp-body" id="rpBody"></div>
+  </aside>
+
+</div><!-- /.app -->
+
+<script>
+/* ══════════════════════════════════════════════════
+   ISO 286-1 DATA
+   ══════════════════════════════════════════════════ */
+
+const SIZE_RANGES = [
+  {over:0,  to:3  },
+  {over:3,  to:6  },
+  {over:6,  to:10 },
+  {over:10, to:18 },
+  {over:18, to:30 },
+  {over:30, to:50 },
+  {over:50, to:80 },
+  {over:80, to:120},
+  {over:120,to:180},
+  {over:180,to:250},
+  {over:250,to:315},
+  {over:315,to:400},
+  {over:400,to:500},
+];
+
+// IT5–IT11 for 13 size ranges (µm)
+const IT_TABLE = [
+//  IT5  IT6  IT7  IT8  IT9  IT10 IT11
+  [  4,   6,  10,  14,  25,  40,  60], // >0-3
+  [  5,   8,  12,  18,  30,  48,  75], // >3-6
+  [  6,   9,  15,  22,  36,  58,  90], // >6-10
+  [  8,  11,  18,  27,  43,  70, 110], // >10-18
+  [  9,  13,  21,  33,  52,  84, 130], // >18-30
+  [ 11,  16,  25,  39,  62, 100, 160], // >30-50
+  [ 13,  19,  30,  46,  74, 120, 190], // >50-80
+  [ 15,  22,  35,  54,  87, 140, 220], // >80-120
+  [ 18,  25,  40,  63, 100, 160, 250], // >120-180
+  [ 20,  29,  46,  72, 115, 185, 290], // >180-250
+  [ 23,  32,  52,  81, 130, 210, 320], // >250-315
+  [ 25,  36,  57,  89, 140, 230, 360], // >315-400
+  [ 27,  40,  63,  97, 155, 250, 400], // >400-500
+];
+// Index mapping: IT5→0, IT6→1, IT7→2, IT8→3, IT9→4, IT10→5, IT11→6
+
+// Shaft fundamental deviations (µm)
+// c–g: fundamental = 'es' (upper deviation, negative)   → ei = es − IT
+// k–u: fundamental = 'ei' (lower deviation, positive)   → es = ei + IT
+// h  : es = 0, ei = −IT
+// js : es = +ceil(IT/2), ei = −floor(IT/2)
+const SHAFT_FUND = {
+  'c': [-60,-70,-80,-95,-110,-120,-140,-170,-200,-240,-300,-360,-440],
+  'd': [-20,-30,-40,-50,-65,-80,-100,-120,-145,-170,-190,-210,-230],
+  'e': [-14,-20,-25,-32,-40,-50,-60,-72,-85,-100,-110,-125,-135],
+  'f': [-6,-10,-13,-16,-20,-25,-30,-36,-43,-50,-56,-62,-68],
+  'g': [-2,-4,-5,-6,-7,-9,-10,-12,-14,-15,-17,-18,-20],
+  'h': [0,0,0,0,0,0,0,0,0,0,0,0,0],
+  'k': [0,1,1,1,2,2,2,3,3,4,4,4,5],
+  'm': [2,4,6,10,12,14,17,20,24,28,31,34,38],
+  'n': [4,8,10,12,15,17,20,23,27,31,34,37,40],
+  'p': [6,12,15,18,22,26,32,37,43,50,56,62,68],
+  'r': [10,15,19,23,28,34,42,52,65,80,96,111,129],
+  's': [14,19,23,28,35,43,56,75,100,130,164,199,242],
+  'u': [18,24,30,36,44,54,70,92,126,165,210,252,305],
+};
+
+// Available letters
+const HOLE_LETTERS  = ['C','D','E','F','G','H','JS','K','M','N','P','R','S','U'];
+const SHAFT_LETTERS = ['c','d','e','f','g','h','js','k','m','n','p','r','s','u'];
+const IT_GRADES     = [5, 6, 7, 8, 9, 10, 11];
+
+// ISO preferred fits (hole-basis system)
+const COMMON_FITS = [
+  {code:'H11/c11', type:'clearance',   desc:'Çok gevşek',       tip:'Büyük toleranslı bağlantılar, bakım kapakları'},
+  {code:'H9/d9',   type:'clearance',   desc:'Serbest çalışma',  tip:'Yağlamalı yatak, gevşek dönen parçalar'},
+  {code:'H8/f7',   type:'clearance',   desc:'Serbest dönen',    tip:'Pres yağ, kaymalı yatak uygulamaları'},
+  {code:'H7/g6',   type:'clearance',   desc:'Hassas dönen',     tip:'Hassas yatak, kayar-döner mekanizmalar'},
+  {code:'H7/h6',   type:'clearance',   desc:'Hassas sürgü',     tip:'Sıfıra yakın boşluk, yönlendirme elemanları'},
+  {code:'H7/k6',   type:'transition',  desc:'Konum (geçiş)',    tip:'Konumlandırma, sökülebilir montaj'},
+  {code:'H7/m6',   type:'transition',  desc:'Konum (sıkı)',     tip:'Döngüsel yük, güvenli konumlandırma'},
+  {code:'H7/n6',   type:'transition',  desc:'Geçiş / hafif int.','tip':'Sürekli montaj, anahtarlı bağlantı'},
+  {code:'H7/p6',   type:'interference','desc':'Hafif pres',     tip:'Bronz burç-pim, ısıl genleşme izin verilir'},
+  {code:'H7/r6',   type:'interference','desc':'Orta pres',      tip:'Dişli-mil, yüksek tork iletimi'},
+  {code:'H7/s6',   type:'interference','desc':'Sıkı pres',      tip:'Sabit bağlantı, takoz veya çekme gerektirir'},
+  {code:'H7/u7',   type:'interference','desc':'Ağır pres',      tip:'Rijit montaj, sökülemez-kalıcı bağlantı'},
+];
+
+/* ══════════════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════════════ */
+let curDia    = 20;
+let curIsHole = true;
+let curLetter = 'H';
+let curIT     = 7;
+let curFit    = 'H7/g6'; // null = single mode
+
+/* ══════════════════════════════════════════════════
+   CORE CALCULATIONS
+   ══════════════════════════════════════════════════ */
+
+function getRangeIdx(dia) {
+  for (let i = 0; i < SIZE_RANGES.length; i++) {
+    const r = SIZE_RANGES[i];
+    if (dia > r.over && dia <= r.to) return i;
+  }
+  return -1;
+}
+
+function getITval(ridx, itGrade) {
+  const col = itGrade - 5;
+  if (col < 0 || col > 6 || ridx < 0) return null;
+  return IT_TABLE[ridx][col];
+}
+
+// Returns {upper, lower, it} in µm
+// upper = ES (hole) or es (shaft)
+// lower = EI (hole) or ei (shaft)
+function getDeviations(letter, itGrade, ridx) {
+  const IT = getITval(ridx, itGrade);
+  if (IT === null) return null;
+
+  const isHole = letter === letter.toUpperCase() && letter !== 'JS';
+  // Handle JS/js as special case
+  const isJS = letter.toUpperCase() === 'JS';
+  const low = letter.toLowerCase();
+
+  if (isJS) {
+    return { upper: Math.ceil(IT / 2), lower: -Math.floor(IT / 2), it: IT, isHole: isHole || letter === 'JS' };
+  }
+
+  // h / H — zero fundamental deviation
+  if (low === 'h') {
+    if (letter === 'H') return { upper: IT,  lower: 0,   it: IT, isHole: true };
+    else                return { upper: 0,   lower: -IT, it: IT, isHole: false };
+  }
+
+  const fd = SHAFT_FUND[low]?.[ridx];
+  if (fd === undefined) return null;
+
+  // c–g: fundamental deviation is 'es' (upper, negative)
+  if ('cdefg'.includes(low)) {
+    if (letter === letter.toUpperCase()) {
+      // Hole C–G: EI = −es (positive), ES = EI + IT
+      const EI = -fd;
+      return { upper: EI + IT, lower: EI, it: IT, isHole: true };
+    } else {
+      // Shaft c–g: es (negative), ei = es − IT
+      return { upper: fd, lower: fd - IT, it: IT, isHole: false };
+    }
+  }
+
+  // k–u: fundamental deviation is 'ei' (lower, positive)
+  if ('kmnprsu'.includes(low)) {
+    if (letter === letter.toUpperCase()) {
+      // Hole K–U: ES = −ei (negative), EI = ES − IT
+      const ES = -fd;
+      return { upper: ES, lower: ES - IT, it: IT, isHole: true };
+    } else {
+      // Shaft k–u: ei (positive), es = ei + IT
+      return { upper: fd + IT, lower: fd, it: IT, isHole: false };
+    }
+  }
+
+  return null;
+}
+
+// Parse tolerance code like "H7", "g6", "JS7", "js6"
+function parseCode(code) {
+  const m = code.match(/^([A-Za-z]+)(\d+)$/);
+  if (!m) return null;
+  return { letter: m[1], itGrade: parseInt(m[2]) };
+}
+
+// Calculate fit result
+function calcFit(fitCode, dia) {
+  const ridx = getRangeIdx(dia);
+  if (ridx < 0) return null;
+  const parts = fitCode.split('/');
+  if (parts.length !== 2) return null;
+  const h = parseCode(parts[0]);
+  const s = parseCode(parts[1]);
+  if (!h || !s) return null;
+  const hDev = getDeviations(h.letter, h.itGrade, ridx);
+  const sDev = getDeviations(s.letter, s.itGrade, ridx);
+  if (!hDev || !sDev) return null;
+
+  // Clearance: positive = gap, negative = interference
+  const maxClear = hDev.upper - sDev.lower; // hole max, shaft min
+  const minClear = hDev.lower - sDev.upper; // hole min, shaft max
+
+  let fitType;
+  if (minClear > 0)       fitType = 'clearance';
+  else if (maxClear < 0)  fitType = 'interference';
+  else                    fitType = 'transition';
+
+  return {
+    hDev, sDev, maxClear, minClear, fitType,
+    hMax: +(dia + hDev.upper / 1000).toFixed(3),
+    hMin: +(dia + hDev.lower / 1000).toFixed(3),
+    sMax: +(dia + sDev.upper / 1000).toFixed(3),
+    sMin: +(dia + sDev.lower / 1000).toFixed(3),
+    holeParts: parts[0],
+    shaftParts: parts[1],
+  };
+}
+
+const fmt = (v, digits = 3) => v.toFixed(digits);
+const sign = v => (v > 0 ? '+' : '') + v;
+
+/* ══════════════════════════════════════════════════
+   SVG TOLERANCE ZONE DIAGRAM
+   ══════════════════════════════════════════════════ */
+function drawSVG() {
+  const svg = document.getElementById('tolSvg');
+  const VW = 448, VH = 200;
+  const ML = 56, MR = 16, MT = 14, MB = 28;
+  const drawH = VH - MT - MB;
+  const drawW = VW - ML - MR;
+  const BLUE = '#60a5fa', ORANGE = '#f97316';
+
+  const ridx = getRangeIdx(curDia);
+  if (ridx < 0) {
+    svg.innerHTML = `<text x="${VW/2}" y="${VH/2}" text-anchor="middle" dominant-baseline="middle"
+      font-family="'DM Sans',sans-serif" font-size="12" fill="#555577">
+      Çap 0–500 mm aralığı dışında</text>`;
+    return;
+  }
+
+  // Determine zones to draw
+  let zones = [];
+  if (curFit) {
+    const fd = calcFit(curFit, curDia);
+    if (fd) {
+      zones = [
+        { dev: fd.hDev, color: BLUE,   code: fd.holeParts  },
+        { dev: fd.sDev, color: ORANGE, code: fd.shaftParts },
+      ];
+    }
+  }
+  if (zones.length === 0) {
+    const dev = getDeviations(curLetter, curIT, ridx);
+    if (!dev) { svg.innerHTML = ''; return; }
+    zones = [{ dev, color: curIsHole ? BLUE : ORANGE, code: `${curLetter}${curIT}` }];
+  }
+
+  // Y-scale
+  let maxV = 0, minV = 0;
+  zones.forEach(z => {
+    maxV = Math.max(maxV, z.dev.upper);
+    minV = Math.min(minV, z.dev.lower);
+  });
+  const rng   = Math.max(Math.abs(maxV - minV), 2);
+  const pad   = Math.max(rng * 0.22, 1);
+  const dMax  = maxV + pad;
+  const dMin  = minV - pad;
+  const scale = drawH / (dMax - dMin);
+  const devY  = v => MT + (dMax - v) * scale;
+  const zeroY = devY(0);
+
+  let out = `<defs>
+    <marker id="mah" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+      <path d="M1 1L7 4L1 7" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.4" stroke-linecap="round"/></marker>
+  </defs>`;
+
+  // Y-axis
+  out += `<line x1="${ML}" y1="${MT}" x2="${ML}" y2="${VH-MB}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+  // µm label (rotated)
+  out += `<text x="10" y="${MT+drawH/2}" text-anchor="middle" dominant-baseline="middle"
+    font-family="'JetBrains Mono',monospace" font-size="8" fill="rgba(255,255,255,0.18)"
+    transform="rotate(-90,10,${MT+drawH/2})">sapma (µm)</text>`;
+
+  // Zero line
+  out += `<line x1="${ML-4}" y1="${zeroY}" x2="${VW-MR}" y2="${zeroY}"
+    stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>`;
+  out += `<text x="${ML-8}" y="${zeroY+4}" text-anchor="end"
+    font-family="'JetBrains Mono',monospace" font-size="10" fill="rgba(255,255,255,0.35)">0</text>`;
+
+  // Zone geometry
+  const nz = zones.length;
+  const zoneW = nz === 1 ? 110 : 86;
+  const gap   = 22;
+  const totalZW = nz * zoneW + (nz - 1) * gap;
+  const startX  = ML + (drawW - totalZW) / 2;
+
+  // Track label Y positions to prevent overlap
+  const usedYs = [zeroY];
+  function safeY(y) {
+    const MINSP = 12;
+    let adj = y;
+    usedYs.forEach(uy => {
+      if (Math.abs(adj - uy) < MINSP) adj = (adj >= uy) ? uy + MINSP : uy - MINSP;
+    });
+    usedYs.push(adj);
+    return adj;
+  }
+
+  zones.forEach((z, i) => {
+    const zx   = startX + i * (zoneW + gap);
+    const topY = devY(z.dev.upper);
+    const botY = devY(z.dev.lower);
+    const zTop = Math.min(topY, botY);
+    const zH   = Math.max(Math.abs(topY - botY), 3);
+    const midX = zx + zoneW / 2;
+
+    // Zone rectangle
+    out += `<rect x="${zx}" y="${zTop}" width="${zoneW}" height="${zH}"
+      fill="${z.color}18" stroke="${z.color}" stroke-width="1.8" rx="3"/>`;
+
+    // Horizontal dashed guide lines from y-axis
+    out += `<line x1="${ML}" y1="${topY}" x2="${zx}" y2="${topY}"
+      stroke="${z.color}" stroke-width="0.7" stroke-dasharray="3 2" opacity="0.4"/>`;
+    if (z.dev.lower !== 0)
+      out += `<line x1="${ML}" y1="${botY}" x2="${zx}" y2="${botY}"
+        stroke="${z.color}" stroke-width="0.7" stroke-dasharray="3 2" opacity="0.4"/>`;
+
+    // Y-axis tick marks
+    out += `<line x1="${ML-4}" y1="${topY}" x2="${ML}" y2="${topY}" stroke="${z.color}" stroke-width="0.9" opacity="0.6"/>`;
+    if (z.dev.lower !== 0)
+      out += `<line x1="${ML-4}" y1="${botY}" x2="${ML}" y2="${botY}" stroke="${z.color}" stroke-width="0.9" opacity="0.6"/>`;
+
+    // Deviation labels (with overlap protection)
+    const uLblY = safeY(topY);
+    const uTxt = (z.dev.upper > 0 ? '+' : '') + z.dev.upper;
+    out += `<text x="${ML-8}" y="${uLblY+4}" text-anchor="end"
+      font-family="'JetBrains Mono',monospace" font-size="9.5" fill="${z.color}">${uTxt}</text>`;
+
+    if (z.dev.lower !== 0) {
+      const lLblY = safeY(botY);
+      const lTxt = (z.dev.lower > 0 ? '+' : '') + z.dev.lower;
+      out += `<text x="${ML-8}" y="${lLblY+4}" text-anchor="end"
+        font-family="'JetBrains Mono',monospace" font-size="9.5" fill="${z.color}">${lTxt}</text>`;
+    }
+
+    // IT annotation inside zone (if tall enough)
+    if (zH > 22) {
+      const itLblY = zTop + zH / 2 + 5;
+      out += `<text x="${midX}" y="${itLblY}" text-anchor="middle"
+        font-family="'JetBrains Mono',monospace" font-size="9" fill="${z.color}bb">
+        IT${z.dev.it ? '' : ''}${z.dev.it}µm</text>`;
+    }
+
+    // IT double-arrow (single zone only)
+    if (nz === 1 && zH > 30) {
+      const arX = zx + zoneW + 12;
+      out += `<line x1="${arX}" y1="${topY}" x2="${arX}" y2="${botY}"
+        stroke="rgba(255,255,255,0.2)" stroke-width="0.9"
+        marker-start="url(#mah)" marker-end="url(#mah)"/>`;
+      out += `<text x="${arX+5}" y="${(topY+botY)/2+4}"
+        font-family="'JetBrains Mono',monospace" font-size="8.5" fill="rgba(255,255,255,0.3)">
+        IT${curIT}=${z.dev.it}µm</text>`;
+    }
+
+    // Code label at bottom
+    out += `<text x="${midX}" y="${VH-MB+17}" text-anchor="middle"
+      font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="700"
+      fill="${z.color}">${z.code}</text>`;
+  });
+
+  // Nominal diameter label
+  out += `<text x="${VW-MR}" y="${VH-5}" text-anchor="end"
+    font-family="'JetBrains Mono',monospace" font-size="9" fill="rgba(255,255,255,0.2)">
+    Ø${curDia}mm · ISO 286-1</text>`;
+
+  svg.innerHTML = out;
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER RIGHT PANEL
+   ══════════════════════════════════════════════════ */
+function renderRightPanel() {
+  const body = document.getElementById('rpBody');
+  let html = '';
+
+  // Fit analysis section (shown when curFit is set)
+  if (curFit) {
+    const fd = calcFit(curFit, curDia);
+    if (fd) {
+      const typeLbl = { clearance: 'BOŞLUKLU BİRLEŞME', transition: 'GEÇİŞ BİRLEŞMESİ', interference: 'SIKIŞMALI BİRLEŞME' }[fd.fitType];
+      const typeCls = { clearance: 'fb-clr', transition: 'fb-trn', interference: 'fb-int' }[fd.fitType];
+      const typeClr = { clearance: 'var(--teal)', transition: 'var(--yellow)', interference: 'var(--red)' }[fd.fitType];
+
+      html += `<div class="fit-display">
+        <div class="fit-code-big" style="color:${typeClr}">${curFit}</div>
+        <span class="fit-badge ${typeCls}">${typeLbl}</span>
+      </div>`;
+
+      // Min/Max limits
+      html += `<div class="fit-limits">`;
+      if (fd.fitType === 'clearance') {
+        html += `
+          <div class="flc">
+            <div class="flc-lbl">Min Boşluk</div>
+            <div class="flc-val" style="color:var(--teal)">+${fd.minClear}</div>
+            <div class="flc-unit">µm = ${(fd.minClear/1000).toFixed(3)} mm</div>
+          </div>
+          <div class="flc">
+            <div class="flc-lbl">Max Boşluk</div>
+            <div class="flc-val" style="color:var(--teal)">+${fd.maxClear}</div>
+            <div class="flc-unit">µm = ${(fd.maxClear/1000).toFixed(3)} mm</div>
+          </div>`;
+      } else if (fd.fitType === 'interference') {
+        const minInt = Math.abs(fd.maxClear);
+        const maxInt = Math.abs(fd.minClear);
+        html += `
+          <div class="flc">
+            <div class="flc-lbl">Min Sıkışma</div>
+            <div class="flc-val" style="color:var(--red)">${minInt}</div>
+            <div class="flc-unit">µm = ${(minInt/1000).toFixed(3)} mm</div>
+          </div>
+          <div class="flc">
+            <div class="flc-lbl">Max Sıkışma</div>
+            <div class="flc-val" style="color:var(--red)">${maxInt}</div>
+            <div class="flc-unit">µm = ${(maxInt/1000).toFixed(3)} mm</div>
+          </div>`;
+      } else {
+        // Transition: show both possible extremes
+        html += `
+          <div class="flc">
+            <div class="flc-lbl">Max Boşluk</div>
+            <div class="flc-val" style="color:var(--teal)">+${fd.maxClear}</div>
+            <div class="flc-unit">µm</div>
+          </div>
+          <div class="flc">
+            <div class="flc-lbl">Max Sıkışma</div>
+            <div class="flc-val" style="color:var(--red)">${Math.abs(fd.minClear)}</div>
+            <div class="flc-unit">µm</div>
+          </div>`;
+      }
+      html += `</div>`;
+
+      // 4 dimension limits
+      html += `<div class="fit-dims">
+        <div class="fd-row">
+          <span class="fd-lbl" style="color:var(--blue)">DELİK &nbsp;D<sub>max</sub></span>
+          <span class="fd-val" style="color:var(--blue)">Ø ${fd.hMax} mm</span>
+        </div>
+        <div class="fd-row">
+          <span class="fd-lbl" style="color:var(--blue)">DELİK &nbsp;D<sub>min</sub></span>
+          <span class="fd-val" style="color:var(--blue)">Ø ${fd.hMin} mm</span>
+        </div>
+        <div class="fd-row" style="margin-top:6px">
+          <span class="fd-lbl" style="color:var(--orange)">MİL &nbsp;&nbsp;&nbsp;&nbsp;d<sub>max</sub></span>
+          <span class="fd-val" style="color:var(--orange)">Ø ${fd.sMax} mm</span>
+        </div>
+        <div class="fd-row">
+          <span class="fd-lbl" style="color:var(--orange)">MİL &nbsp;&nbsp;&nbsp;&nbsp;d<sub>min</sub></span>
+          <span class="fd-val" style="color:var(--orange)">Ø ${fd.sMin} mm</span>
+        </div>
+      </div>`;
+    }
+  }
+
+  // Common fits list
+  html += `<div class="fits-section">`;
+  const cats = ['clearance', 'transition', 'interference'];
+  const catLbls = { clearance: 'Boşluklu', transition: 'Geçiş', interference: 'Sıkışmalı' };
+  const chipCls  = { clearance: 'fc-clr',  transition: 'fc-trn',  interference: 'fc-int'   };
+
+  cats.forEach(cat => {
+    html += `<div class="fits-cat">${catLbls[cat]}</div><div class="fit-row">`;
+    COMMON_FITS.filter(f => f.type === cat).forEach(f => {
+      const on = curFit === f.code;
+      html += `<button class="fit-btn ${on ? 'on' : ''}" onclick="selectFit('${f.code}')"
+        title="${f.tip}">
+        <span class="fit-code-sm">${f.code}</span>
+        <span class="fit-desc-sm">${f.desc}</span>
+      </button>`;
+    });
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+  body.innerHTML = html;
+}
+
+/* ══════════════════════════════════════════════════
+   UI BUILDERS
+   ══════════════════════════════════════════════════ */
+function buildLetterGrid() {
+  const letters = curIsHole ? HOLE_LETTERS : SHAFT_LETTERS;
+  const cls = curIsHole ? 'sel-hole' : 'sel-shaft';
+  document.getElementById('letterGrid').innerHTML =
+    letters.map(l =>
+      `<button class="ltr-btn ${l === curLetter ? cls : ''}" onclick="selLetter('${l}')">${l}</button>`
+    ).join('');
+}
+
+function buildITGrid() {
+  document.getElementById('itGrid').innerHTML =
+    IT_GRADES.map(g =>
+      `<button class="it-btn ${g === curIT ? 'sel' : ''}" onclick="selIT(${g})">IT${g}</button>`
+    ).join('');
+}
+
+function buildQuickSizes() {
+  const SIZES = [3, 5, 6, 8, 10, 12, 16, 20, 25, 30, 40, 50, 60, 80, 100];
+  document.getElementById('quickSizes').innerHTML =
+    SIZES.map(s =>
+      `<button class="qs ${s === curDia ? 'on' : ''}" onclick="setDia(${s})">${s}</button>`
+    ).join('');
+}
+
+/* ══════════════════════════════════════════════════
+   UPDATE DISPLAY
+   ══════════════════════════════════════════════════ */
+function updateDisplay() {
+  const ridx = getRangeIdx(curDia);
+  const rangeTag = document.getElementById('rangeTag');
+
+  if (ridx < 0) {
+    rangeTag.textContent = '0–500 mm dışında!';
+    rangeTag.style.color = 'var(--red)';
+    document.getElementById('tolSvg').innerHTML = '';
+    return;
+  }
+  const r = SIZE_RANGES[ridx];
+  rangeTag.textContent = `>${r.over} – ${r.to} mm`;
+  rangeTag.style.color = 'var(--dim2)';
+
+  // Tolerance badge
+  const badge = document.getElementById('tolBadge');
+  if (curFit) {
+    const parts = curFit.split('/');
+    badge.innerHTML = `<span style="color:var(--blue)">${parts[0]}</span><span style="color:var(--dim)">/</span><span style="color:var(--orange)">${parts[1]}</span>`;
+  } else {
+    badge.textContent = `${curLetter}${curIT}`;
+    badge.style.color = curIsHole ? 'var(--blue)' : 'var(--orange)';
+  }
+
+  // Deviation labels (update ES/es, EI/ei labels)
+  document.getElementById('lbl_upper').textContent = curIsHole ? 'Üst Sapma (ES)' : 'Üst Sapma (es)';
+  document.getElementById('lbl_lower').textContent = curIsHole ? 'Alt Sapma (EI)' : 'Alt Sapma (ei)';
+
+  // Results table (always shows the manually selected code)
+  const dev = getDeviations(curLetter, curIT, ridx);
+  if (dev) {
+    const s = id => document.getElementById(id);
+    const nomFmt = (+curDia).toFixed(3);
+    s('r_code').textContent  = `${curLetter}${curIT}`;
+    s('r_nom').textContent   = nomFmt;
+    s('r_it').textContent    = `IT${curIT} = ${dev.it}`;
+    s('r_upper').textContent = sign(dev.upper);
+    s('r_lower').textContent = sign(dev.lower);
+    s('r_dmax').textContent  = fmt(curDia + dev.upper / 1000);
+    s('r_dmin').textContent  = fmt(curDia + dev.lower / 1000);
+  }
+
+  drawSVG();
+  renderRightPanel();
+}
+
+/* ══════════════════════════════════════════════════
+   EVENT HANDLERS
+   ══════════════════════════════════════════════════ */
+function setPart(type) {
+  curIsHole = (type === 'hole');
+  document.getElementById('holeBtn').className = `hs-btn ${curIsHole ? 'on-hole' : ''}`;
+  document.getElementById('shaftBtn').className = `hs-btn ${!curIsHole ? 'on-shaft' : ''}`;
+  curLetter = curIsHole ? 'H' : 'h';
+  curFit = null;
+  buildLetterGrid();
+  updateDisplay();
+}
+
+function selLetter(letter) {
+  curLetter = letter;
+  curFit = null;
+  buildLetterGrid();
+  updateDisplay();
+}
+
+function selIT(grade) {
+  curIT = grade;
+  curFit = null;
+  buildITGrid();
+  updateDisplay();
+}
+
+function setDia(dia) {
+  curDia = dia;
+  document.getElementById('diaInput').value = dia;
+  buildQuickSizes();
+  updateDisplay();
+}
+
+function selectFit(fitCode) {
+  if (curFit === fitCode) {
+    // Clicking the same fit again → deselect
+    curFit = null;
+  } else {
+    curFit = fitCode;
+    // Sync sidebar to hole code of this fit
+    const h = parseCode(fitCode.split('/')[0]);
+    if (h) { curLetter = h.letter; curIT = h.itGrade; curIsHole = true; }
+    document.getElementById('holeBtn').className = 'hs-btn on-hole';
+    document.getElementById('shaftBtn').className = 'hs-btn';
+    buildLetterGrid();
+    buildITGrid();
+  }
+  updateDisplay();
+}
+
+/* ══════════════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════════════ */
+function init() {
+  buildLetterGrid();
+  buildITGrid();
+  buildQuickSizes();
+
+  // Diameter input listener
+  document.getElementById('diaInput').addEventListener('input', function () {
+    const v = parseFloat(this.value);
+    if (v > 0 && v <= 500) {
+      curDia = v;
+      // Update quick-size active state
+      document.querySelectorAll('.qs').forEach(b =>
+        b.classList.toggle('on', parseFloat(b.textContent) === v)
+      );
+      updateDisplay();
+    }
+  });
+
+  updateDisplay();
+}
+
+init();
+</script>
+</body>
+</html>
