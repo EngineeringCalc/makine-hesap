@@ -96,7 +96,7 @@
     .page-sub { font-size: var(--fz-11); color: var(--dim2); font-family: var(--font-m); margin-top: 3px; }
     .chain-badge { font-family: var(--font-m); font-size: var(--fz-22); font-weight: 600; color: var(--sc-color); line-height: 1; flex-shrink: 0; }
 
-    /* ── PREVIEW  (400px) ── */
+    /* ── PREVIEW ── */
     .preview-wrap { padding: 10px 16px 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .preview-box { background: var(--surf1); border: 1px solid var(--border); border-radius: 10px; height: 400px; overflow: hidden; }
     .preview-box svg { width: 100%; height: 100%; }
@@ -113,7 +113,7 @@
     .inp-label {
       font-family: var(--font-h); font-size: var(--fz-13);
       letter-spacing: 1px; color: #c0c0e0; text-transform: uppercase;
-      display: flex; align-items: center; gap: 0;
+      display: flex; align-items: center;
     }
     .opt-bdg {
       font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim);
@@ -132,9 +132,14 @@
       font-size: var(--fz-15); font-weight: 600;
       outline: none; min-width: 0;
       -moz-appearance: textfield;
+      appearance: textfield;
     }
     input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      appearance: none;
+    }
+    
     .inp-sfx {
       padding: 0 11px; display: flex; align-items: center;
       font-family: var(--font-m); font-size: var(--fz-12);
@@ -183,7 +188,6 @@
     .result-area { padding: 0 16px 12px; display: none; flex-shrink: 0; }
     .result-area.visible { display: block; animation: fadeUp 0.2s ease; }
     @keyframes fadeUp { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
-
     .res-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
     .res-card { background: var(--surf1); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
     .res-lbl { font-family: var(--font-h); font-size: var(--fz-10); letter-spacing: 1.5px; color: var(--dim2); text-transform: uppercase; }
@@ -208,12 +212,19 @@
     .fml { font-family: var(--font-m); font-size: var(--fz-10); color: var(--dim2); line-height: 2.2; }
     .fml .hi { color: var(--teal); }
 
-    /* ── RIGHT PANEL ── */
-    .right-panel {
-      background: var(--bg2); border-left: 1px solid var(--border);
-      width: 300px; flex-shrink: 0;
+    /* ══════════════════════════════════════════════
+       PANELS — Zincir Verileri + Dişli Verileri
+    ══════════════════════════════════════════════ */
+
+    /* ── SHARED PANEL STYLES ── */
+    .right-panel, .sprocket-panel {
+      background: var(--bg2);
+      width: 265px; flex-shrink: 0;
       display: flex; flex-direction: column; overflow: hidden;
     }
+    .right-panel  { border-left: 1px solid var(--border); }
+    .sprocket-panel { border-left: 1px solid var(--border); }
+
     .rp-hdr {
       padding: 12px 14px; border-bottom: 1px solid var(--border);
       display: flex; align-items: center;
@@ -224,34 +235,107 @@
     .rp-body::-webkit-scrollbar { width: 3px; }
     .rp-body::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
 
+    /* ── CHAIN ID BLOCK ── */
     .chain-id-blk {
-      padding: 14px 16px 12px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: baseline; gap: 10px;
+      padding: 14px 14px 11px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: baseline; gap: 10px; flex-shrink: 0;
     }
     .chain-id   { font-family: var(--font-m); font-size: var(--fz-26); font-weight: 600; color: var(--sc-color); }
     .chain-stag { font-family: var(--font-h); font-size: var(--fz-11); color: var(--dim2); letter-spacing: 1px; }
 
-    .spec-grp { padding: 10px 14px; border-bottom: 1px solid var(--border); }
-    .spec-grp-ttl { font-family: var(--font-h); font-size: var(--fz-10); letter-spacing: 2px; color: var(--dim2); text-transform: uppercase; margin-bottom: 7px; }
+    /* ── SPEC GROUP ── */
+    .spec-grp { padding: 9px 14px; border-bottom: 1px solid var(--border); }
+    .spec-grp-ttl { font-family: var(--font-h); font-size: var(--fz-10); letter-spacing: 2px; color: var(--dim2); text-transform: uppercase; margin-bottom: 6px; }
     .spec-row { display: flex; justify-content: space-between; align-items: baseline; padding: 3px 0; }
-    .spec-nm  { font-family: var(--font-b); font-size: var(--fz-12); color: var(--dim2); }
-    .spec-vl  { font-family: var(--font-m); font-size: var(--fz-13); font-weight: 600; color: var(--text); }
+    .spec-nm  { font-family: var(--font-b); font-size: var(--fz-11); color: var(--dim2); }
+    .spec-vl  { font-family: var(--font-m); font-size: var(--fz-12); font-weight: 600; color: var(--text); }
     .spec-vl.tl { color: var(--teal); }
     .spec-vl.bl { color: var(--blue); }
     .spec-vl.yl { color: var(--yellow); }
     .spec-vl.ac { color: var(--accent); }
-    .spec-vl.sc { color: var(--sc-color); font-size: var(--fz-15); }
+    .spec-vl.sc { color: var(--sc-color); font-size: var(--fz-14); }
+    .spec-vl.grn { color: var(--green); }
+    .spec-vl.rd  { color: var(--red); }
 
+    /* ── A-BAR ── */
     .a-bar { height: 4px; border-radius: 2px; background: var(--surf3); margin: 7px 0 4px; overflow: hidden; }
     .a-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--teal), var(--blue)); }
     .a-bar-lbl { display: flex; justify-content: space-between; }
     .a-bar-lbl span { font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim); }
     .a-bar-lbl .mid { color: var(--teal); }
 
+    /* ── SERVICE STATUS BADGE ── */
+    .serv-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-family: var(--font-m); font-size: var(--fz-11); font-weight: 600;
+      padding: 4px 10px; border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .serv-safe   { background: rgba(74,222,128,0.12);  color: var(--green);  border: 1px solid rgba(74,222,128,0.25); }
+    .serv-warn   { background: rgba(251,191,36,0.12);  color: var(--yellow); border: 1px solid rgba(251,191,36,0.25); }
+    .serv-danger { background: rgba(248,113,113,0.12); color: var(--red);    border: 1px solid rgba(248,113,113,0.25); }
+
+    /* ── CALC RESULTS SECTION (Zincir Verileri panelinde) ── */
+    .calc-results-grp { display: none; }
+    .calc-results-grp.visible { display: block; animation: fadeUp 0.2s ease; }
+
+    /* ══════════════════════════════════════════════
+       DİŞLİ VERİLERİ PANELİ — karşılaştırma ızgarası
+    ══════════════════════════════════════════════ */
+    .dg-comp {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      border-bottom: 1px solid var(--border);
+    }
+    .dg-title-cell { grid-column: 1 / -1; }
+
+    /* Başlık satırı */
+    .dg-col-hdr {
+      font-family: var(--font-h); font-size: var(--fz-10);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 7px 10px; text-align: right;
+      border-bottom: 1px solid var(--border);
+    }
+    .dg-col-hdr.lbl { text-align: left; color: var(--dim2); }
+    .dg-col-hdr.z1c { color: var(--accent); }
+    .dg-col-hdr.z2c { color: var(--blue); }
+
+    /* Veri satırları */
+    .dg-row { display: contents; }
+    .dg-lbl {
+      font-family: var(--font-b); font-size: var(--fz-10); color: var(--dim2);
+      padding: 4px 10px; display: flex; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .dg-val {
+      font-family: var(--font-m); font-size: var(--fz-11); font-weight: 600;
+      color: var(--text); text-align: right;
+      padding: 4px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .dg-val.ac { color: var(--accent); }
+    .dg-val.bl { color: var(--blue); }
+    .dg-val.tl { color: var(--teal); }
+    .dg-val.yl { color: var(--yellow); }
+    .dg-val.grn { color: var(--green); }
+    .dg-val.dim { color: var(--dim2); }
+
+    /* Ayraç satırı (içinde section başlığı) */
+    .dg-sep {
+      grid-column: 1 / -1;
+      font-family: var(--font-h); font-size: var(--fz-10);
+      letter-spacing: 2px; color: var(--dim2); text-transform: uppercase;
+      padding: 8px 10px 5px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surf1);
+    }
+
+    /* ── CHIP / BADGE ── */
     .chip { font-family: var(--font-m); font-size: var(--fz-10); padding: 3px 8px; border-radius: 4px; font-weight: 600; letter-spacing: 0.5px; }
     .chip.iso  { background: rgba(96,165,250,0.12);  color: #60a5fa; border: 1px solid rgba(96,165,250,0.25); }
     .chip.ansi { background: rgba(249,115,22,0.12);  color: #f97316; border: 1px solid rgba(249,115,22,0.25); }
 
+    /* ── EMPTY STATE ── */
     .empty-st { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:32px; text-align:center; }
     .empty-st .ei { font-size: 28px; opacity: 0.22; }
     .empty-st p { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); line-height: 1.75; }
@@ -339,26 +423,41 @@
 
   <!-- Çalışma Parametreleri -->
   <div class="section">
-    <div class="sec-hdr">
-      <div class="sec-ttl">Çalışma Parametreleri</div>
-    </div>
-    <div class="input-row">
-      <div class="inp-g">
-        <div class="inp-label">Giriş Devri n₁</div>
-        <div class="inp-wrap">
-          <input type="number" id="n1" value="1450" min="1" max="10000" oninput="onInput()">
-          <span class="inp-sfx">rpm</span>
-        </div>
+      <div class="sec-hdr">
+        <div class="sec-ttl">Çalışma Parametreleri</div>
       </div>
-      <div class="inp-g">
-        <div class="inp-label">Güç P <span class="opt-bdg">OPSİYONEL</span></div>
-        <div class="inp-wrap">
-          <input type="number" id="power" placeholder="—" min="0" max="10000" oninput="onInput()">
-          <span class="inp-sfx">kW</span>
+      
+      <div class="input-row" style="grid-template-columns: 1fr 1fr; row-gap: 12px;">
+        
+        <div class="inp-g">
+          <div class="inp-label">Giriş Devri n₁</div>
+          <div class="inp-wrap">
+            <input type="number" id="n1" value="1450" min="1" max="10000" oninput="onInput()">
+            <span class="inp-sfx">rpm</span>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
+
+        <div class="inp-g">
+          <div class="inp-label">Güç P <span class="opt-bdg">OPSİYONEL</span></div>
+          <div class="inp-wrap">
+            <input type="number" id="power" placeholder="—" min="0" max="10000" oninput="onInput()">
+            <span class="inp-sfx">kW</span>
+          </div>
+        </div>
+
+        <div class="inp-g" style="grid-column: 1 / -1;"> <div class="inp-label">Servis Faktörü K_A</div>
+          <div class="inp-wrap">
+            <select id="ka-factor" onchange="calculate()" style="flex: 1; padding: 10px 12px; background: transparent; border: none; color: var(--text); font-family: var(--font-m); font-size: var(--fz-13); font-weight: 600; outline: none; appearance: none; cursor: pointer;">
+              <option value="1.0" style="color: #000;">1.0 - Darbesiz / Düzgün</option>
+              <option value="1.2" selected style="color: #000;">1.2 - Hafif Darbeli</option>
+              <option value="1.5" style="color: #000;">1.5 - Orta Darbeli</option>
+              <option value="2.0" style="color: #000;">2.0 - Ağır Darbeli</option>
+            </select>
+            <span class="inp-sfx">K_A</span>
+          </div>
+        </div>
+
+      </div> </div> 
 
   <!-- Geometri -->
   <div class="section">
@@ -428,14 +527,16 @@
       <span class="hi">d</span> = p / sin(π/z) &nbsp;[mm — adım çemberi çapı]<br>
       <span class="hi">v</span> = p · z₁ · n₁ / 60 000 &nbsp;[m/s — zincir hızı]<br>
       <span class="hi">Lp</span> = 2a/p + (z₁+z₂)/2 + ((z₂−z₁)/2π)² · (p/a)<br>
-      <span class="hi">a</span> &nbsp;= (p/4) · [K + √(K²−8M²)] &nbsp;&nbsp;K = Lp−(z₁+z₂)/2, M = (z₂−z₁)/2π<br>
-      <span class="hi">F</span> &nbsp;= P · 1000 / v &nbsp;[N — tahrik kuvveti, P girilmişse]
+      <span class="hi">a</span> &nbsp;= (p/4) · [K + √(K²−8M²)] &nbsp;K = Lp−(z₁+z₂)/2, M = (z₂−z₁)/2π<br>
+      <span class="hi">F_tahrik</span> = P · 1000 / v &nbsp;[N]<br>
+      <span class="hi">F_gergin</span> = (F_tahrik · K_A) + F_merkezkaç + F_sarkma<br>
+      <span class="hi">SF</span> = Q / F_gergin
     </div>
   </div>
 
 </main>
 
-<!-- ── RIGHT PANEL ─────────────────────────────── -->
+<!-- ── ZİNCİR VERİLERİ PANELİ ────────────────────── -->
 <aside class="right-panel">
   <div class="rp-hdr">
     <div class="rp-title">ZİNCİR VERİLERİ</div>
@@ -444,7 +545,21 @@
   <div class="rp-body" id="rp-body">
     <div class="empty-st">
       <div class="ei">⛓</div>
-      <p>Sol panelden bir<br>zincir adımı seçin.<br>ISO/DIN veya ANSI<br>boyut verileri burada<br>görünecek.</p>
+      <p>Sol panelden bir<br>zincir adımı seçin.</p>
+    </div>
+  </div>
+</aside>
+
+<!-- ── DİŞLİ VERİLERİ PANELİ ────────────────────── -->
+<aside class="sprocket-panel">
+  <div class="rp-hdr">
+    <div class="rp-title">DİŞLİ VERİLERİ</div>
+    <div id="sp-badge"></div>
+  </div>
+  <div class="rp-body" id="sp-body">
+    <div class="empty-st">
+      <div class="ei">⚙️</div>
+      <p>Zincir adımı ve<br>diş sayılarını girin.</p>
     </div>
   </div>
 </aside>
@@ -497,15 +612,15 @@ const CD = {
 };
 
 /* ── STATE ── */
-let curStd  = 'iso';
-let curKey  = null;
-let geoMode = 'a2lp';
+let curStd     = 'iso';
+let curKey     = null;
+let geoMode    = 'a2lp';
+let lastCalcA  = null;   /* son hesaplanan aks mesafesi (sarma açısı için) */
 
 /* ── INIT ── */
 (function init(){
   applyColors('iso');
-  document.getElementById('rp-chip').innerHTML =
-    '<span class="chip iso">ISO</span>';
+  document.getElementById('rp-chip').innerHTML = '<span class="chip iso">ISO</span>';
   renderList();
   pickChain('16B');
 })();
@@ -533,7 +648,6 @@ function selStd(std){
   document.getElementById('rp-chip').innerHTML =
     `<span class="chip ${cfg.chip}">${cfg.chipLbl}</span>`;
 
-  /* Pick closest pitch */
   let best = Object.keys(cfg.chains)[0];
   if(prevP){
     let minD = Infinity;
@@ -543,6 +657,7 @@ function selStd(std){
     });
   }
   curKey = null;
+  lastCalcA = null;
   renderList();
   pickChain(best);
 }
@@ -561,6 +676,7 @@ function renderList(){
 
 function pickChain(key){
   curKey = key;
+  lastCalcA = null;
   document.querySelectorAll('#chain-list .sz-btn').forEach(b=>
     b.classList.toggle('active', b.dataset.chain === key));
   const badge = document.getElementById('chain-badge');
@@ -568,6 +684,7 @@ function pickChain(key){
   badge.style.display = 'block';
   updateGeoHint();
   updateRightPanel();
+  updateSprocketPanel();
   updateSVG();
 }
 
@@ -590,15 +707,14 @@ function setGeoMode(btn){
 function updateGeoHint(){
   if(!curKey) return;
   const p  = CD[curStd].chains[curKey].p;
-  const z1 = parseInt(document.getElementById('z1').value)  || 17;
-  const z2 = parseInt(document.getElementById('z2').value)  || 34;
+  const z1 = parseInt(document.getElementById('z1').value) || 17;
+  const z2 = parseInt(document.getElementById('z2').value) || 34;
   const aO = 40*p;
 
   if(geoMode === 'a2lp'){
     document.getElementById('geo-hint').textContent =
       `Önerilen: ${aO.toFixed(0)} mm (40p) · Maks: ${(80*p).toFixed(0)} mm`;
-    document.getElementById('geo-rec').textContent =
-      `40p = ${aO.toFixed(0)} mm`;
+    document.getElementById('geo-rec').textContent = `40p = ${aO.toFixed(0)} mm`;
     if(!document.getElementById('geo-input').value)
       document.getElementById('geo-input').placeholder = aO.toFixed(0);
   } else {
@@ -615,6 +731,8 @@ function updateGeoHint(){
 /* ── REAL-TIME UPDATE ── */
 function onInput(){
   if(!curKey) return;
+  lastCalcA = null;   /* z/n değişince sarma açısı geçersiz */
+
   const z1 = parseInt(document.getElementById('z1').value);
   const z2 = parseInt(document.getElementById('z2').value);
   const c  = CD[curStd].chains[curKey];
@@ -636,43 +754,34 @@ function onInput(){
     document.getElementById('ratio-strip').style.display = 'none';
   }
   updateGeoHint();
+  updateSprocketPanel();
   updateSVG();
 }
 
 /* ══════════════════════════════════════════════
-   SVG ÇİZİMİ  —  gerçek zamanlı
-   Tüm metin stilleri CSS token'larına bağlı:
-   font-family: var(--font-h / --font-m)
-   font-size:   var(--fz-*)
-   fill:        var(--text / --accent / --blue / --dim / --dim2)
+   SVG ÇİZİMİ
 ══════════════════════════════════════════════ */
 function updateSVG(){
   if(!curKey) return;
-  const c  = CD[curStd].chains[curKey];
+  const c   = CD[curStd].chains[curKey];
   const z1v = parseInt(document.getElementById('z1').value);
   const z2v = parseInt(document.getElementById('z2').value);
   if(!z1v || !z2v || z1v < 6 || z2v < 6) return;
 
   const VW=448, VH=400;
 
-  /* Hangi dişli büyük? Her zaman büyük sağa */
   const isZ1small = z1v <= z2v;
-  const zL = isZ1small ? z1v : z2v;  /* sol (küçük) */
-  const zR = isZ1small ? z2v : z1v;  /* sağ (büyük) */
+  const zL = isZ1small ? z1v : z2v;
+  const zR = isZ1small ? z2v : z1v;
   const lblL = isZ1small ? 'SÜRÜCÜ' : 'TAHRİK';
   const lblR = isZ1small ? 'TAHRİK' : 'SÜRÜCÜ';
-  /* z₁ her zaman SÜRÜCÜ'nün yanında, z₂ TAHRİK'in yanında */
   const subL = isZ1small ? 'z\u2081' : 'z\u2082';
   const subR = isZ1small ? 'z\u2082' : 'z\u2081';
 
-  /* Adım çemberi yarıçapları (mm) */
   const RL = c.p / (2*Math.sin(Math.PI/zL));
   const RR = c.p / (2*Math.sin(Math.PI/zR));
-
-  /* Diş yüksekliği (görsel yaklaşım) */
   const TH = Math.max(c.d1*0.28, c.p*0.08);
 
-  /* Ölçek hesabı — VH=400 için cap=8 */
   const availW = VW-60, availH = VH-60;
   const sH = (availH/2-4) / (RR+TH);
   const dispCD = Math.max(RL+RR+2*c.p, (RL+RR)*1.45);
@@ -685,22 +794,17 @@ function updateSVG(){
   const cxR = VW - 30 - rR - th - 2;
   const dx  = cxR - cxL;
 
-  /* Teğet geometrisi */
   const sinA = Math.min((rR-rL)/dx, 0.92);
   const cosA = Math.sqrt(1-sinA*sinA);
 
-  /* Teğet noktaları */
   const P = {
     lu:{ x:cxL-rL*sinA, y:cy-rL*cosA },
     ll:{ x:cxL-rL*sinA, y:cy+rL*cosA },
     ru:{ x:cxR-rR*sinA, y:cy-rR*cosA },
     rl:{ x:cxR-rR*sinA, y:cy+rR*cosA }
   };
-
-  /* Büyük yay flag (sağ dişli ≥180°) */
   const arcFlagR = sinA > 0.01 ? 1 : 0;
 
-  /* Dişli silüeti */
   function sprPath(cx, cy, rp, z, th){
     const ra = rp+th, rb = Math.max(rp-th*0.28, rp*0.55);
     const n  = Math.min(z,42)*2;
@@ -718,38 +822,23 @@ function updateSVG(){
   const f=n=>n.toFixed(2);
   let sv = `<svg viewBox="0 0 ${VW} ${VH}" xmlns="http://www.w3.org/2000/svg">`;
 
-  /* ── Zincir (arkada, hardcoded — geometrik element) ── */
-  sv+=`<line x1="${f(P.lu.x)}" y1="${f(P.lu.y)}" x2="${f(P.ru.x)}" y2="${f(P.ru.y)}"
-    stroke="rgba(0,212,170,0.5)" stroke-width="2.5"/>`;
-  sv+=`<line x1="${f(P.ll.x)}" y1="${f(P.ll.y)}" x2="${f(P.rl.x)}" y2="${f(P.rl.y)}"
-    stroke="rgba(0,212,170,0.5)" stroke-width="2.5"/>`;
-  sv+=`<path d="M${f(P.lu.x)} ${f(P.lu.y)} A${f(rL)} ${f(rL)} 0 0 0 ${f(P.ll.x)} ${f(P.ll.y)}"
-    fill="none" stroke="rgba(0,212,170,0.5)" stroke-width="2.5"/>`;
-  sv+=`<path d="M${f(P.ru.x)} ${f(P.ru.y)} A${f(rR)} ${f(rR)} 0 ${arcFlagR} 1 ${f(P.rl.x)} ${f(P.rl.y)}"
-    fill="none" stroke="rgba(0,212,170,0.5)" stroke-width="2.5"/>`;
+  sv+=`<line x1="${f(P.lu.x)}" y1="${f(P.lu.y)}" x2="${f(P.ru.x)}" y2="${f(P.ru.y)}" stroke="rgba(0,212,170,0.5)" stroke-width="2.5"/>`;
+  sv+=`<line x1="${f(P.ll.x)}" y1="${f(P.ll.y)}" x2="${f(P.rl.x)}" y2="${f(P.rl.y)}" stroke="rgba(0,212,170,0.5)" stroke-width="2.5"/>`;
+  sv+=`<path d="M${f(P.lu.x)} ${f(P.lu.y)} A${f(rL)} ${f(rL)} 0 0 0 ${f(P.ll.x)} ${f(P.ll.y)}" fill="none" stroke="rgba(0,212,170,0.5)" stroke-width="2.5"/>`;
+  sv+=`<path d="M${f(P.ru.x)} ${f(P.ru.y)} A${f(rR)} ${f(rR)} 0 ${arcFlagR} 1 ${f(P.rl.x)} ${f(P.rl.y)}" fill="none" stroke="rgba(0,212,170,0.5)" stroke-width="2.5"/>`;
 
-  /* ── Dişliler (hardcoded — geometrik element) ── */
-  sv+=`<path d="${sprPath(cxL,cy,rL,zL,th)}"
-    fill="rgba(249,115,22,0.18)" stroke="#f97316" stroke-width="0.9" stroke-linejoin="round"/>`;
-  sv+=`<circle cx="${f(cxL)}" cy="${f(cy)}" r="${f(rL*0.42)}"
-    fill="rgba(249,115,22,0.10)" stroke="#f97316" stroke-width="0.5" opacity="0.7"/>`;
+  sv+=`<path d="${sprPath(cxL,cy,rL,zL,th)}" fill="rgba(249,115,22,0.18)" stroke="#f97316" stroke-width="0.9" stroke-linejoin="round"/>`;
+  sv+=`<circle cx="${f(cxL)}" cy="${f(cy)}" r="${f(rL*0.42)}" fill="rgba(249,115,22,0.10)" stroke="#f97316" stroke-width="0.5" opacity="0.7"/>`;
   sv+=`<line x1="${f(cxL-7)}" y1="${f(cy)}" x2="${f(cxL+7)}" y2="${f(cy)}" stroke="#f97316" stroke-width="1.2" opacity="0.4"/>`;
   sv+=`<line x1="${f(cxL)}" y1="${f(cy-7)}" x2="${f(cxL)}" y2="${f(cy+7)}" stroke="#f97316" stroke-width="1.2" opacity="0.4"/>`;
 
-  sv+=`<path d="${sprPath(cxR,cy,rR,zR,th)}"
-    fill="rgba(249,115,22,0.18)" stroke="#f97316" stroke-width="0.9" stroke-linejoin="round"/>`;
-  sv+=`<circle cx="${f(cxR)}" cy="${f(cy)}" r="${f(rR*0.35)}"
-    fill="rgba(249,115,22,0.10)" stroke="#f97316" stroke-width="0.5" opacity="0.7"/>`;
+  sv+=`<path d="${sprPath(cxR,cy,rR,zR,th)}" fill="rgba(249,115,22,0.18)" stroke="#f97316" stroke-width="0.9" stroke-linejoin="round"/>`;
+  sv+=`<circle cx="${f(cxR)}" cy="${f(cy)}" r="${f(rR*0.35)}" fill="rgba(249,115,22,0.10)" stroke="#f97316" stroke-width="0.5" opacity="0.7"/>`;
   sv+=`<line x1="${f(cxR-7)}" y1="${f(cy)}" x2="${f(cxR+7)}" y2="${f(cy)}" stroke="#f97316" stroke-width="1.2" opacity="0.4"/>`;
   sv+=`<line x1="${f(cxR)}" y1="${f(cy-7)}" x2="${f(cxR)}" y2="${f(cy+7)}" stroke="#f97316" stroke-width="1.2" opacity="0.4"/>`;
 
-  /* ── Etiketler: CSS token'larına bağlı style="" ile ──
-     font-family → var(--font-h) / var(--font-m)
-     font-size   → var(--fz-13) / var(--fz-12)
-     fill        → var(--text)  / var(--accent)          */
   const topL = Math.max(18, cy-rL-th-22);
   const topR = Math.max(18, cy-rR-th-22);
-
   sv+=`<text x="${f(cxL)}" y="${topL}" text-anchor="middle">
     <tspan style="font-family:var(--font-h);font-size:var(--fz-13);font-weight:700;fill:var(--text);letter-spacing:1.5px">${lblL}</tspan
     ><tspan dx="6" style="font-family:var(--font-m);font-size:var(--fz-14);font-weight:600;fill:var(--accent)">${subL}</tspan>
@@ -759,38 +848,25 @@ function updateSVG(){
     ><tspan dx="6" style="font-family:var(--font-m);font-size:var(--fz-14);font-weight:600;fill:var(--accent)">${subR}</tspan>
   </text>`;
 
-  /* ── z değerleri (dişlinin içinde) — font-size dinamik (px) ── */
   const fsL = Math.min(Math.max(rL*0.36,9),16).toFixed(1);
   const fsR = Math.min(Math.max(rR*0.30,9),16).toFixed(1);
-  sv+=`<text x="${f(cxL)}" y="${f(cy)}" text-anchor="middle" dominant-baseline="middle"
-    style="font-family:var(--font-m);font-size:${fsL}px;font-weight:600;fill:var(--accent)" opacity="0.85">z${zL}</text>`;
-  sv+=`<text x="${f(cxR)}" y="${f(cy)}" text-anchor="middle" dominant-baseline="middle"
-    style="font-family:var(--font-m);font-size:${fsR}px;font-weight:600;fill:var(--accent)" opacity="0.85">z${zR}</text>`;
+  sv+=`<text x="${f(cxL)}" y="${f(cy)}" text-anchor="middle" dominant-baseline="middle" style="font-family:var(--font-m);font-size:${fsL}px;font-weight:600;fill:var(--accent)" opacity="0.85">z${zL}</text>`;
+  sv+=`<text x="${f(cxR)}" y="${f(cy)}" text-anchor="middle" dominant-baseline="middle" style="font-family:var(--font-m);font-size:${fsR}px;font-weight:600;fill:var(--accent)" opacity="0.85">z${zR}</text>`;
 
-  /* ── d₁ ölçü çizgisi (sol dişlinin altında) ── */
   const dimY = cy + rL + th + 10;
   if(dimY < VH-16){
-    sv+=`<line x1="${f(cxL-rL)}" y1="${dimY}" x2="${f(cxL+rL)}" y2="${dimY}"
-      stroke="#60a5fa" stroke-width="0.8"/>`;
-    sv+=`<line x1="${f(cxL-rL)}" y1="${dimY-4}" x2="${f(cxL-rL)}" y2="${dimY+4}"
-      stroke="#60a5fa" stroke-width="0.8"/>`;
-    sv+=`<line x1="${f(cxL+rL)}" y1="${dimY-4}" x2="${f(cxL+rL)}" y2="${dimY+4}"
-      stroke="#60a5fa" stroke-width="0.8"/>`;
-    sv+=`<text x="${f(cxL)}" y="${dimY+12}" text-anchor="middle"
-      style="font-family:var(--font-m);font-size:var(--fz-9);fill:var(--blue)">⌀${(RL*2).toFixed(1)}</text>`;
+    sv+=`<line x1="${f(cxL-rL)}" y1="${dimY}" x2="${f(cxL+rL)}" y2="${dimY}" stroke="#60a5fa" stroke-width="0.8"/>`;
+    sv+=`<line x1="${f(cxL-rL)}" y1="${dimY-4}" x2="${f(cxL-rL)}" y2="${dimY+4}" stroke="#60a5fa" stroke-width="0.8"/>`;
+    sv+=`<line x1="${f(cxL+rL)}" y1="${dimY-4}" x2="${f(cxL+rL)}" y2="${dimY+4}" stroke="#60a5fa" stroke-width="0.8"/>`;
+    sv+=`<text x="${f(cxL)}" y="${dimY+12}" text-anchor="middle" style="font-family:var(--font-m);font-size:var(--fz-9);fill:var(--blue)">⌀${(RL*2).toFixed(1)}</text>`;
   }
 
-  /* ── Aks mesafesi göstergesi (üstte kesikli çizgi) ── */
   const cdY = Math.max(topR-10, 4);
   if(cdY > 3 && cdY < cy-rR-th-4){
-    sv+=`<line x1="${f(cxL)}" y1="${f(cdY)}" x2="${f(cxR)}" y2="${f(cdY)}"
-      stroke="rgba(255,255,255,0.8)" stroke-width="1" stroke-dasharray="4,3"/>`;
-    sv+=`<line x1="${f(cxL)}" y1="${f(cy-rL-th)}" x2="${f(cxL)}" y2="${f(cdY)}"
-      stroke="rgba(255,255,255,0.8)" stroke-width="1"/>`;
-    sv+=`<line x1="${f(cxR)}" y1="${f(cy-rR-th)}" x2="${f(cxR)}" y2="${f(cdY)}"
-      stroke="rgba(255,255,255,0.8)" stroke-width="1"/>`;
-    sv+=`<text x="${f((cxL+cxR)/2)}" y="${cdY-3}" text-anchor="middle"
-      style="font-family:var(--font-h);font-size:var(--fz-15);fill:var(--dim2);letter-spacing:1px">A</text>`;
+    sv+=`<line x1="${f(cxL)}" y1="${f(cdY)}" x2="${f(cxR)}" y2="${f(cdY)}" stroke="rgba(0,212,170,0.35)" stroke-width="0.8" stroke-dasharray="5,3"/>`;
+    sv+=`<line x1="${f(cxL)}" y1="${f(cy-rL-th)}" x2="${f(cxL)}" y2="${f(cdY)}" stroke="rgba(0,212,170,0.22)" stroke-width="0.6"/>`;
+    sv+=`<line x1="${f(cxR)}" y1="${f(cy-rR-th)}" x2="${f(cxR)}" y2="${f(cdY)}" stroke="rgba(0,212,170,0.22)" stroke-width="0.6"/>`;
+    sv+=`<text x="${f((cxL+cxR)/2)}" y="${cdY-3}" text-anchor="middle" style="font-family:var(--font-h);font-size:var(--fz-9);fill:var(--teal);letter-spacing:1px;opacity:0.7">a</text>`;
   }
 
   sv+='</svg>';
@@ -812,8 +888,7 @@ function calculate(){
   const gv = parseFloat(document.getElementById('geo-input').value);
 
   if(!z1 || !z2 || z1 < 6 || z2 < 6 || !n1 || !gv){
-    alert('Lütfen tüm zorunlu alanları doldurun.');
-    return;
+    alert('Lütfen tüm zorunlu alanları doldurun.'); return;
   }
 
   const i  = z2/z1;
@@ -846,41 +921,76 @@ function calculate(){
   }
 
   const a_adj = a_calc*0.997;
-  const F = (P>0 && v>0) ? (P*1000/v) : null;
+  lastCalcA   = a_adj;  /* sarma açısı için kaydet */
 
+  /* Arayüzden Servis Faktörünü (K_A) al */
+  const K_A = parseFloat(document.getElementById('ka-factor').value) || 1.2;
+
+  /* Tahrik kuvveti */
+  const F_drv = (P>0 && v>0) ? (P*1000/v) : null;
+
+  /* Merkezkaç kuvveti: F_c = q × v² */
+  const F_c = c.q * v * v;
+
+  /* Sarkma kuvveti (a_adj mm olduğu için 1000'e bölerek metreye çeviriyoruz) */
+  const a_m = a_adj / 1000;
+  const F_s = 9.81 * c.q * a_m;
+
+
+  /* Gergin taraf toplam yükü (K_A ile çarpılmış tahrik kuvveti + merkezkaç + sarkma) */
+  const F_tight = (F_drv !== null ? (F_drv * K_A) : 0) + F_c + F_s;
+
+  /* Toplam zincir uzunluğu */
+  const L_mm = Lp * p;
+  const L_m  = L_mm / 1000;
+
+  /* Toplam zincir ağırlığı */
+  const W_kg = L_m * c.q;
+
+  /* Emniyet katsayısı */
+  const SF = F_tight > 0 ? (c.Q * 1000) / F_tight : null;
+
+  /* Servis durumu */
+  let svcTxt, svcCls;
+  if(SF === null || !isFinite(SF)){ svcTxt='—'; svcCls=''; }
+  else if(SF >= 7){ svcTxt='Güvenli ✓'; svcCls='serv-safe'; }
+  else if(SF >= 4){ svcTxt='Sınırda ⚠'; svcCls='serv-warn'; }
+  else            { svcTxt='Riskli ✕';  svcCls='serv-danger'; }
+
+  /* ── Ana sonuç kartları ── */
   document.getElementById('r-i').textContent  = i.toFixed(3);
   document.getElementById('r-v').textContent  = v.toFixed(3);
   document.getElementById('r-n2').textContent = n2.toFixed(1);
   document.getElementById('r-lp').textContent = Lp;
 
   const lpNote = document.getElementById('r-lp-note');
-  if(wasOdd){
-    lpNote.textContent = '⚠ tek sayıdan çift sayıya yuvarlandı';
-    lpNote.className   = 'res-unt warn';
-  } else {
-    lpNote.textContent = 'çift halka — offset bağlantı gerekmez';
-    lpNote.className   = 'res-unt';
-  }
+  if(wasOdd){ lpNote.textContent='⚠ tek→çift yuvarlandı'; lpNote.className='res-unt warn'; }
+  else      { lpNote.textContent='çift halka'; lpNote.className='res-unt'; }
 
   document.getElementById('r-a').textContent      = a_adj.toFixed(1);
   document.getElementById('r-a-note').textContent = 'mm  (−0.3% sarkma payı)';
 
   const fCard = document.getElementById('res-f-card');
   const row2  = document.getElementById('res-row2');
-  if(F !== null){
-    document.getElementById('r-f').textContent = Math.round(F).toLocaleString('tr');
+  if(F_drv !== null){
+    document.getElementById('r-f').textContent = Math.round(F_drv).toLocaleString('tr');
     fCard.style.display = '';
     row2.style.gridTemplateColumns = '1fr 1fr 1fr';
   } else {
     fCard.style.display = 'none';
     row2.style.gridTemplateColumns = '1fr 1fr';
   }
-
   document.getElementById('result-area').classList.add('visible');
+
+  /* ── Zincir Verileri paneline ek hesap sonuçları ── */
+  updateChainCalcResults({ L_mm, L_m, W_kg, F_tight, F_c, F_drv, SF, svcTxt, svcCls });
+
+  /* ── Dişli Verileri panelini güncelle (sarma açısıyla) ── */
+  updateSprocketPanel();
 }
 
 /* ══════════════════════════════════════════════
-   SAĞ PANEL
+   ZİNCİR VERİLERİ PANELİ
 ══════════════════════════════════════════════ */
 function updateRightPanel(){
   if(!curKey) return;
@@ -889,10 +999,7 @@ function updateRightPanel(){
   const p   = c.p;
 
   const inchRow = c.inch
-    ? `<div class="spec-row">
-         <span class="spec-nm">Adım (inç)</span>
-         <span class="spec-vl">${c.inch}</span>
-       </div>`
+    ? `<div class="spec-row"><span class="spec-nm">Adım (inç)</span><span class="spec-vl">${c.inch}</span></div>`
     : '';
 
   document.getElementById('rp-body').innerHTML = `
@@ -903,76 +1010,213 @@ function updateRightPanel(){
 
     <div class="spec-grp">
       <div class="spec-grp-ttl">Boyutlar</div>
-      <div class="spec-row">
-        <span class="spec-nm">Adım p</span>
-        <span class="spec-vl sc">${p.toFixed(3)} mm</span>
-      </div>
+      <div class="spec-row"><span class="spec-nm">Adım p</span><span class="spec-vl sc">${p.toFixed(3)} mm</span></div>
       ${inchRow}
-      <div class="spec-row">
-        <span class="spec-nm">İç Genişlik b₁</span>
-        <span class="spec-vl">${c.b1.toFixed(2)} mm</span>
-      </div>
-      <div class="spec-row">
-        <span class="spec-nm">Makaracık Çapı d₁</span>
-        <span class="spec-vl bl">${c.d1.toFixed(2)} mm</span>
-      </div>
-      <div class="spec-row">
-        <span class="spec-nm">Pim Çapı d₂</span>
-        <span class="spec-vl">${c.d2.toFixed(2)} mm</span>
-      </div>
+      <div class="spec-row"><span class="spec-nm">İç Genişlik b₁</span><span class="spec-vl">${c.b1.toFixed(2)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Makaracık Çapı d₁</span><span class="spec-vl bl">${c.d1.toFixed(2)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Pim Çapı d₂</span><span class="spec-vl">${c.d2.toFixed(2)} mm</span></div>
     </div>
 
     <div class="spec-grp">
       <div class="spec-grp-ttl">Mukavemet &amp; Ağırlık</div>
-      <div class="spec-row">
-        <span class="spec-nm">Min. Kırılma Yükü Q</span>
-        <span class="spec-vl ac">${c.Q.toFixed(1)} kN</span>
-      </div>
-      <div class="spec-row">
-        <span class="spec-nm">Zincir Ağırlığı q</span>
-        <span class="spec-vl yl">${c.q.toFixed(2)} kg/m</span>
-      </div>
+      <div class="spec-row"><span class="spec-nm">Min. Kırılma Yükü Q</span><span class="spec-vl ac">${c.Q.toFixed(1)} kN</span></div>
+      <div class="spec-row"><span class="spec-nm">Zincir Ağırlığı q</span><span class="spec-vl yl">${c.q.toFixed(2)} kg/m</span></div>
     </div>
 
     <div class="spec-grp">
       <div class="spec-grp-ttl">Aks Mesafesi Önerisi</div>
-      <div class="spec-row">
-        <span class="spec-nm">Minimum  (30p)</span>
-        <span class="spec-vl">${(30*p).toFixed(0)} mm</span>
-      </div>
-      <div class="spec-row">
-        <span class="spec-nm">Optimum  (40p) ★</span>
-        <span class="spec-vl tl">${(40*p).toFixed(0)} mm</span>
-      </div>
-      <div class="spec-row">
-        <span class="spec-nm">Maksimum (80p)</span>
-        <span class="spec-vl">${(80*p).toFixed(0)} mm</span>
-      </div>
+      <div class="spec-row"><span class="spec-nm">Minimum  (30p)</span><span class="spec-vl">${(30*p).toFixed(0)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Optimum  (40p) ★</span><span class="spec-vl tl">${(40*p).toFixed(0)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Maksimum (80p)</span><span class="spec-vl">${(80*p).toFixed(0)} mm</span></div>
       <div class="a-bar"><div class="a-bar-fill"></div></div>
-      <div class="a-bar-lbl">
-        <span>30p</span><span class="mid">40p ★</span><span>80p</span>
-      </div>
+      <div class="a-bar-lbl"><span>30p</span><span class="mid">40p ★</span><span>80p</span></div>
     </div>
 
     <div class="spec-grp">
       <div class="spec-grp-ttl">Diş Sayısı Önerileri</div>
-      <div class="spec-row">
-        <span class="spec-nm">Sürücü z₁ (önerilen min)</span>
-        <span class="spec-vl">17 diş</span>
-      </div>
-      <div class="spec-row">
-        <span class="spec-nm">Sürücü z₁ (mutlak min)</span>
-        <span class="spec-vl">9 diş</span>
-      </div>
-      <div class="spec-row">
-        <span class="spec-nm">Maks. iletim oranı</span>
-        <span class="spec-vl">7 : 1</span>
-      </div>
-      <div class="spec-row">
-        <span class="spec-nm">Halka sayısı</span>
-        <span class="spec-vl">Çift tercih edilir</span>
-      </div>
+      <div class="spec-row"><span class="spec-nm">Sürücü z₁ (önerilen min)</span><span class="spec-vl">17 diş</span></div>
+      <div class="spec-row"><span class="spec-nm">Sürücü z₁ (mutlak min)</span><span class="spec-vl">9 diş</span></div>
+      <div class="spec-row"><span class="spec-nm">Maks. iletim oranı</span><span class="spec-vl">7 : 1</span></div>
     </div>
+
+    <!-- Hesap sonuçları bölümü — Hesapla'dan sonra dolar -->
+    <div class="spec-grp calc-results-grp" id="rp-calc">
+      <div class="spec-grp-ttl">Hesap Sonuçları</div>
+      <div id="rp-calc-inner"></div>
+    </div>
+  `;
+}
+
+function updateChainCalcResults({ L_mm, L_m, W_kg, F_tight, F_c, F_drv, SF, svcTxt, svcCls }){
+  const grp = document.getElementById('rp-calc');
+  if(!grp) return;
+  grp.classList.add('visible');
+
+  const sfTxt  = (SF && isFinite(SF)) ? SF.toFixed(2) : '—';
+  const sfCls  = (SF && isFinite(SF)) ? (SF>=7?'grn':SF>=4?'yl':'rd') : '';
+  const ftTxt  = F_tight > 0 ? Math.round(F_tight).toLocaleString('tr') + ' N' : '—';
+  const fcTxt  = F_c > 0     ? Math.round(F_c).toLocaleString('tr')     + ' N' : '—';
+  const fdTxt  = F_drv       ? Math.round(F_drv).toLocaleString('tr')   + ' N' : '—';
+
+  document.getElementById('rp-calc-inner').innerHTML = `
+    <div class="spec-row">
+      <span class="spec-nm">Zincir uzunluğu</span>
+      <span class="spec-vl tl">${L_mm.toFixed(0)} mm</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-nm"></span>
+      <span class="spec-vl" style="color:var(--dim2)">${L_m.toFixed(3)} m</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-nm">Toplam ağırlık</span>
+      <span class="spec-vl yl">${W_kg.toFixed(2)} kg</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-nm">Tahrik kuvveti</span>
+      <span class="spec-vl">${fdTxt}</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-nm">Merkezkaç kuvveti</span>
+      <span class="spec-vl">${fcTxt}</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-nm">Gergin taraf yükü</span>
+      <span class="spec-vl ac">${ftTxt}</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-nm">Emniyet katsayısı</span>
+      <span class="spec-vl ${sfCls}">${sfTxt}</span>
+    </div>
+    <div style="padding:6px 0 2px">
+      ${svcCls ? `<span class="serv-badge ${svcCls}">${svcTxt}</span>` : '<span style="font-family:var(--font-m);font-size:var(--fz-10);color:var(--dim2)">Güç girilmediğinde servis analizi yapılamaz</span>'}
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════════════════
+   DİŞLİ VERİLERİ PANELİ
+══════════════════════════════════════════════ */
+function updateSprocketPanel(){
+  if(!curKey){
+    document.getElementById('sp-body').innerHTML = `
+      <div class="empty-st"><div class="ei">⚙️</div>
+        <p>Zincir adımı ve<br>diş sayılarını girin.</p></div>`;
+    return;
+  }
+
+  const c  = CD[curStd].chains[curKey];
+  const p  = c.p;
+  const z1 = parseInt(document.getElementById('z1').value);
+  const z2 = parseInt(document.getElementById('z2').value);
+  const n1 = parseFloat(document.getElementById('n1').value);
+
+  if(!z1 || !z2 || z1 < 6 || z2 < 6){
+    document.getElementById('sp-body').innerHTML = `
+      <div class="empty-st"><div class="ei">⚙️</div>
+        <p>Geçerli diş sayısı<br>girin (min. 6).</p></div>`;
+    return;
+  }
+
+  /* Adım çemberi çapları */
+  const d1 = p / Math.sin(Math.PI/z1);
+  const d2 = p / Math.sin(Math.PI/z2);
+
+  /* Dış çap (da ≈ d + 0.8·D_roller, ISO 606) */
+  const da1 = d1 + 0.8 * c.d1;
+  const da2 = d2 + 0.8 * c.d1;
+
+  /* Diş dibi çapı (df = d - D_roller) */
+  const df1 = d1 - c.d1;
+  const df2 = d2 - c.d1;
+
+  /* Diş aralığı açısı */
+  const th1 = 360/z1;
+  const th2 = 360/z2;
+
+  /* Çevre uzunluğu */
+  const circ1 = Math.PI * d1;
+  const circ2 = Math.PI * d2;
+
+  /* Çevre hızları */
+  const n2   = n1 ? n1*z1/z2 : null;
+  const vp1  = n1 ? (Math.PI*d1*n1)/60000 : null;
+  const vp2  = (n1 && n2) ? (Math.PI*d2*n2)/60000 : null;
+
+  /* Sarma açıları (yalnızca lastCalcA varsa) */
+  let alpha1 = null, alpha2 = null;
+  if(lastCalcA && lastCalcA > 0){
+    const sinAlpha = (d2-d1) / (2*lastCalcA);
+    if(Math.abs(sinAlpha) <= 1){
+      const alphaDeg = Math.asin(sinAlpha) * 180/Math.PI;
+      alpha1 = 180 - 2*alphaDeg;
+      alpha2 = 180 + 2*alphaDeg;
+    }
+  }
+
+  /* Yardımcı: değer veya "—" */
+  const fmt = (v, dec=2, unit='') => v !== null ? `${v.toFixed(dec)}${unit}` : '—';
+  const fmtCls = (v, threshold, cls) => v !== null && v >= threshold ? cls : '';
+
+  document.getElementById('sp-badge').innerHTML =
+    `<span class="chip ${curStd === 'iso' ? 'iso' : 'ansi'}">${curKey}</span>`;
+
+  document.getElementById('sp-body').innerHTML = `
+
+    <!-- Karşılaştırma başlık satırı -->
+    <div class="dg-comp">
+      <div class="dg-col-hdr lbl"></div>
+      <div class="dg-col-hdr z1c">SÜRÜCÜ z₁=${z1}</div>
+      <div class="dg-col-hdr z2c">TAHRİK z₂=${z2}</div>
+
+      <!-- ── Adım Çemberi Çapları ── -->
+      <div class="dg-sep">Çaplar</div>
+      <div class="dg-lbl">Adım çemberi d</div>
+      <div class="dg-val ac">${d1.toFixed(2)} mm</div>
+      <div class="dg-val bl">${d2.toFixed(2)} mm</div>
+
+      <div class="dg-lbl">Dış çap da (approx.)</div>
+      <div class="dg-val">${da1.toFixed(2)} mm</div>
+      <div class="dg-val">${da2.toFixed(2)} mm</div>
+
+      <div class="dg-lbl">Diş dibi çapı df</div>
+      <div class="dg-val dim">${df1.toFixed(2)} mm</div>
+      <div class="dg-val dim">${df2.toFixed(2)} mm</div>
+
+      <!-- ── Geometri ── -->
+      <div class="dg-sep">Geometri</div>
+      <div class="dg-lbl">Diş aralığı açısı</div>
+      <div class="dg-val">${th1.toFixed(2)}°</div>
+      <div class="dg-val">${th2.toFixed(2)}°</div>
+
+      <div class="dg-lbl">Çevre uzunluğu</div>
+      <div class="dg-val">${circ1.toFixed(1)} mm</div>
+      <div class="dg-val">${circ2.toFixed(1)} mm</div>
+
+      <!-- ── Sarma Açıları ── -->
+      <div class="dg-sep">Sarma Açısı${lastCalcA ? '' : ' (Hesapla\'dan sonra)'}</div>
+      <div class="dg-lbl">Sarma açısı α</div>
+      <div class="dg-val ${alpha1 && alpha1 >= 120 ? 'grn' : alpha1 ? 'yl' : 'dim'}">${alpha1 !== null ? alpha1.toFixed(1)+'°' : '—'}</div>
+      <div class="dg-val tl">${alpha2 !== null ? alpha2.toFixed(1)+'°' : '—'}</div>
+
+      <!-- ── Dinamik ── -->
+      <div class="dg-sep">Çevre Hızı${n1 ? '' : ' (n₁ girilmedi)'}</div>
+      <div class="dg-lbl">Dişli çevre hızı</div>
+      <div class="dg-val">${vp1 !== null ? vp1.toFixed(3)+' m/s' : '—'}</div>
+      <div class="dg-val">${vp2 !== null ? vp2.toFixed(3)+' m/s' : '—'}</div>
+
+      <div class="dg-lbl">Devir (n)</div>
+      <div class="dg-val dim">${n1 ? n1.toFixed(0)+' rpm' : '—'}</div>
+      <div class="dg-val dim">${n2 ? n2.toFixed(1)+' rpm' : '—'}</div>
+    </div>
+
+    <!-- Not: sarma açısı uyarısı -->
+    ${alpha1 !== null && alpha1 < 120 ? `
+    <div style="padding:10px 12px;background:rgba(251,191,36,0.07);border-top:1px solid rgba(251,191,36,0.2)">
+      <span style="font-family:var(--font-m);font-size:var(--fz-9);color:var(--yellow)">
+        ⚠ Sürücü sarma açısı ${alpha1.toFixed(1)}° — önerilen minimum 120°.
+        Aks mesafesini artırın veya z₁/z₂ oranını azaltın.
+      </span>
+    </div>` : ''}
   `;
 }
 </script>
