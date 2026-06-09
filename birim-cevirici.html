@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birim Çevirici | MH Platform</title>
+<link rel="stylesheet" href="mh-tokens.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,0.016) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.016) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none}
+
+/* ─── NAV ─── */
+nav{position:relative;z-index:10;flex-shrink:0;
+  background:rgba(7,7,14,0.92);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;height:52px;gap:20px}
+.brand{font-family:var(--font-logo);font-size:var(--fz-18);letter-spacing:3px;
+  color:var(--orange);text-decoration:none}
+.brand em{color:var(--text);font-style:normal}
+.breadcrumb{font-size:var(--fz-12);color:#8080a8;font-family:var(--font-m);
+  display:flex;align-items:center;gap:8px}
+.breadcrumb span{color:#52527a}
+
+/* ─── APP SHELL ─── */
+.app{position:relative;z-index:1;display:flex;flex:1;overflow:hidden;
+  --cc:#60a5fa}
+
+/* ─── LEFT: Category sidebar ─── */
+.cat-col{background:var(--bg2);border-right:1px solid var(--border);
+  width:220px;flex-shrink:0;display:flex;flex-direction:column;
+  overflow-y:auto;padding-bottom:20px}
+.col-label{font-family:var(--font-h);font-size:var(--fz-11);letter-spacing:2px;
+  color:#9090c0;text-transform:uppercase;padding:14px 14px 8px;flex-shrink:0}
+.col-section{font-family:var(--font-h);font-size:var(--fz-10);letter-spacing:2px;
+  color:#52527a;text-transform:uppercase;padding:10px 14px 5px;
+  border-top:1px solid var(--border);margin-top:4px}
+.col-section:first-of-type{border-top:none;margin-top:0}
+.cat-btn{display:flex;align-items:center;gap:10px;width:100%;
+  padding:8px 14px;background:transparent;border:none;
+  border-left:3px solid transparent;
+  color:#8080a8;font-family:var(--font-b);font-size:var(--fz-13);
+  cursor:pointer;text-align:left;transition:all .15s;white-space:nowrap}
+.cat-btn:hover{background:var(--surf1);color:var(--text)}
+.cat-btn.active{background:var(--surf1);color:var(--text);
+  font-weight:500;border-left-color:var(--cc)}
+.cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;
+  opacity:.55;transition:opacity .15s}
+.cat-btn.active .cat-dot{opacity:1}
+.cat-icon-sm{font-size:13px;width:18px;text-align:center;flex-shrink:0}
+
+/* ─── CENTER: Converter ─── */
+.conv-col{width:480px;max-width:480px;flex-shrink:0;display:flex;
+  flex-direction:column;overflow-y:auto;padding:14px 16px;gap:12px}
+
+/* Category header */
+.cat-header{display:flex;align-items:center;gap:14px;
+  padding:12px 14px;background:var(--surf1);
+  border:1px solid var(--border);border-radius:10px;
+  border-top:3px solid var(--cc);transition:border-top-color .2s}
+.cat-icon-big{font-size:22px;line-height:1;flex-shrink:0}
+.cat-title-txt{font-family:var(--font-h);font-size:var(--fz-20);
+  font-weight:700;color:var(--text);line-height:1.1}
+.cat-subtitle-txt{font-size:var(--fz-11);color:#8080a8;margin-top:3px}
+
+/* Main converter card */
+.conv-card{background:var(--surf1);border:1px solid var(--border);
+  border-radius:10px;padding:20px 16px;display:flex;flex-direction:column;gap:14px}
+
+.field-lbl{font-family:var(--font-h);font-size:var(--fz-10);
+  letter-spacing:2px;color:#52527a;text-transform:uppercase;margin-bottom:6px}
+
+/* Input + select row */
+.conv-row{display:flex;gap:8px;align-items:stretch}
+.inp-wrap{flex:1;display:flex;background:var(--surf2);
+  border:1px solid var(--border);border-radius:8px;
+  overflow:hidden;transition:border-color .2s}
+.inp-wrap:focus-within{border-color:var(--cc)}
+.conv-inp{flex:1;padding:12px 16px;background:transparent;border:none;
+  color:var(--text);font-family:var(--font-m);font-size:var(--fz-22);
+  font-weight:600;outline:none;min-width:0;
+  -webkit-appearance:none; -moz-appearance:textfield; appearance:none;}
+.conv-inp::placeholder{color:#444468}
+
+/* Unit select */
+.sel-wrap{position:relative;flex-shrink:0}
+.sel-wrap::after{content:'▾';position:absolute;right:10px;top:50%;
+  transform:translateY(-50%);color:#52527a;pointer-events:none;
+  font-size:10px;line-height:1}
+.unit-sel{min-width:118px;height:100%;padding:0 28px 0 12px;
+  background:var(--surf3);border:1px solid var(--border);
+  color:var(--text);font-family:var(--font-h);font-size:var(--fz-14);
+  font-weight:700;letter-spacing:.5px;cursor:pointer;outline:none;
+  appearance:none;transition:background .15s, border-color .15s;
+  border-radius:8px}
+.unit-sel:focus{background:#232345;border-color:var(--cc)}
+.unit-sel option{background:#17172a;font-family:monospace;font-size:13px}
+
+/* Swap row */
+.swap-row{display:flex;align-items:center;gap:10px;padding:2px 0}
+.div-line{flex:1;height:1px;background:var(--border)}
+.swap-btn{display:flex;align-items:center;justify-content:center;
+  width:38px;height:38px;background:var(--surf2);
+  border:1px solid var(--border);border-radius:8px;
+  color:#8080a8;font-size:18px;cursor:pointer;
+  transition:all .2s;user-select:none}
+.swap-btn:hover{border-color:var(--cc);color:var(--cc);background:var(--surf3);
+  transform:rotate(180deg)}
+
+/* Formula strip */
+.formula-strip{display:flex;align-items:center;gap:10px;
+  padding:10px 14px;background:rgba(0,0,0,.2);
+  border-radius:8px;border:1px solid var(--border)}
+.fmla-txt{font-family:var(--font-m);font-size:var(--fz-12);
+  color:#8080a8;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.fmla-accent{color:var(--cc)}
+.copy-btn{padding:4px 10px;background:transparent;
+  border:1px solid var(--border);border-radius:5px;
+  color:#52527a;font-family:var(--font-m);font-size:var(--fz-10);
+  cursor:pointer;transition:all .15s;flex-shrink:0;white-space:nowrap}
+.copy-btn:hover{border-color:var(--cc);color:var(--cc)}
+.copy-btn.ok{color:var(--green);border-color:var(--green)}
+
+/* Tips box */
+.tips-box{border-left:3px solid var(--cc);border-radius:0 8px 8px 0;
+  background:rgba(0,0,0,.15);
+  padding:10px 14px;transition:border-left-color .2s}
+.tips-txt{font-size:var(--fz-11);color:#8080a8;line-height:1.7;font-family:var(--font-b)}
+.tips-txt strong{color:#9090c0;font-weight:600}
+
+/* ─── SPACER ─── */
+.flex-space{flex:1;min-width:0}
+
+/* ─── RIGHT: Cascade panel ─── */
+.casc-col{background:var(--bg2);border-left:1px solid var(--border);
+  width:300px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden}
+.casc-head{padding:11px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.casc-title{font-family:var(--font-h);font-size:var(--fz-14);
+  font-weight:700;letter-spacing:1px}
+.casc-sub{font-family:var(--font-m);font-size:var(--fz-11);
+  color:var(--cc);text-align:right;transition:color .2s}
+.casc-list{flex:1;overflow-y:auto;padding:6px 8px;display:flex;flex-direction:column;gap:2px}
+
+/* Cascade items */
+.c-item{display:flex;align-items:center;gap:8px;
+  padding:7px 10px 7px 12px;
+  border-radius:6px;border-left:3px solid transparent;
+  cursor:pointer;transition:background .12s;user-select:none}
+.c-item:hover{background:var(--surf1)}
+.c-item.c-from{border-left-color:var(--cc);background:rgba(255,255,255,.025)}
+.c-item.c-to{border-left-color:#00d4aa;background:rgba(0,212,170,.03)}
+
+.c-lbl{font-family:var(--font-m);font-size:var(--fz-12);font-weight:600;
+  min-width:58px;flex-shrink:0;color:#8080a8;transition:color .15s}
+.c-item.c-from .c-lbl{color:var(--cc)}
+.c-item.c-to .c-lbl{color:#00d4aa}
+
+.c-name{font-size:var(--fz-10);color:#52527a;font-family:var(--font-b);
+  flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-val{font-family:var(--font-m);font-size:var(--fz-12);font-weight:600;
+  color:var(--text);text-align:right;flex-shrink:0;
+  max-width:105px;overflow:hidden;white-space:nowrap}
+.c-item.c-from .c-val{color:var(--cc)}
+.c-item.c-to .c-val{color:#00d4aa}
+
+.c-flash{animation:cfls .4s ease forwards}
+@keyframes cfls{
+  0%{background:rgba(74,222,128,.15)}
+  100%{background:transparent}
+}
+
+/* Section divider in cascade */
+.c-section{font-family:var(--font-h);font-size:var(--fz-9);
+  letter-spacing:2px;color:#444468;text-transform:uppercase;
+  padding:8px 10px 3px;margin-top:4px}
+
+/* Scrollbar tweaks */
+.casc-list::-webkit-scrollbar,.conv-col::-webkit-scrollbar,.cat-col::-webkit-scrollbar{width:4px}
+.casc-list::-webkit-scrollbar-track,.conv-col::-webkit-scrollbar-track,.cat-col::-webkit-scrollbar-track{background:transparent}
+.casc-list::-webkit-scrollbar-thumb,.conv-col::-webkit-scrollbar-thumb,.cat-col::-webkit-scrollbar-thumb{background:#1e1e34;border-radius:2px}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="index.html">MH<em>Platform</em></a>
+  <div class="breadcrumb">
+    <span>/</span>
+    <span id="navCrumb">Birim Çevirici</span>
+  </div>
+</nav>
+
+<div class="app" id="app">
+
+  <!-- LEFT: Category sidebar -->
+  <div class="cat-col" id="catCol"></div>
+
+  <!-- CENTER: Main converter -->
+  <div class="conv-col">
+
+    <div class="cat-header" id="catHdr">
+      <div class="cat-icon-big" id="catIcon">📏</div>
+      <div>
+        <div class="cat-title-txt" id="catTitle">Uzunluk</div>
+        <div class="cat-subtitle-txt" id="catSub">—</div>
+      </div>
+    </div>
+
+    <div class="conv-card">
+      <!-- FROM field -->
+      <div>
+        <div class="field-lbl">Giriş</div>
+        <div class="conv-row">
+          <div class="inp-wrap">
+            <input class="conv-inp" id="fromInp" type="text"
+              inputmode="decimal" value="1" autocomplete="off"
+              placeholder="değer girin">
+          </div>
+          <div class="sel-wrap">
+            <select class="unit-sel" id="fromSel"></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Swap -->
+      <div class="swap-row">
+        <div class="div-line"></div>
+        <button class="swap-btn" id="swapBtn" title="Birimleri Ters Çevir">⇅</button>
+        <div class="div-line"></div>
+      </div>
+
+      <!-- TO field -->
+      <div>
+        <div class="field-lbl">Sonuç</div>
+        <div class="conv-row">
+          <div class="inp-wrap">
+            <input class="conv-inp" id="toInp" type="text"
+              inputmode="decimal" autocomplete="off"
+              placeholder="—">
+          </div>
+          <div class="sel-wrap">
+            <select class="unit-sel" id="toSel"></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formula -->
+      <div class="formula-strip">
+        <div class="fmla-txt" id="fmlaTxt">—</div>
+        <button class="copy-btn" id="copyBtn">Kopyala</button>
+      </div>
+    </div>
+
+    <!-- Engineering tip -->
+    <div class="tips-box" id="tipsBox">
+      <div class="tips-txt" id="tipsTxt"></div>
+    </div>
+
+  </div><!-- /conv-col -->
+
+
+  <!-- RIGHT: All-units cascade -->
+  <div class="casc-col">
+    <div class="casc-head">
+      <div class="casc-title">Tüm Birimler</div>
+      <div class="casc-sub" id="cascSub">—</div>
+    </div>
+    <div class="casc-list" id="cascList"></div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  VERİ — 13 kategori, mühendislik odaklı birim seçimi
+// ═══════════════════════════════════════════════════════════════════
+const π = Math.PI;
+
+const CATS = [
+  /* ── BOYUT ── */
+  {
+    id:'uzunluk', lbl:'Uzunluk', icon:'📏', color:'#60a5fa', sec:'Boyut',
+    desc:'Boyut, mesafe, çap, derinlik ölçüleri',
+    tip:'<strong>Mühendislik notu:</strong> Mekanik tasarımda temel birim mm\'dir. 1 inç = 25,4 mm (tam değer). TS/DIN standartlarında ölçüler mm ile ifade edilir.',
+    units:[
+      {id:'nm',  lb:'nm',   nm:'Nanometre',         f:1e-9},
+      {id:'um',  lb:'µm',   nm:'Mikrometre',        f:1e-6},
+      {id:'mm',  lb:'mm',   nm:'Milimetre',         f:1e-3},
+      {id:'cm',  lb:'cm',   nm:'Santimetre',        f:1e-2},
+      {id:'m',   lb:'m',    nm:'Metre',             f:1},
+      {id:'km',  lb:'km',   nm:'Kilometre',         f:1e3},
+      {id:'in',  lb:'in',   nm:'İnç',               f:0.0254},
+      {id:'ft',  lb:'ft',   nm:'Foot (ayak)',       f:0.3048},
+      {id:'yd',  lb:'yd',   nm:'Yard',              f:0.9144},
+      {id:'mi',  lb:'mi',   nm:'Mil (kara)',        f:1609.344},
+      {id:'nmi', lb:'nmi',  nm:'Deniz mili',        f:1852},
+    ],
+    dF:'mm', dT:'m'
+  },
+  {
+    id:'alan', lbl:'Alan', icon:'⬜', color:'#a78bfa', sec:'Boyut',
+    desc:'Kesit alanı, yüzey alanı',
+    tip:'<strong>Mühendislik notu:</strong> Profil kesit alanı hesaplarında mm² kullanılır. 1 cm² = 100 mm². Kesit alanı tabloları (IPE, HEB) cm² ile verilir.',
+    units:[
+      {id:'mm2',  lb:'mm²',  nm:'Milimetre kare',    f:1e-6},
+      {id:'cm2',  lb:'cm²',  nm:'Santimetre kare',   f:1e-4},
+      {id:'dm2',  lb:'dm²',  nm:'Desimetre kare',    f:0.01},
+      {id:'m2',   lb:'m²',   nm:'Metre kare',        f:1},
+      {id:'km2',  lb:'km²',  nm:'Kilometre kare',    f:1e6},
+      {id:'ha',   lb:'ha',   nm:'Hektar',            f:1e4},
+      {id:'in2',  lb:'in²',  nm:'İnç kare',          f:6.4516e-4},
+      {id:'ft2',  lb:'ft²',  nm:'Foot kare',         f:9.2903e-2},
+      {id:'yd2',  lb:'yd²',  nm:'Yard kare',         f:0.836127},
+    ],
+    dF:'cm2', dT:'in2'
+  },
+  {
+    id:'hacim', lbl:'Hacim', icon:'🧊', color:'#34d399', sec:'Boyut',
+    desc:'Sıvı hacmi, tank, debi hesabı',
+    tip:'<strong>Mühendislik notu:</strong> 1 L = 1 dm³ = 1000 cm³. Hidrolik sistemlerde L/dak, pnömatik sistemlerde m³/h yaygındır.',
+    units:[
+      {id:'mm3',   lb:'mm³',     nm:'Milimetre küp',           f:1e-9},
+      {id:'cm3',   lb:'cm³(mL)', nm:'Santimetre küp / Mililitre', f:1e-6},
+      {id:'dL',    lb:'dL',      nm:'Desilitre',               f:1e-4},
+      {id:'L',     lb:'L',       nm:'Litre',                   f:1e-3},
+      {id:'m3',    lb:'m³',      nm:'Metre küp',               f:1},
+      {id:'in3',   lb:'in³',     nm:'İnç küp',                 f:1.6387064e-5},
+      {id:'ft3',   lb:'ft³',     nm:'Foot küp',                f:0.028316847},
+      {id:'galUS', lb:'gal(US)', nm:'Galon (ABD)',             f:3.785412e-3},
+      {id:'galUK', lb:'gal(UK)', nm:'Galon (İngiltere)',       f:4.546092e-3},
+      {id:'bbl',   lb:'bbl',     nm:'Varil (petrol)',          f:0.158987},
+    ],
+    dF:'L', dT:'m3'
+  },
+  /* ── MEKANİK ── */
+  {
+    id:'kutle', lbl:'Kütle', icon:'⚖️', color:'#f97316', sec:'Mekanik',
+    desc:'Kütle ve ağırlık ölçüleri',
+    tip:'<strong>Mühendislik notu:</strong> Malzeme yoğunluğu g/cm³ veya kg/m³ ile verilir. Çelik ≈ 7850 kg/m³, alüminyum ≈ 2700 kg/m³, bakır ≈ 8900 kg/m³.',
+    units:[
+      {id:'mg',  lb:'mg',     nm:'Miligram',         f:1e-6},
+      {id:'g',   lb:'g',      nm:'Gram',             f:1e-3},
+      {id:'kg',  lb:'kg',     nm:'Kilogram',         f:1},
+      {id:'t',   lb:'t',      nm:'Ton (metrik)',     f:1e3},
+      {id:'oz',  lb:'oz',     nm:'Ons (avoirdupois)',f:0.0283495},
+      {id:'lb',  lb:'lb',     nm:'Pound',            f:0.453592},
+      {id:'ton', lb:'ton(US)',nm:'Ton kısa (ABD)',   f:907.185},
+    ],
+    dF:'kg', dT:'lb'
+  },
+  {
+    id:'kuvvet', lbl:'Kuvvet', icon:'↗️', color:'#f87171', sec:'Mekanik',
+    desc:'Kuvvet, yük, ağırlık kuvveti',
+    tip:'<strong>Mühendislik notu:</strong> 1 kgf = 9,80665 N. Cıvata sıkma kuvvetleri ve yatak yükleri kN, taşıyıcı konstrüksiyonlarda kN–MN ile ifade edilir.',
+    units:[
+      {id:'mN',   lb:'mN',   nm:'Milinewton',               f:1e-3},
+      {id:'N',    lb:'N',    nm:'Newton',                   f:1},
+      {id:'kN',   lb:'kN',   nm:'Kilonewton',               f:1e3},
+      {id:'MN',   lb:'MN',   nm:'Meganewton',               f:1e6},
+      {id:'kgf',  lb:'kgf',  nm:'Kilogram kuvvet',          f:9.80665},
+      {id:'tf',   lb:'tf',   nm:'Ton kuvvet (metrik)',      f:9806.65},
+      {id:'lbf',  lb:'lbf',  nm:'Pound kuvvet',            f:4.44822},
+      {id:'kipf', lb:'kipf', nm:'Kip (1000 lbf)',          f:4448.22},
+      {id:'dyn',  lb:'dyn',  nm:'Din (CGS)',               f:1e-5},
+    ],
+    dF:'N', dT:'kgf'
+  },
+  {
+    id:'basinc', lbl:'Basınç / Gerilme', icon:'🔵', color:'#fbbf24', sec:'Mekanik',
+    desc:'Mekanik gerilme, sıvı/gaz basıncı',
+    tip:'<strong>Mühendislik notu:</strong> MPa = N/mm². Çelik akma dayanımı (Re) 250–1200 MPa arasındadır. 1 atm ≈ 0,1013 MPa ≈ 1,013 bar ≈ 14,696 psi.',
+    units:[
+      {id:'Pa',      lb:'Pa',       nm:'Pascal',                   f:1},
+      {id:'kPa',     lb:'kPa',      nm:'Kilopascal',              f:1e3},
+      {id:'MPa',     lb:'MPa',      nm:'Megapascal (= N/mm²)',    f:1e6},
+      {id:'GPa',     lb:'GPa',      nm:'Gigapascal',              f:1e9},
+      {id:'bar',     lb:'bar',      nm:'Bar',                     f:1e5},
+      {id:'mbar',    lb:'mbar',     nm:'Milibar',                 f:100},
+      {id:'atm',     lb:'atm',      nm:'Standart atmosfer',       f:101325},
+      {id:'kgfcm2',  lb:'kgf/cm²', nm:'kgf / santimetre kare',  f:98066.5},
+      {id:'psi',     lb:'psi',      nm:'PSI — pound / inç kare', f:6894.757},
+      {id:'ksi',     lb:'ksi',      nm:'Kilo-PSI',               f:6894757},
+      {id:'mmHg',    lb:'mmHg',     nm:'Milimetre civa (Torr)',  f:133.322},
+      {id:'inHg',    lb:'inHg',     nm:'İnç civa',              f:3386.39},
+    ],
+    dF:'MPa', dT:'psi'
+  },
+  {
+    id:'tork', lbl:'Tork / Moment', icon:'🔄', color:'#f472b6', sec:'Mekanik',
+    desc:'Döndürme momenti, sıkma torku',
+    tip:'<strong>Mühendislik notu:</strong> Cıvata sıkma torku N·m ile; redüktör/motor çıkış torku kN·m ile ifade edilir. 1 N·m ≈ 0,738 lbf·ft ≈ 8,85 lbf·in.',
+    units:[
+      {id:'Nmm',   lb:'N·mm',    nm:'Newton · milimetre',    f:1e-3},
+      {id:'Ncm',   lb:'N·cm',    nm:'Newton · santimetre',  f:1e-2},
+      {id:'Nm',    lb:'N·m',     nm:'Newton · metre',       f:1},
+      {id:'kNm',   lb:'kN·m',    nm:'Kilonewton · metre',  f:1e3},
+      {id:'kgfcm', lb:'kgf·cm',  nm:'kgf · santimetre',    f:0.0980665},
+      {id:'kgfm',  lb:'kgf·m',   nm:'kgf · metre',         f:9.80665},
+      {id:'lbfin', lb:'lbf·in',  nm:'Pound kuvvet · inç',  f:0.112985},
+      {id:'lbfft', lb:'lbf·ft',  nm:'Pound kuvvet · foot', f:1.35582},
+    ],
+    dF:'Nm', dT:'kgfm'
+  },
+  {
+    id:'guc', lbl:'Güç', icon:'⚡', color:'#4ade80', sec:'Mekanik',
+    desc:'Motor gücü, mekanik güç, ısıl güç',
+    tip:'<strong>Mühendislik notu:</strong> 1 hp (PS, metrik beygir) = 735,5 W. Motor etiketi kW gösterir. 1 kW ≈ 1,36 PS. Elektrik motorlarında P = M · ω formülü ile hesaplanır.',
+    units:[
+      {id:'W',      lb:'W',        nm:'Watt',                     f:1},
+      {id:'kW',     lb:'kW',       nm:'Kilowatt',                f:1e3},
+      {id:'MW',     lb:'MW',       nm:'Megawatt',                f:1e6},
+      {id:'hpM',    lb:'hp (PS)',  nm:'Beygir gücü — metrik (PS)', f:735.49875},
+      {id:'hpI',    lb:'hp (imp)', nm:'Beygir gücü — imperial',  f:745.69987},
+      {id:'kgfms',  lb:'kgf·m/s', nm:'kgf · metre / saniye',   f:9.80665},
+      {id:'BTUh',   lb:'BTU/h',   nm:'BTU / saat',              f:0.293071},
+      {id:'kcals',  lb:'kcal/s',  nm:'Kilokalori / saniye',    f:4186.8},
+    ],
+    dF:'kW', dT:'hpM'
+  },
+  {
+    id:'enerji', lbl:'Enerji', icon:'🔋', color:'#00d4aa', sec:'Mekanik',
+    desc:'İş, enerji, ısı miktarı',
+    tip:'<strong>Mühendislik notu:</strong> 1 kWh = 3600 kJ. Isıtma/soğutma enerji hesaplarında kJ veya kcal; kaynak enerjisi kJ/mm ile verilir.',
+    units:[
+      {id:'J',     lb:'J',      nm:'Joule',                   f:1},
+      {id:'kJ',    lb:'kJ',     nm:'Kilojoule',              f:1e3},
+      {id:'MJ',    lb:'MJ',     nm:'Megajoule',              f:1e6},
+      {id:'Wh',    lb:'Wh',     nm:'Watt saat',              f:3600},
+      {id:'kWh',   lb:'kWh',    nm:'Kilowatt saat',         f:3.6e6},
+      {id:'cal',   lb:'cal',    nm:'Kalori',                f:4.1868},
+      {id:'kcal',  lb:'kcal',   nm:'Kilokalori',            f:4186.8},
+      {id:'BTU',   lb:'BTU',    nm:'İngiliz ısı birimi',   f:1055.06},
+      {id:'ftlbf', lb:'ft·lbf', nm:'Foot · pound kuvvet', f:1.35582},
+    ],
+    dF:'kJ', dT:'kcal'
+  },
+  /* ── DİĞER ── */
+  {
+    id:'sicaklik', lbl:'Sıcaklık', icon:'🌡️', color:'#fb923c', sec:'Diğer',
+    desc:'Termal ölçümler, ısıl işlem parametreleri',
+    tip:'<strong>Mühendislik notu:</strong> Çelik ısıl işlem aralıkları: tavlama 750–900 °C, söndürme 800–870 °C, menevişleme 150–650 °C. Kaynakta ön ısıtma 100–300 °C.',
+    type:'temp',
+    units:[
+      {id:'C',  lb:'°C',  nm:'Santigrat (Celsius)'},
+      {id:'F',  lb:'°F',  nm:'Fahrenheit'},
+      {id:'K',  lb:'K',   nm:'Kelvin'},
+      {id:'R',  lb:'°R',  nm:'Rankine'},
+    ],
+    dF:'C', dT:'F'
+  },
+  {
+    id:'hiz', lbl:'Hız', icon:'💨', color:'#4da6ff', sec:'Diğer',
+    desc:'Doğrusal hız, kayış/zincir çevre hızı',
+    tip:'<strong>Mühendislik notu:</strong> Zincir çevre hızı üst sınırı ≈ 15 m/s, düz kayış ≈ 30 m/s. Talaşlı imalatta kesme hızı m/dak ile verilir.',
+    units:[
+      {id:'mms',  lb:'mm/s',   nm:'Milimetre / saniye',   f:1e-3},
+      {id:'cms',  lb:'cm/s',   nm:'Santimetre / saniye', f:1e-2},
+      {id:'ms',   lb:'m/s',    nm:'Metre / saniye',      f:1},
+      {id:'mmin', lb:'m/dak',  nm:'Metre / dakika',      f:1/60},
+      {id:'kmh',  lb:'km/sa',  nm:'Kilometre / saat',    f:1/3.6},
+      {id:'fts',  lb:'ft/s',   nm:'Foot / saniye',       f:0.3048},
+      {id:'mph',  lb:'mph',    nm:'Mil / saat',          f:0.44704},
+      {id:'knot', lb:'knot',   nm:'Knot (deniz mili/sa)',f:0.514444},
+    ],
+    dF:'ms', dT:'kmh'
+  },
+  {
+    id:'acisal', lbl:'Açısal Hız', icon:'🔁', color:'#bb88ff', sec:'Diğer',
+    desc:'Motor devri, dişli hızı, açısal frekans',
+    tip:'<strong>Mühendislik notu:</strong> ω = 2π · n / 60 (n: dev/dak → ω: rad/s). Standart motor hızları: 750, 1000, 1500, 3000 dev/dak. Çevresel hız: v = ω · r.',
+    units:[
+      {id:'rpm',  lb:'rpm',   nm:'Dev / dakika',         f:2*π/60},
+      {id:'rps',  lb:'rps',   nm:'Dev / saniye',         f:2*π},
+      {id:'rads', lb:'rad/s', nm:'Radyan / saniye',     f:1},
+      {id:'Hz',   lb:'Hz',    nm:'Hertz (= rps)',       f:2*π},
+      {id:'degs', lb:'°/s',   nm:'Derece / saniye',    f:π/180},
+    ],
+    dF:'rpm', dT:'rads'
+  },
+  {
+    id:'aci', lbl:'Açı', icon:'📐', color:'#67e8f9', sec:'Diğer',
+    desc:'Açısal ölçümler, konik açılar, eğim',
+    tip:'<strong>Mühendislik notu:</strong> 1 tam dönüş = 360° = 2π rad = 400 grad. Koniklik (konus açısı) genellikle °\'de ifade edilir. Küçük tolerans açıları için mrad praktiktir.',
+    units:[
+      {id:'deg',    lb:'°',      nm:'Derece',               f:1},
+      {id:'rad',    lb:'rad',    nm:'Radyan',               f:180/π},
+      {id:'mrad',   lb:'mrad',   nm:'Milyradyan',           f:0.18/π},
+      {id:'grad',   lb:'grad',   nm:'Gradyan (gon)',        f:0.9},
+      {id:'rev',    lb:'rev',    nm:'Devir (tam dönüş)',    f:360},
+      {id:'arcmin', lb:'\'',     nm:'Dakika (arc min)',    f:1/60},
+      {id:'arcsec', lb:'"',      nm:'Saniye (arc sec)',    f:1/3600},
+    ],
+    dF:'deg', dT:'rad'
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════
+let CAT    = CATS[0];
+let FROM   = CAT.dF;
+let TO     = CAT.dT;
+let FVAL   = 1;   // current from-value (canonical)
+
+// ═══════════════════════════════════════════════════════════════════
+//  DOM REFS
+// ═══════════════════════════════════════════════════════════════════
+const $app      = document.getElementById('app');
+const $catCol   = document.getElementById('catCol');
+const $catHdr   = document.getElementById('catHdr');
+const $catIcon  = document.getElementById('catIcon');
+const $catTitle = document.getElementById('catTitle');
+const $catSub   = document.getElementById('catSub');
+const $fromInp  = document.getElementById('fromInp');
+const $toInp    = document.getElementById('toInp');
+const $fromSel  = document.getElementById('fromSel');
+const $toSel    = document.getElementById('toSel');
+const $swapBtn  = document.getElementById('swapBtn');
+const $fmlaTxt  = document.getElementById('fmlaTxt');
+const $copyBtn  = document.getElementById('copyBtn');
+const $cascList = document.getElementById('cascList');
+const $cascSub  = document.getElementById('cascSub');
+const $tipsTxt  = document.getElementById('tipsTxt');
+const $tipsBox  = document.getElementById('tipsBox');
+const $navCrumb = document.getElementById('navCrumb');
+
+// ═══════════════════════════════════════════════════════════════════
+//  CONVERSION MATH
+// ═══════════════════════════════════════════════════════════════════
+
+// Temperature: all conversions go through Kelvin as base
+function toK(v, uid){
+  switch(uid){
+    case 'C': return v + 273.15;
+    case 'F': return (v + 459.67) * 5/9;
+    case 'K': return v;
+    case 'R': return v * 5/9;
+  }
+  return NaN;
+}
+function fromK(K, uid){
+  switch(uid){
+    case 'C': return K - 273.15;
+    case 'F': return K * 9/5 - 459.67;
+    case 'K': return K;
+    case 'R': return K * 9/5;
+  }
+  return NaN;
+}
+
+function conv(val, fromId, toId){
+  if (fromId === toId) return val;
+  if (CAT.type === 'temp') return fromK(toK(val, fromId), toId);
+  const fu = CAT.units.find(u => u.id === fromId);
+  const tu = CAT.units.find(u => u.id === toId);
+  if (!fu || !tu) return NaN;
+  return (val * fu.f) / tu.f;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  NUMBER FORMATTING
+// ═══════════════════════════════════════════════════════════════════
+
+function fmtInp(n){
+  if (!isFinite(n) || isNaN(n)) return '';
+  if (n === 0) return '0';
+  const abs = Math.abs(n);
+  if (abs >= 1e-6 && abs < 1e12)
+    return parseFloat(n.toPrecision(10)).toString();
+  return n.toExponential(6);
+}
+
+function fmtDisp(n, sig=6){
+  if (!isFinite(n) || isNaN(n)) return '—';
+  if (n === 0) return '0';
+  const abs = Math.abs(n);
+  if (abs >= 0.001 && abs < 1e8)
+    return parseFloat(n.toPrecision(sig)).toString();
+  return n.toExponential(3);
+}
+
+function fmtFactor(n){
+  if (!isFinite(n) || isNaN(n)) return '—';
+  if (n === 0) return '0';
+  const abs = Math.abs(n);
+  if (abs >= 0.0001 && abs < 1e9)
+    return parseFloat(n.toPrecision(8)).toString();
+  return n.toExponential(5);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  UI — DROPDOWNS
+// ═══════════════════════════════════════════════════════════════════
+
+function buildDropdown(sel, cat, activeId){
+  sel.innerHTML = '';
+  cat.units.forEach(u => {
+    const o = document.createElement('option');
+    o.value = u.id;
+    o.textContent = u.lb;
+    if (u.id === activeId) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  UI — FORMULA STRIP
+// ═══════════════════════════════════════════════════════════════════
+
+const TEMP_FORMULAS = {
+  'C-F':'°F = °C × 9/5 + 32',
+  'F-C':'°C = (°F − 32) × 5/9',
+  'C-K':'K = °C + 273,15',
+  'K-C':'°C = K − 273,15',
+  'C-R':'°R = (°C + 273,15) × 9/5',
+  'R-C':'°C = °R × 5/9 − 273,15',
+  'F-K':'K = (°F + 459,67) × 5/9',
+  'K-F':'°F = K × 9/5 − 459,67',
+  'F-R':'°R = °F + 459,67',
+  'R-F':'°F = °R − 459,67',
+  'K-R':'°R = K × 9/5',
+  'R-K':'K = °R × 5/9',
+};
+
+function updateFormula(){
+  const fu = CAT.units.find(u => u.id === FROM);
+  const tu = CAT.units.find(u => u.id === TO);
+  if (!fu || !tu){ $fmlaTxt.innerHTML='—'; return; }
+
+  let html = '';
+  if (CAT.type === 'temp'){
+    const f = TEMP_FORMULAS[`${FROM}-${TO}`] || `${fu.lb} → ${tu.lb}`;
+    html = `<span style="color:#52527a">Formül: </span><span class="fmla-accent">${f}</span>`;
+  } else {
+    const factor = conv(1, FROM, TO);
+    html = `1 <span class="fmla-accent">${fu.lb}</span>&thinsp;=&thinsp;<span class="fmla-accent">${fmtFactor(factor)}</span>&thinsp;<span class="fmla-accent">${tu.lb}</span>`;
+  }
+  $fmlaTxt.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  UI — CASCADE
+// ═══════════════════════════════════════════════════════════════════
+
+function updateCascade(){
+  $cascList.innerHTML = '';
+  const fu = CAT.units.find(u => u.id === FROM);
+  $cascSub.textContent = `${fmtDisp(FVAL, 5)} ${fu ? fu.lb : ''}`;
+
+  CAT.units.forEach(u => {
+    const val = conv(FVAL, FROM, u.id);
+    const isF = (u.id === FROM);
+    const isT = (u.id === TO);
+
+    const div = document.createElement('div');
+    div.className = `c-item${isF?' c-from':''}${isT?' c-to':''}`;
+    div.title = `${u.nm} — tıkla kopyala`;
+    div.innerHTML = `
+      <div class="c-lbl">${u.lb}</div>
+      <div class="c-name">${u.nm}</div>
+      <div class="c-val">${isNaN(val) ? '—' : fmtDisp(val, 5)}</div>
+    `;
+    div.addEventListener('click', () => {
+      if (!isNaN(val)){
+        navigator.clipboard.writeText(fmtDisp(val, 8)).catch(()=>{});
+        div.classList.add('c-flash');
+        setTimeout(()=> div.classList.remove('c-flash'), 500);
+      }
+    });
+    $cascList.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  CALCULATE
+// ═══════════════════════════════════════════════════════════════════
+
+function calc(side){
+  if (side === 'from'){
+    const v = parseFloat($fromInp.value);
+    if (!isNaN(v)){
+      FVAL = v;
+      const r = conv(v, FROM, TO);
+      $toInp.value = fmtInp(r);
+    } else {
+      $toInp.value = '';
+    }
+  } else {
+    const v = parseFloat($toInp.value);
+    if (!isNaN(v)){
+      const r = conv(v, TO, FROM);
+      FVAL = r;
+      $fromInp.value = fmtInp(r);
+    } else {
+      $fromInp.value = '';
+    }
+  }
+  updateFormula();
+  updateCascade();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SWITCH CATEGORY
+// ═══════════════════════════════════════════════════════════════════
+
+function switchCat(cat){
+  CAT   = cat;
+  FROM  = cat.dF;
+  TO    = cat.dT;
+  FVAL  = 1;
+
+  // Color
+  $app.style.setProperty('--cc', cat.color);
+  $cascSub.style.color = cat.color;
+
+  // Header
+  $catIcon.textContent    = cat.icon;
+  $catTitle.textContent   = cat.lbl;
+  $catSub.textContent     = cat.desc;
+  $catHdr.style.borderTopColor = cat.color;
+
+  // Tips
+  $tipsTxt.innerHTML         = cat.tip || '';
+  $tipsBox.style.borderLeftColor = cat.color;
+
+  // Nav breadcrumb
+  $navCrumb.textContent = `Birim Çevirici — ${cat.lbl}`;
+  document.title = `${cat.lbl} | Birim Çevirici — MH Platform`;
+
+  // Dropdowns
+  buildDropdown($fromSel, cat, FROM);
+  buildDropdown($toSel,   cat, TO);
+
+  // Input
+  $fromInp.value = '1';
+  $toInp.value   = '';
+
+  // Active button
+  $catCol.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.id === cat.id);
+  });
+
+  calc('from');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  BUILD SIDEBAR
+// ═══════════════════════════════════════════════════════════════════
+
+function buildSidebar(){
+  let currentSec = null;
+
+  CATS.forEach(cat => {
+    // Insert section label when section changes
+    if (cat.sec !== currentSec){
+      currentSec = cat.sec;
+      const sec = document.createElement('div');
+      sec.className = 'col-section';
+      sec.textContent = cat.sec;
+      $catCol.appendChild(sec);
+    }
+
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn';
+    btn.dataset.id = cat.id;
+    btn.style.setProperty('--cc', cat.color);
+    btn.innerHTML = `
+      <span class="cat-dot" style="background:${cat.color}"></span>
+      <span class="cat-icon-sm">${cat.icon}</span>
+      <span>${cat.lbl}</span>
+    `;
+    btn.addEventListener('click', () => switchCat(cat));
+    $catCol.appendChild(btn);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  EVENT LISTENERS
+// ═══════════════════════════════════════════════════════════════════
+
+$fromInp.addEventListener('input', () => calc('from'));
+$toInp.addEventListener('input',   () => calc('to'));
+
+$fromSel.addEventListener('change', () => {
+  FROM = $fromSel.value;
+  calc('from');
+});
+$toSel.addEventListener('change', () => {
+  TO = $toSel.value;
+  calc('from');
+});
+
+$swapBtn.addEventListener('click', () => {
+  const prevFrom = FROM;
+  const prevTo   = TO;
+  const prevToVal = parseFloat($toInp.value);
+
+  FROM = prevTo;
+  TO   = prevFrom;
+  $fromSel.value = FROM;
+  $toSel.value   = TO;
+
+  if (!isNaN(prevToVal)){
+    $fromInp.value = fmtInp(prevToVal);
+    FVAL = prevToVal;
+  }
+  calc('from');
+});
+
+$copyBtn.addEventListener('click', () => {
+  const v = $toInp.value;
+  if (!v) return;
+  navigator.clipboard.writeText(v).then(() => {
+    $copyBtn.textContent = '✓ Kopyalandı';
+    $copyBtn.classList.add('ok');
+    setTimeout(() => {
+      $copyBtn.textContent = 'Kopyala';
+      $copyBtn.classList.remove('ok');
+    }, 1500);
+  }).catch(()=>{});
+});
+
+// Allow only valid numeric characters in text inputs
+function sanitizeNumInput(inp){
+  inp.addEventListener('keydown', e => {
+    const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab',
+                     'Home','End','-','.','e','E','+'];
+    if (allowed.includes(e.key)) return;
+    if (e.key >= '0' && e.key <= '9') return;
+    e.preventDefault();
+  });
+}
+sanitizeNumInput($fromInp);
+sanitizeNumInput($toInp);
+
+// ═══════════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════════
+buildSidebar();
+switchCat(CATS[0]);
+</script>
+</body>
+</html>
