@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Triger Dişli Hesabı — MH Platform</title>
+  <link rel="stylesheet" href="mh-tokens.css">
+  <style>
+    :root {
+      --dim:  #52527a;
+      --dim2: #8080a8;
+      --tc:   #a78bfa;
+      --tc-bg: rgba(167,139,250,0.12);
+      --tc-bd: rgba(167,139,250,0.25);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--font-b);
+      display: flex; flex-direction: column;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(7,7,14,0.92); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 20px; height: 52px; gap: 20px; flex-shrink: 0;
+    }
+    .brand { font-family: var(--font-logo); font-size: var(--fz-18); letter-spacing: 3px; color: var(--accent); text-decoration: none; }
+    .brand em { color: var(--text); font-style: normal; }
+    .breadcrumb { font-size: var(--fz-12); color: var(--dim2); font-family: var(--font-m); display: flex; align-items: center; gap: 8px; }
+    .breadcrumb .sep { color: var(--dim); }
+
+    /* ── APP ── */
+    .app { display: flex; flex: 1; overflow: hidden; position: relative; z-index: 1; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--bg2); border-right: 1px solid var(--border);
+      width: 200px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto; padding-bottom: 16px;
+    }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .sec-label {
+      font-family: var(--font-h); font-size: var(--fz-11);
+      letter-spacing: 2px; color: #9090c0; text-transform: uppercase;
+      padding: 12px 14px 5px; flex-shrink: 0;
+    }
+    .sb-div { height: 1px; background: var(--border); margin: 6px 14px; }
+
+    .belt-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; padding: 8px 14px;
+      background: transparent; border: none; border-left: 3px solid transparent;
+      color: var(--dim2); font-family: var(--font-m); font-size: var(--fz-12);
+      cursor: pointer; text-align: left; transition: all 0.15s;
+    }
+    .belt-btn:hover { background: var(--surf1); color: var(--text); }
+    .belt-btn.active {
+      background: var(--surf1); color: var(--text);
+      font-weight: 600; border-left-color: var(--tc);
+    }
+    .belt-btn .bp { font-size: var(--fz-10); color: var(--dim); }
+    .belt-btn.active .bp { color: var(--dim2); }
+
+    /* ── CONTENT ── */
+    .content {
+      width: 480px; max-width: 480px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto; border-right: 1px solid var(--border);
+    }
+    .content::-webkit-scrollbar { width: 3px; }
+    .content::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    /* Page header */
+    .page-hdr {
+      padding: 13px 16px 11px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 8px; flex-shrink: 0;
+    }
+    .page-title { font-family: var(--font-h); font-size: var(--fz-20); font-weight: 700; letter-spacing: 1px; }
+    .page-sub { font-size: var(--fz-11); color: var(--dim2); font-family: var(--font-m); margin-top: 3px; }
+    .page-badge {
+      font-family: var(--font-m); font-size: var(--fz-13); font-weight: 600;
+      color: var(--tc); flex-shrink: 0; padding-top: 2px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Preview */
+    .preview-wrap { padding: 10px 16px 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .preview-box {
+      background: #07070e; border: 1px solid var(--border); border-radius: 10px;
+      height: 210px; overflow: hidden;
+    }
+    #beltSVG { width: 100%; height: 100%; display: block; }
+
+    /* Tab bar */
+    .tab-bar {
+      display: flex; background: var(--surf1);
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .tab-btn {
+      padding: 13px 20px; background: transparent; border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--dim2); font-family: var(--font-h);
+      font-size: var(--fz-13); font-weight: 700; letter-spacing: 1px;
+      cursor: pointer; transition: all 0.18s;
+      position: relative; top: 1px;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--text); border-bottom-color: var(--tc); }
+
+    /* Sections */
+    .section { padding: 11px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .sec-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+    .sec-ttl { font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 2px; color: #9090c0; text-transform: uppercase; }
+    .sec-tag { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); }
+
+    /* Input grid */
+    .input-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .inp-g       { display: flex; flex-direction: column; gap: 4px; }
+    .inp-label   {
+      font-family: var(--font-h); font-size: var(--fz-13);
+      letter-spacing: 1px; color: #c0c0e0; text-transform: uppercase;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .opt-tag {
+      font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim);
+      padding: 2px 5px; background: var(--surf3); border-radius: 3px;
+    }
+    .inp-wrap {
+      display: flex; background: var(--surf2);
+      border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; transition: border-color 0.2s;
+    }
+    .inp-wrap:focus-within { border-color: var(--tc); }
+    .inp-wrap input {
+      flex: 1; padding: 10px 12px;
+      background: transparent; border: none;
+      color: var(--text); font-family: var(--font-m);
+      font-size: var(--fz-15); font-weight: 600;
+      outline: none; min-width: 0;
+      -moz-appearance: textfield;
+    }
+    .inp-wrap input[readonly] { color: var(--tc); cursor: default; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .inp-sfx {
+      padding: 0 11px; display: flex; align-items: center;
+      font-family: var(--font-m); font-size: var(--fz-12);
+      color: var(--dim); background: var(--surf3);
+      border-left: 1px solid var(--border); flex-shrink: 0;
+    }
+    .inp-sfx.hi { color: var(--tc); background: rgba(167,139,250,0.08); border-left-color: rgba(167,139,250,0.18); }
+    .inp-hint { font-family: var(--font-m); font-size: var(--fz-10); color: var(--dim2); min-height: 14px; }
+    .inp-hint.warn { color: var(--yellow); }
+
+    /* Static display */
+    .inp-static {
+      padding: 10px 12px;
+      background: var(--surf2); border: 1px solid var(--border); border-radius: 8px;
+      font-family: var(--font-m); font-size: var(--fz-15); font-weight: 600;
+      color: var(--tc);
+    }
+
+    /* Quick strip */
+    .q-strip {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 4px 10px; padding: 8px 12px;
+      background: var(--surf1); border-radius: 8px; margin-top: 10px;
+    }
+    .ql { font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 1px; color: var(--dim2); text-transform: uppercase; }
+    .qv { font-family: var(--font-m); font-size: var(--fz-14); font-weight: 600; }
+    .qs { color: var(--dim); font-size: var(--fz-11); }
+    .c-pur { color: var(--tc); }
+    .c-tl  { color: var(--teal); }
+    .c-bl  { color: var(--blue); }
+    .c-yl  { color: var(--yellow); }
+    .c-grn { color: var(--green); }
+    .c-rd  { color: var(--red); }
+    .c-dim { color: var(--dim2); }
+
+    /* Calc button */
+    .calc-btn {
+      display: block; width: calc(100% - 32px);
+      margin: 12px 16px; padding: 14px;
+      background: var(--accent); border: none; border-radius: 10px;
+      color: white; font-family: var(--font-h);
+      font-size: var(--fz-18); font-weight: 700; letter-spacing: 2px;
+      cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    }
+    .calc-btn:hover { background: #ea6c0d; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(249,115,22,0.35); }
+    .calc-btn:active { transform: translateY(0); }
+
+    /* Result area */
+    .result-area { padding: 0 16px 14px; display: none; flex-shrink: 0; }
+    .result-area.show { display: block; animation: fadeUp 0.2s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+
+    .result-card {
+      background: var(--surf1); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .res-hdr {
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .res-hdr-lbl { font-family: var(--font-h); font-size: var(--fz-13); letter-spacing: 2px; color: var(--dim2); text-transform: uppercase; }
+    .res-main-val { font-family: var(--font-m); font-size: var(--fz-22); font-weight: 600; color: var(--tc); }
+    .spec-grid { padding: 6px 14px 10px; }
+    .spec-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .spec-row:last-child { border-bottom: none; }
+    .spec-nm { font-family: var(--font-h); font-size: var(--fz-13); letter-spacing: 0.5px; color: var(--dim2); text-transform: uppercase; }
+    .spec-vl { font-family: var(--font-m); font-size: var(--fz-13); font-weight: 600; }
+    .warn-strip {
+      padding: 9px 14px; border-top: 1px solid rgba(251,191,36,0.2);
+      background: rgba(251,191,36,0.07);
+      font-family: var(--font-m); font-size: var(--fz-10);
+      color: var(--yellow); line-height: 1.7;
+    }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel {
+      background: var(--bg2); border-left: 1px solid var(--border);
+      flex: 1; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .rp-hdr {
+      padding: 12px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .rp-title { font-family: var(--font-h); font-size: var(--fz-15); font-weight: 700; letter-spacing: 1px; }
+    .rp-tag { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); }
+    .rp-body { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; }
+    .rp-body::-webkit-scrollbar { width: 3px; }
+    .rp-body::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    /* RP cards */
+    .rp-card { background: var(--surf1); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .rp-card-hdr {
+      padding: 7px 12px; border-bottom: 1px solid var(--border);
+      font-family: var(--font-h); font-size: var(--fz-11);
+      letter-spacing: 2px; color: #9090c0; text-transform: uppercase;
+    }
+    .rp-card-body { padding: 6px 12px 8px; }
+    .rp-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .rp-row:last-child { border-bottom: none; }
+    .rp-nm { font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 0.5px; color: var(--dim2); text-transform: uppercase; }
+    .rp-vl { font-family: var(--font-m); font-size: var(--fz-12); font-weight: 600; }
+
+    /* Comparison grid */
+    .dg-comp {
+      display: grid; grid-template-columns: 1fr auto auto;
+      border-bottom: 1px solid var(--border);
+    }
+    .dg-col-hdr {
+      font-family: var(--font-h); font-size: var(--fz-10);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 7px 10px; text-align: right;
+      border-bottom: 1px solid var(--border);
+    }
+    .dg-col-hdr.lbl { text-align: left; color: var(--dim2); }
+    .dg-col-hdr.z1c { color: var(--tc); }
+    .dg-col-hdr.z2c { color: var(--blue); }
+    .dg-lbl {
+      font-family: var(--font-b); font-size: var(--fz-10); color: var(--dim2);
+      padding: 4px 10px; display: flex; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .dg-val {
+      font-family: var(--font-m); font-size: var(--fz-11); font-weight: 600;
+      color: var(--text); text-align: right;
+      padding: 4px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .dg-val.pur { color: var(--tc); }
+    .dg-val.blu { color: var(--blue); }
+    .dg-val.tl  { color: var(--teal); }
+    .dg-val.yl  { color: var(--yellow); }
+    .dg-val.grn { color: var(--green); }
+    .dg-val.rd  { color: var(--red); }
+    .dg-val.dim { color: var(--dim2); }
+    .dg-sep {
+      grid-column: 1/-1;
+      font-family: var(--font-h); font-size: var(--fz-10);
+      letter-spacing: 2px; color: var(--dim2); text-transform: uppercase;
+      padding: 7px 10px 4px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.015);
+    }
+
+    /* Formula / info box */
+    .fml-box {
+      padding: 10px 12px;
+      background: rgba(167,139,250,0.05); border: 1px solid rgba(167,139,250,0.15);
+      border-radius: 8px;
+      font-family: var(--font-m); font-size: var(--fz-10);
+      color: #c4b5fd; line-height: 2.0;
+    }
+    .fml-ttl { font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 1px; display: block; margin-bottom: 5px; color: #c4b5fd; }
+
+    /* Empty state */
+    .empty-st {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px; color: var(--dim); font-size: var(--fz-12);
+      text-align: center; padding: 30px;
+    }
+    .empty-ic { font-size: var(--fz-28); opacity: 0.22; }
+    .empty-st p { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); line-height: 1.75; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="brand">MH<em>Platform</em></a>
+  <div class="breadcrumb">
+    <span>Hesaplama Araçları</span>
+    <span class="sep">/</span>
+    <span>Triger Dişli Hesabı</span>
+  </div>
+</nav>
+
+<div class="app">
+
+<!-- ── SOL SIDEBAR ── -->
+<aside class="sidebar">
+  <p class="sec-label">Imperial (inch)</p>
+  <button class="belt-btn" data-b="MXL"    onclick="selectBelt('MXL')">   <span>MXL</span>    <span class="bp">0.080"</span></button>
+  <button class="belt-btn" data-b="XL"     onclick="selectBelt('XL')">    <span>XL</span>     <span class="bp">0.200"</span></button>
+  <button class="belt-btn" data-b="L"      onclick="selectBelt('L')">     <span>L</span>      <span class="bp">3/8"</span></button>
+  <button class="belt-btn" data-b="H"      onclick="selectBelt('H')">     <span>H</span>      <span class="bp">1/2"</span></button>
+  <button class="belt-btn" data-b="XH"     onclick="selectBelt('XH')">    <span>XH</span>     <span class="bp">7/8"</span></button>
+  <button class="belt-btn" data-b="XXH"    onclick="selectBelt('XXH')">   <span>XXH</span>    <span class="bp">1.25"</span></button>
+
+  <div class="sb-div"></div>
+  <p class="sec-label">Metrik T / AT</p>
+  <button class="belt-btn" data-b="T2.5"   onclick="selectBelt('T2.5')">  <span>T2.5</span>   <span class="bp">2.5 mm</span></button>
+  <button class="belt-btn" data-b="AT2.5"  onclick="selectBelt('AT2.5')"> <span>AT2.5</span>  <span class="bp">2.5 mm</span></button>
+  <button class="belt-btn" data-b="T5"     onclick="selectBelt('T5')">    <span>T5</span>     <span class="bp">5.0 mm</span></button>
+  <button class="belt-btn" data-b="AT5"    onclick="selectBelt('AT5')">   <span>AT5</span>    <span class="bp">5.0 mm</span></button>
+  <button class="belt-btn" data-b="AT10"   onclick="selectBelt('AT10')">  <span>AT10</span>   <span class="bp">10.0 mm</span></button>
+  <button class="belt-btn" data-b="T20"    onclick="selectBelt('T20')">   <span>T20</span>    <span class="bp">20.0 mm</span></button>
+  <button class="belt-btn" data-b="AT20"   onclick="selectBelt('AT20')">  <span>AT20</span>   <span class="bp">20.0 mm</span></button>
+
+  <div class="sb-div"></div>
+  <p class="sec-label">HTD (Curvilinear)</p>
+  <button class="belt-btn" data-b="HTD3M"  onclick="selectBelt('HTD3M')"> <span>HTD 3M</span> <span class="bp">3.0 mm</span></button>
+  <button class="belt-btn" data-b="HTD5M"  onclick="selectBelt('HTD5M')"> <span>HTD 5M</span> <span class="bp">5.0 mm</span></button>
+  <button class="belt-btn" data-b="HTD8M"  onclick="selectBelt('HTD8M')"> <span>HTD 8M</span> <span class="bp">8.0 mm</span></button>
+  <button class="belt-btn" data-b="HTD14M" onclick="selectBelt('HTD14M')"><span>HTD 14M</span><span class="bp">14.0 mm</span></button>
+  <button class="belt-btn" data-b="HTD20M" onclick="selectBelt('HTD20M')"><span>HTD 20M</span><span class="bp">20.0 mm</span></button>
+</aside>
+
+<!-- ── ORTA İÇERİK ── -->
+<main class="content">
+
+  <div class="page-hdr">
+    <div>
+      <div class="page-title">TRİGER DİŞLİ HESABI</div>
+      <div class="page-sub" id="pageSub">ISO 5296 · AT10 · p = 10.000 mm · h = 2.50 mm</div>
+    </div>
+    <div class="page-badge" id="pageBadge">AT10</div>
+  </div>
+
+  <!-- SVG önizleme -->
+  <div class="preview-wrap">
+    <div class="preview-box">
+      <svg id="beltSVG" viewBox="0 0 448 210" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabSingle" onclick="setTab('single')">TEK DİŞLİ</button>
+    <button class="tab-btn"        id="tabDual"   onclick="setTab('dual')">İKİLİ SİSTEM</button>
+  </div>
+
+  <!-- ─── TEK DİŞLİ PANEL ─── -->
+  <div id="panelSingle">
+
+    <div class="section">
+      <div class="sec-hdr">
+        <span class="sec-ttl">Kasnak Parametreleri</span>
+        <span class="sec-tag" id="pitchTag">p = 10.000 mm</span>
+      </div>
+      <div class="input-row">
+        <div class="inp-g">
+          <span class="inp-label">Diş Sayısı (Z)</span>
+          <div class="inp-wrap">
+            <input type="number" id="zS" value="24" min="6" max="300" step="1" oninput="onSingle()">
+            <span class="inp-sfx">diş</span>
+          </div>
+          <div class="inp-hint" id="zS_hint">Önerilen min: Z ≥ 12</div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Adım (t)</span>
+          <div class="inp-wrap">
+            <input type="number" id="tS" value="10.000" readonly tabindex="-1">
+            <span class="inp-sfx hi">mm</span>
+          </div>
+          <div class="inp-hint">Seçili kayış tipine göre sabit</div>
+        </div>
+      </div>
+      <div class="q-strip" id="singleStrip">
+        <span class="ql">d₀</span><span class="qv c-pur" id="qs_d0">—</span>
+        <span class="qs">·</span>
+        <span class="ql">df</span><span class="qv c-bl"  id="qs_df">—</span>
+        <span class="qs">·</span>
+        <span class="ql">da</span><span class="qv"        id="qs_da">—</span>
+        <span class="qs">·</span>
+        <span class="ql">1 Tur</span><span class="qv c-tl" id="qs_ct">—</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-hdr">
+        <span class="sec-ttl">Devir Hızı <span style="font-weight:400;opacity:.6">— isteğe bağlı</span></span>
+      </div>
+      <div class="input-row">
+        <div class="inp-g">
+          <span class="inp-label">Devir (n) <span class="opt-tag">OPT</span></span>
+          <div class="inp-wrap">
+            <input type="number" id="nS" placeholder="—" min="0" step="1" oninput="onSingle()">
+            <span class="inp-sfx">rpm</span>
+          </div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Çevresel Hız</span>
+          <div class="inp-static" id="vS_disp">—</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /panelSingle -->
+
+  <!-- ─── İKİLİ SİSTEM PANEL ─── -->
+  <div id="panelDual" style="display:none">
+
+    <div class="section">
+      <div class="sec-hdr">
+        <span class="sec-ttl">Dişli Parametreleri</span>
+        <span class="sec-tag" id="pitchTag2">p = 10.000 mm</span>
+      </div>
+      <div class="input-row">
+        <div class="inp-g">
+          <span class="inp-label" style="color:var(--tc)">Sürücü Z₁ <span style="font-size:var(--fz-10);color:var(--dim);font-family:var(--font-m)">(büyük)</span></span>
+          <div class="inp-wrap" style="border-color:rgba(167,139,250,0.3)">
+            <input type="number" id="z1D" value="36" min="6" max="300" step="1" oninput="onDual()">
+            <span class="inp-sfx hi">diş</span>
+          </div>
+          <div class="inp-hint" id="z1D_hint">d₀ = —</div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label" style="color:var(--blue)">Tahrik Z₂ <span style="font-size:var(--fz-10);color:var(--dim);font-family:var(--font-m)">(küçük)</span></span>
+          <div class="inp-wrap" style="border-color:rgba(96,165,250,0.3)">
+            <input type="number" id="z2D" value="18" min="6" max="300" step="1" oninput="onDual()">
+            <span class="inp-sfx" style="color:var(--blue);background:rgba(96,165,250,0.08);border-left-color:rgba(96,165,250,0.18)">diş</span>
+          </div>
+          <div class="inp-hint" id="z2D_hint">d₀ = —</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-hdr">
+        <span class="sec-ttl">İletim & Hız</span>
+      </div>
+      <div class="input-row">
+        <div class="inp-g">
+          <span class="inp-label">Giriş Devri n₁ <span class="opt-tag">OPT</span></span>
+          <div class="inp-wrap">
+            <input type="number" id="n1D" placeholder="—" min="0" step="1" oninput="onDual()">
+            <span class="inp-sfx">rpm</span>
+          </div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Çıkış Devri n₂</span>
+          <div class="inp-static" id="n2D_disp">—</div>
+        </div>
+      </div>
+      <div class="q-strip">
+        <span class="ql">İletim Oranı</span><span class="qv c-pur" id="qd_ratio">—</span>
+        <span class="qs">·</span>
+        <span class="ql">Çev. Hız</span><span class="qv c-tl" id="qd_vel">—</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-hdr">
+        <span class="sec-ttl">Kayış Boyu</span>
+      </div>
+      <div class="input-row">
+        <div class="inp-g">
+          <span class="inp-label">Eksen Mesafesi Ce</span>
+          <div class="inp-wrap">
+            <input type="number" id="ceD" value="200" min="10" step="1" oninput="onDual()">
+            <span class="inp-sfx">mm</span>
+          </div>
+          <div class="inp-hint" id="ceD_hint">—</div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">~ Kayış Boyu L</span>
+          <div class="inp-static" id="LD_disp">—</div>
+        </div>
+      </div>
+      <div class="q-strip">
+        <span class="ql">Diş Sayısı</span><span class="qv c-yl" id="qd_zb">—</span>
+        <span class="qs">·</span>
+        <span class="ql">Sarma Açısı α₂</span><span class="qv c-tl" id="qd_wrap">—</span>
+      </div>
+    </div>
+
+  </div><!-- /panelDual -->
+
+  <button class="calc-btn" onclick="calculate()">HESAPLA</button>
+
+  <div class="result-area" id="resultArea"></div>
+
+</main>
+
+<!-- ── SAĞ PANEL ── -->
+<section class="right-panel">
+  <div class="rp-hdr">
+    <span class="rp-title" id="rpTitle">DİŞLİ GEOMETRİSİ</span>
+    <span class="rp-tag"   id="rpTag">AT10</span>
+  </div>
+  <div class="rp-body" id="rpBody">
+    <div class="empty-st">
+      <div class="empty-ic">⚙</div>
+      <p>Kayış tipini seçin ve<br>parametreleri girin.</p>
+    </div>
+  </div>
+</section>
+
+</div><!-- .app -->
+
+<script>
+/* ════════════════════════════════════════════════════════
+   KAYIŞ TİPİ VERİLERİ
+   p  = adım (mm)  |  h  = diş yüksekliği (mm, kayış tarafı)
+   ha = kasnak addendum (land yüksekliği, mm)
+   std = standart  |  group = görsel gruplama
+════════════════════════════════════════════════════════ */
+const BELTS = {
+  'MXL':   { p:2.032,  h:0.51, ha:0.254, std:'ANSI/RMA IP-24', group:'imperial', label:'MXL',      pitch_label:'2.032 mm (0.080")' },
+  'XL':    { p:5.080,  h:1.27, ha:0.508, std:'ANSI/RMA IP-24', group:'imperial', label:'XL',       pitch_label:'5.080 mm (1/5")'   },
+  'L':     { p:9.525,  h:1.91, ha:0.762, std:'ANSI/RMA IP-24', group:'imperial', label:'L',        pitch_label:'9.525 mm (3/8")'   },
+  'H':     { p:12.700, h:2.29, ha:1.016, std:'ANSI/RMA IP-24', group:'imperial', label:'H',        pitch_label:'12.700 mm (1/2")'  },
+  'XH':    { p:22.225, h:6.35, ha:1.524, std:'ANSI/RMA IP-24', group:'imperial', label:'XH',       pitch_label:'22.225 mm (7/8")'  },
+  'XXH':   { p:31.750, h:9.53, ha:2.032, std:'ANSI/RMA IP-24', group:'imperial', label:'XXH',      pitch_label:'31.750 mm (1.25")' },
+  'T2.5':  { p:2.500,  h:0.70, ha:0.200, std:'ISO 5296-1',     group:'metric',   label:'T2.5',     pitch_label:'2.500 mm'  },
+  'AT2.5': { p:2.500,  h:0.70, ha:0.200, std:'ISO 5296-1',     group:'metric',   label:'AT2.5',    pitch_label:'2.500 mm'  },
+  'T5':    { p:5.000,  h:1.20, ha:0.300, std:'ISO 5296-1',     group:'metric',   label:'T5',       pitch_label:'5.000 mm'  },
+  'AT5':   { p:5.000,  h:1.20, ha:0.300, std:'ISO 5296-1',     group:'metric',   label:'AT5',      pitch_label:'5.000 mm'  },
+  'AT10':  { p:10.000, h:2.50, ha:0.500, std:'ISO 5296-1',     group:'metric',   label:'AT10',     pitch_label:'10.000 mm' },
+  'T20':   { p:20.000, h:5.00, ha:1.000, std:'ISO 5296-1',     group:'metric',   label:'T20',      pitch_label:'20.000 mm' },
+  'AT20':  { p:20.000, h:5.00, ha:1.000, std:'ISO 5296-1',     group:'metric',   label:'AT20',     pitch_label:'20.000 mm' },
+  'HTD3M': { p:3.000,  h:1.22, ha:0.360, std:'HTD / ISO 13050', group:'htd',     label:'HTD 3M',   pitch_label:'3.000 mm'  },
+  'HTD5M': { p:5.000,  h:2.06, ha:0.560, std:'HTD / ISO 13050', group:'htd',     label:'HTD 5M',   pitch_label:'5.000 mm'  },
+  'HTD8M': { p:8.000,  h:3.36, ha:0.840, std:'HTD / ISO 13050', group:'htd',     label:'HTD 8M',   pitch_label:'8.000 mm'  },
+  'HTD14M':{ p:14.000, h:6.00, ha:1.400, std:'HTD / ISO 13050', group:'htd',     label:'HTD 14M',  pitch_label:'14.000 mm' },
+  'HTD20M':{ p:20.000, h:8.40, ha:2.000, std:'HTD / ISO 13050', group:'htd',     label:'HTD 20M',  pitch_label:'20.000 mm' },
+};
+
+/* ── DURUM ── */
+let curBelt = 'AT10';
+let curTab  = 'single';
+
+/* ════════════════════════════════════════════════════════
+   HESAP YARDIMCILARı
+════════════════════════════════════════════════════════ */
+const PI = Math.PI;
+function d0(Z,p)       { return Z*p/PI; }
+function df(Z,p,h)     { return d0(Z,p)-2*h; }
+function da(Z,p,ha)    { return d0(Z,p)+2*ha; }
+function cturn(Z,p)    { return Z*p; }
+function vel(d,n)      { return PI*d*n/60000; }
+function beltLen(d1,d2,Ce){ return 2*Ce + PI*(d1+d2)/2 + (d1-d2)**2/(4*Ce); }
+function wrapDeg(d1,d2,Ce){
+  const s = (d1-d2)/(2*Ce);
+  if(Math.abs(s)>1) return null;
+  return 180 - 2*Math.asin(s)*180/PI;
+}
+function fmt(v, dec=2)  { return (typeof v==='number' && isFinite(v)) ? v.toFixed(dec) : '—'; }
+function fmtN(v, dec=1) { return (typeof v==='number' && isFinite(v)) ? v.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec}) : '—'; }
+
+/* ════════════════════════════════════════════════════════
+   KAYIŞ SEÇİMİ
+════════════════════════════════════════════════════════ */
+function selectBelt(key) {
+  curBelt = key;
+  const b = BELTS[key];
+
+  document.querySelectorAll('.belt-btn').forEach(btn=>
+    btn.classList.toggle('active', btn.dataset.b === key));
+
+  const stdMap = { imperial:'ANSI/RMA IP-24', metric:'ISO 5296-1 · DIN 7721', htd:'HTD / ISO 13050' };
+  document.getElementById('pageSub').textContent =
+    `${stdMap[b.group]||b.std} · ${b.label} · p = ${b.p.toFixed(3)} mm · h = ${b.h.toFixed(2)} mm`;
+  document.getElementById('pageBadge').textContent = b.label;
+  document.getElementById('rpTag').textContent = b.label;
+
+  document.getElementById('pitchTag').textContent  = `p = ${b.p.toFixed(3)} mm`;
+  document.getElementById('pitchTag2').textContent = `p = ${b.p.toFixed(3)} mm`;
+  document.getElementById('tS').value = b.p.toFixed(3);
+
+  document.getElementById('resultArea').classList.remove('show');
+
+  onSingle();
+  onDual();
+}
+
+/* ════════════════════════════════════════════════════════
+   TAB DEĞİŞİMİ
+════════════════════════════════════════════════════════ */
+function setTab(tab) {
+  curTab = tab;
+  document.getElementById('tabSingle').classList.toggle('active', tab==='single');
+  document.getElementById('tabDual'  ).classList.toggle('active', tab==='dual');
+  document.getElementById('panelSingle').style.display = tab==='single' ? '' : 'none';
+  document.getElementById('panelDual'  ).style.display = tab==='dual'   ? '' : 'none';
+  document.getElementById('resultArea').classList.remove('show');
+  document.getElementById('rpTitle').textContent =
+    tab==='single' ? 'DİŞLİ GEOMETRİSİ' : 'İKİLİ SİSTEM';
+  drawSVG();
+  updateRP();
+}
+
+/* ════════════════════════════════════════════════════════
+   TEK DİŞLİ — CANLI GÜNCELLEME
+════════════════════════════════════════════════════════ */
+function onSingle() {
+  const b = BELTS[curBelt];
+  const Z = parseInt(document.getElementById('zS').value)||0;
+  const n = parseFloat(document.getElementById('nS').value);
+
+  const _d0 = Z>0 ? d0(Z,b.p) : null;
+  const _df = Z>0 ? df(Z,b.p,b.h) : null;
+  const _da = Z>0 ? da(Z,b.p,b.ha) : null;
+  const _ct = Z>0 ? cturn(Z,b.p) : null;
+
+  document.getElementById('qs_d0').textContent = _d0 ? fmt(_d0)+' mm' : '—';
+  document.getElementById('qs_df').textContent = _df ? fmt(_df)+' mm' : '—';
+  document.getElementById('qs_da').textContent = _da ? fmt(_da)+' mm' : '—';
+  document.getElementById('qs_ct').textContent = _ct ? fmt(_ct,1)+' mm' : '—';
+
+  const hint = document.getElementById('zS_hint');
+  if(Z && Z < 12){ hint.textContent='⚠ Min Z = 12 önerilir'; hint.className='inp-hint warn'; }
+  else if(_d0)   { hint.textContent=`⌀d₀ = ${fmt(_d0)} mm`; hint.className='inp-hint'; }
+  else           { hint.textContent='Önerilen min: Z ≥ 12'; hint.className='inp-hint'; }
+
+  const v = (_d0 && n>0) ? vel(_d0,n) : null;
+  document.getElementById('vS_disp').textContent = v ? v.toFixed(4)+' m/s' : '—';
+
+  drawSVG();
+  updateRP();
+}
+
+/* ════════════════════════════════════════════════════════
+   İKİLİ SİSTEM — CANLI GÜNCELLEME
+════════════════════════════════════════════════════════ */
+function onDual() {
+  const b  = BELTS[curBelt];
+  const Z1 = parseInt(document.getElementById('z1D').value)||0;
+  const Z2 = parseInt(document.getElementById('z2D').value)||0;
+  const n1 = parseFloat(document.getElementById('n1D').value);
+  const Ce = parseFloat(document.getElementById('ceD').value)||0;
+
+  const _d1 = Z1>0 ? d0(Z1,b.p) : null;
+  const _d2 = Z2>0 ? d0(Z2,b.p) : null;
+
+  document.getElementById('z1D_hint').textContent = _d1 ? `⌀d₀ = ${fmt(_d1)} mm` : '—';
+  document.getElementById('z2D_hint').textContent = _d2 ? `⌀d₀ = ${fmt(_d2)} mm` : '—';
+
+  if(Z1>0 && Z2>0) {
+    const i = Z1/Z2;
+    document.getElementById('qd_ratio').textContent = fmt(i,3)+' : 1';
+    const n2 = (n1>0) ? n1*Z2/Z1 : null;
+    document.getElementById('n2D_disp').textContent = n2 ? fmt(n2,1)+' rpm' : '—';
+    const v = (_d1 && n1>0) ? vel(_d1,n1) : null;
+    document.getElementById('qd_vel').textContent = v ? v.toFixed(3)+' m/s' : '—';
+  } else {
+    document.getElementById('qd_ratio').textContent = '—';
+    document.getElementById('n2D_disp').textContent = '—';
+    document.getElementById('qd_vel').textContent   = '—';
+  }
+
+  if(_d1 && _d2 && Ce>0) {
+    const L_approx = beltLen(_d1,_d2,Ce);
+    const Zb       = Math.round(L_approx/b.p);
+    const L_actual = Zb * b.p;
+    const alpha    = wrapDeg(_d1,_d2,Ce);
+    const alphaEl  = document.getElementById('qd_wrap');
+    document.getElementById('LD_disp').textContent = fmt(L_actual,1)+' mm';
+    document.getElementById('qd_zb').textContent   = `Z = ${Zb} diş`;
+    alphaEl.textContent = alpha!==null ? fmt(alpha,1)+'°' : '—';
+    alphaEl.className   = 'qv '+(alpha!==null && alpha<60 ? 'c-rd' : 'c-tl');
+
+    const minCe = (_d1+_d2)/2 + 5;
+    const hint  = document.getElementById('ceD_hint');
+    if(Ce < minCe) { hint.textContent=`⚠ Min Ce ≈ ${fmt(minCe,1)} mm önerilir`; hint.className='inp-hint warn'; }
+    else           { hint.textContent=`40p = ${fmt(40*b.p,1)} mm önerilen aks mesafesi`; hint.className='inp-hint'; }
+  } else {
+    document.getElementById('LD_disp').textContent = '—';
+    document.getElementById('qd_zb').textContent   = '—';
+    document.getElementById('qd_wrap').textContent  = '—';
+    document.getElementById('ceD_hint').textContent = Ce>0 ? '' : '—';
+  }
+
+  drawSVG();
+  updateRP();
+}
+
+/* ════════════════════════════════════════════════════════
+   HESAPLA
+════════════════════════════════════════════════════════ */
+function calculate() {
+  const b   = BELTS[curBelt];
+  const aEl = document.getElementById('resultArea');
+  aEl.classList.remove('show');
+
+  if(curTab === 'single') {
+    const Z = parseInt(document.getElementById('zS').value);
+    if(!Z || Z<6) { alert('Diş sayısı en az 6 olmalı.'); return; }
+    const n  = parseFloat(document.getElementById('nS').value);
+    const _d0 = d0(Z,b.p), _df=df(Z,b.p,b.h), _da=da(Z,b.p,b.ha), _ct=cturn(Z,b.p);
+    const v   = (n>0) ? vel(_d0,n) : null;
+    aEl.innerHTML = `
+      <div class="result-card">
+        <div class="res-hdr">
+          <span class="res-hdr-lbl">SONUÇ — ${b.label}, Z = ${Z}</span>
+          <span class="res-main-val">${fmt(_d0)} mm</span>
+        </div>
+        <div class="spec-grid">
+          <div class="spec-row"><span class="spec-nm">Bölüm Dairesi Çapı (d₀)</span><span class="spec-vl c-pur">${fmt(_d0)} mm</span></div>
+          <div class="spec-row"><span class="spec-nm">Diş Üstü Çapı (da)</span>   <span class="spec-vl">${fmt(_da)} mm</span></div>
+          <div class="spec-row"><span class="spec-nm">Diş Dibi Çapı (df)</span>   <span class="spec-vl c-bl">${fmt(_df)} mm</span></div>
+          <div class="spec-row"><span class="spec-nm">1 Turda Alınan Yol</span>   <span class="spec-vl c-tl">${fmt(_ct,3)} mm</span></div>
+          ${v!==null ? `<div class="spec-row"><span class="spec-nm">Çevresel Hız (n=${fmt(n,0)} rpm)</span><span class="spec-vl c-yl">${v.toFixed(4)} m/s</span></div>` : ''}
+          <div class="spec-row"><span class="spec-nm">Adım (p)</span>             <span class="spec-vl c-dim">${b.p.toFixed(3)} mm</span></div>
+          <div class="spec-row"><span class="spec-nm">Standart</span>             <span class="spec-vl c-dim">${b.std}</span></div>
+        </div>
+      </div>`;
+
+  } else {
+    const Z1 = parseInt(document.getElementById('z1D').value);
+    const Z2 = parseInt(document.getElementById('z2D').value);
+    const n1 = parseFloat(document.getElementById('n1D').value);
+    const Ce = parseFloat(document.getElementById('ceD').value);
+
+    if(!Z1||!Z2||Z1<6||Z2<6) { alert('Her iki dişli için geçerli diş sayısı girin (min. 6).'); return; }
+    if(!Ce||Ce<=0)             { alert('Eksen mesafesi (Ce) girin.'); return; }
+
+    const _d1=d0(Z1,b.p), _d2=d0(Z2,b.p);
+    const _df1=df(Z1,b.p,b.h), _df2=df(Z2,b.p,b.h);
+    const _da1=da(Z1,b.p,b.ha), _da2=da(Z2,b.p,b.ha);
+    const i  = Z1/Z2;
+    const n2 = (n1>0) ? n1*Z2/Z1 : null;
+    const v1 = (n1>0) ? vel(_d1,n1) : null;
+    const L_approx = beltLen(_d1,_d2,Ce);
+    const Zb = Math.round(L_approx/b.p);
+    const L  = Zb*b.p;
+    const alpha = wrapDeg(_d1,_d2,Ce);
+    const warnAlpha = alpha!==null && alpha<60;
+
+    aEl.innerHTML = `
+      <div class="result-card">
+        <div class="res-hdr">
+          <span class="res-hdr-lbl">İKİLİ SİSTEM — ${b.label}</span>
+          <span class="res-main-val">${fmt(i,3)} : 1</span>
+        </div>
+        <div class="spec-grid">
+          <div class="spec-row"><span class="spec-nm">İletim Oranı (i = Z₁/Z₂)</span><span class="spec-vl c-pur">${fmt(i,4)}</span></div>
+          <div class="spec-row"><span class="spec-nm">Z₁ — Bölüm Çapı (d₁)</span>  <span class="spec-vl c-pur">${fmt(_d1)} mm</span></div>
+          <div class="spec-row"><span class="spec-nm">Z₂ — Bölüm Çapı (d₂)</span>  <span class="spec-vl c-bl">${fmt(_d2)} mm</span></div>
+          ${n2!==null?`<div class="spec-row"><span class="spec-nm">Çıkış Devri (n₂)</span><span class="spec-vl">${fmt(n2,1)} rpm</span></div>`:''}
+          ${v1!==null?`<div class="spec-row"><span class="spec-nm">Kayış Çevresel Hızı</span><span class="spec-vl c-yl">${v1.toFixed(4)} m/s</span></div>`:''}
+          <div class="spec-row"><span class="spec-nm">Eksen Mesafesi (Ce)</span>    <span class="spec-vl c-dim">${fmt(Ce,1)} mm</span></div>
+          <div class="spec-row"><span class="spec-nm">Yaklaşık Kayış Boyu (L)</span><span class="spec-vl c-tl">${fmt(L,1)} mm</span></div>
+          <div class="spec-row"><span class="spec-nm">Kayış Diş Sayısı</span>       <span class="spec-vl c-tl">${Zb} diş</span></div>
+          <div class="spec-row"><span class="spec-nm">Z₂ Sarma Açısı (α₂)</span>   <span class="spec-vl ${warnAlpha?'c-rd':'c-grn'}">${alpha!==null?fmt(alpha,1)+'°':'—'}</span></div>
+        </div>
+        ${warnAlpha?`<div class="warn-strip">⚠  Z₂ sarma açısı ${fmt(alpha,1)}° — ISO 5296 min. 60° önerir. Ce değerini artırın veya Z₁/Z₂ oranını düşürün.</div>`:''}
+      </div>`;
+  }
+
+  aEl.classList.add('show');
+}
+
+/* ════════════════════════════════════════════════════════
+   SAĞ PANEL
+════════════════════════════════════════════════════════ */
+function updateRP() {
+  const b    = BELTS[curBelt];
+  const body = document.getElementById('rpBody');
+
+  if(curTab === 'single') {
+    const Z  = parseInt(document.getElementById('zS').value)||0;
+    const n  = parseFloat(document.getElementById('nS').value);
+    const _d0= Z>0 ? d0(Z,b.p)    : null;
+    const _df= Z>0 ? df(Z,b.p,b.h) : null;
+    const _da= Z>0 ? da(Z,b.p,b.ha): null;
+    const _ct= Z>0 ? cturn(Z,b.p)  : null;
+    const v  = (_d0&&n>0) ? vel(_d0,n) : null;
+
+    const gpLabel = { imperial:'Trapezoidal (inch)', metric:'Trapezoidal (metric)', htd:'Curvilinear / HTD' };
+
+    body.innerHTML = `
+      <div class="rp-card">
+        <div class="rp-card-hdr">Kayış Tipi — ${b.label}</div>
+        <div class="rp-card-body">
+          <div class="rp-row"><span class="rp-nm">Standart</span>         <span class="rp-vl c-dim">${b.std}</span></div>
+          <div class="rp-row"><span class="rp-nm">Adım (p)</span>         <span class="rp-vl c-pur">${b.p.toFixed(3)} mm</span></div>
+          <div class="rp-row"><span class="rp-nm">Diş Yüksekliği (h)</span><span class="rp-vl">${b.h.toFixed(2)} mm</span></div>
+          <div class="rp-row"><span class="rp-nm">Kasnak Addendum (ha)</span><span class="rp-vl">${b.ha.toFixed(3)} mm</span></div>
+          <div class="rp-row"><span class="rp-nm">Profil</span>           <span class="rp-vl c-dim">${gpLabel[b.group]||b.group}</span></div>
+        </div>
+      </div>
+
+      <div class="rp-card">
+        <div class="rp-card-hdr">Kasnak Geometrisi — Z = ${Z||'?'}</div>
+        <div class="rp-card-body">
+          <div class="rp-row"><span class="rp-nm">Bölüm Çapı (d₀)</span><span class="rp-vl c-pur">${_d0?fmt(_d0)+' mm':'—'}</span></div>
+          <div class="rp-row"><span class="rp-nm">Diş Dibi (df)</span>  <span class="rp-vl c-bl">${_df?fmt(_df)+' mm':'—'}</span></div>
+          <div class="rp-row"><span class="rp-nm">Diş Üstü (da)</span>  <span class="rp-vl">${_da?fmt(_da)+' mm':'—'}</span></div>
+          <div class="rp-row"><span class="rp-nm">1 Tur Yolu</span>     <span class="rp-vl c-tl">${_ct?fmt(_ct,2)+' mm':'—'}</span></div>
+          ${v!==null?`<div class="rp-row"><span class="rp-nm">Çev. Hız</span><span class="rp-vl c-yl">${v.toFixed(4)} m/s</span></div>`:''}
+        </div>
+      </div>
+
+      <div class="fml-box">
+        <span class="fml-ttl">FORMÜLLER</span>
+        d₀ = Z × p / π  ·  bölüm dairesi çapı<br>
+        da = d₀ + 2·ha  ·  kasnak diş üstü<br>
+        df = d₀ − 2·h   ·  kasnak diş dibi<br>
+        C₁ = Z × p      ·  1 turda kayış yolu<br>
+        v  = π·d₀·n / 60 000  ·  hız (m/s)
+      </div>`;
+
+  } else {
+    const Z1=parseInt(document.getElementById('z1D').value)||0;
+    const Z2=parseInt(document.getElementById('z2D').value)||0;
+    const n1=parseFloat(document.getElementById('n1D').value);
+    const Ce=parseFloat(document.getElementById('ceD').value)||0;
+    const _d1=Z1>0?d0(Z1,b.p):null, _d2=Z2>0?d0(Z2,b.p):null;
+    const _df1=Z1>0?df(Z1,b.p,b.h):null, _df2=Z2>0?df(Z2,b.p,b.h):null;
+    const _da1=Z1>0?da(Z1,b.p,b.ha):null, _da2=Z2>0?da(Z2,b.p,b.ha):null;
+    const i  = (Z1>0&&Z2>0) ? Z1/Z2 : null;
+    const n2 = (i&&n1>0) ? n1*Z2/Z1 : null;
+    const v1 = (_d1&&n1>0) ? vel(_d1,n1) : null;
+    const L_approx=(_d1&&_d2&&Ce>0)?beltLen(_d1,_d2,Ce):null;
+    const Zb  = L_approx ? Math.round(L_approx/b.p) : null;
+    const L   = Zb ? Zb*b.p : null;
+    const alpha = (_d1&&_d2&&Ce>0) ? wrapDeg(_d1,_d2,Ce) : null;
+
+    body.innerHTML = `
+      <div class="rp-card">
+        <div class="rp-card-hdr">Karşılaştırma — ${b.label}</div>
+        <div class="dg-comp">
+          <div class="dg-col-hdr lbl"></div>
+          <div class="dg-col-hdr z1c">SÜRÜCÜ Z₁=${Z1||'?'}</div>
+          <div class="dg-col-hdr z2c">TAHRİK Z₂=${Z2||'?'}</div>
+
+          <div class="dg-sep">Çaplar</div>
+          <div class="dg-lbl">Bölüm çapı d₀</div>
+          <div class="dg-val pur">${_d1?fmt(_d1)+' mm':'—'}</div>
+          <div class="dg-val blu">${_d2?fmt(_d2)+' mm':'—'}</div>
+
+          <div class="dg-lbl">Diş üstü da</div>
+          <div class="dg-val">${_da1?fmt(_da1)+' mm':'—'}</div>
+          <div class="dg-val">${_da2?fmt(_da2)+' mm':'—'}</div>
+
+          <div class="dg-lbl">Diş dibi df</div>
+          <div class="dg-val dim">${_df1?fmt(_df1)+' mm':'—'}</div>
+          <div class="dg-val dim">${_df2?fmt(_df2)+' mm':'—'}</div>
+
+          <div class="dg-sep">Kinematik</div>
+          <div class="dg-lbl">İletim oranı i</div>
+          <div class="dg-val pur" style="grid-column:2/-1">${i?fmt(i,3)+' : 1':'—'}</div>
+
+          <div class="dg-lbl">Devir</div>
+          <div class="dg-val dim">${n1>0?fmt(n1,0)+' rpm':'—'}</div>
+          <div class="dg-val dim">${n2?fmt(n2,1)+' rpm':'—'}</div>
+
+          <div class="dg-lbl">Çev. hız</div>
+          <div class="dg-val yl">${v1?v1.toFixed(3)+' m/s':'—'}</div>
+          <div class="dg-val dim">${v1?v1.toFixed(3)+' m/s':'—'}</div>
+
+          <div class="dg-sep">Kayış</div>
+          <div class="dg-lbl">Ce</div>
+          <div class="dg-val" style="grid-column:2/-1">${Ce>0?fmt(Ce,1)+' mm':'—'}</div>
+          <div class="dg-lbl">Kayış boyu L</div>
+          <div class="dg-val tl" style="grid-column:2/-1">${L?fmt(L,1)+' mm':'—'}</div>
+          <div class="dg-lbl">Kayış dişi</div>
+          <div class="dg-val tl" style="grid-column:2/-1">${Zb?Zb+' diş':'—'}</div>
+          <div class="dg-lbl">Sarma α₂</div>
+          <div class="dg-val ${alpha!==null&&alpha<60?'rd':'tl'}" style="grid-column:2/-1">${alpha!==null?fmt(alpha,1)+'°':'—'}</div>
+        </div>
+      </div>
+
+      <div class="fml-box">
+        <span class="fml-ttl">FORMÜLLER</span>
+        L ≈ 2Ce + π(d₁+d₂)/2 + (d₁−d₂)²/(4Ce)<br>
+        i = Z₁/Z₂  ·  n₂ = n₁·Z₂/Z₁<br>
+        α₂ = 180° − 2·arcsin((d₁−d₂)/(2·Ce))
+      </div>`;
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   SVG ÇİZİM
+════════════════════════════════════════════════════════ */
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, text) {
+  const e = document.createElementNS(NS, tag);
+  for(const [k,v] of Object.entries(attrs)) e.setAttribute(k, String(v));
+  if(text !== undefined) e.textContent = text;
+  return e;
+}
+
+function drawSVG() {
+  const svg = document.getElementById('beltSVG');
+  svg.innerHTML = '';
+  if(curTab === 'single') drawSinglePulley(svg);
+  else                    drawDualSystem(svg);
+}
+
+/* ── Tek Dişli SVG ── */
+function drawSinglePulley(svg) {
+  const W=448, H=210;
+  const b  = BELTS[curBelt];
+  const Z  = parseInt(document.getElementById('zS').value)||24;
+
+  const _d0  = d0(Z,b.p);
+  const _df  = df(Z,b.p,b.h);
+  const _da  = da(Z,b.p,b.ha);
+
+  /* ölçek: kasnak en büyük çap (da/2) drawing alanına sığsın */
+  const CX = 120, CY = H/2;
+  const maxR = Math.min(CX - 16, H/2 - 18);
+  const scale = Math.min(maxR / (_da/2), 6.0);
+
+  const r0 = _d0/2 * scale;
+  const rf = _df/2 * scale;
+  const ra = _da/2 * scale;
+  const rh = Math.max(rf * 0.22, 4);  /* mil deliği */
+
+  /* ── Defs: gradient + shadow ── */
+  const defs = el('defs', {});
+
+  const rg = el('radialGradient', { id:'pg', cx:'42%', cy:'40%', r:'58%' });
+  rg.appendChild(el('stop', { offset:'0%',   'stop-color':'rgba(167,139,250,0.20)' }));
+  rg.appendChild(el('stop', { offset:'100%', 'stop-color':'rgba(167,139,250,0.06)' }));
+  defs.appendChild(rg);
+
+  const rg2 = el('radialGradient', { id:'pg2', cx:'50%', cy:'50%', r:'50%' });
+  rg2.appendChild(el('stop', { offset:'0%',   'stop-color':'rgba(167,139,250,0.10)' }));
+  rg2.appendChild(el('stop', { offset:'100%', 'stop-color':'rgba(0,0,0,0)' }));
+  defs.appendChild(rg2);
+
+  svg.appendChild(defs);
+
+  /* ── Kasnak gövdesi (diş profilini çiz) ── */
+  const toothPath = buildToothPath(CX, CY, rf, ra, Z);
+  svg.appendChild(el('path', {
+    d: toothPath,
+    fill: 'url(#pg)', stroke: '#a78bfa', 'stroke-width': '1.2',
+    'stroke-linejoin': 'round'
+  }));
+
+  /* ── Bölüm dairesi (dashed, mavi) ── */
+  svg.appendChild(el('circle', {
+    cx:CX, cy:CY, r:r0,
+    fill:'none', stroke:'#60a5fa', 'stroke-width':'0.8', 'stroke-dasharray':'5 3'
+  }));
+
+  /* ── Merkez çarpı ── */
+  const cl = rh * 1.7;
+  [[-cl,0],[cl,0],[0,-cl],[0,cl]].forEach(([dx,dy]) =>
+    svg.appendChild(el('line',{
+      x1:CX, y1:CY, x2:CX+dx, y2:CY+dy,
+      stroke:'rgba(255,255,255,0.18)', 'stroke-width':'0.8'
+    }))
+  );
+
+  /* ── Mil deliği ── */
+  svg.appendChild(el('circle', {
+    cx:CX, cy:CY, r:rh,
+    fill:'rgba(0,0,0,0.55)', stroke:'rgba(167,139,250,0.3)', 'stroke-width':'0.8'
+  }));
+
+  /* ── ANNOTATION (sağ taraf) ── */
+  /* 3 annotasyon: da (üst-sağ), d0 (sağ), df (alt-sağ) */
+  const AX = CX + ra + 12;  /* annotation shelf başlangıç X */
+  const LX = W - 8;          /* label X */
+
+  addDimArrow(svg, CX, CY, ra, -40, '#f97316', 'da', `${fmt(_da)} mm`, AX, LX);
+  addDimArrow(svg, CX, CY, r0,   0, '#60a5fa', 'd₀', `${fmt(_d0)} mm`, AX, LX);
+  addDimArrow(svg, CX, CY, rf,  38, '#8080a8', 'df', `${fmt(_df)} mm`, AX, LX);
+
+  /* ── Alt bilgi etiketi ── */
+  const labelY = CY + ra + 18;
+  if(labelY < H - 4) {
+    svg.appendChild(el('text', {
+      x: CX, y: labelY, 'text-anchor':'middle',
+      'font-family':'JetBrains Mono, monospace', 'font-size':'9.5',
+      fill:'rgba(167,139,250,0.65)'
+    }, `Z = ${Z}  ·  p = ${b.p} mm  ·  C₁ = ${fmt(_d0*PI,2)} mm`));
+  }
+}
+
+/* ── Dimension arrow helper ── */
+function addDimArrow(svg, cx, cy, r, yOff, color, lbl, val, ax, lx) {
+  /* Açı: yOff pozitif → aşağı, negatif → yukarı */
+  const angle  = Math.atan2(yOff, r);            /* radyan */
+  const px     = cx + r * Math.cos(angle);
+  const py     = cy + r * Math.sin(angle);
+  const elbowY = cy + yOff;
+  const elbowX = Math.max(ax, px + 8);
+
+  /* Kasnak yüzeyinden dirsek'e çizgi */
+  svg.appendChild(el('line', {
+    x1:px, y1:py, x2:elbowX, y2:elbowY,
+    stroke:color, 'stroke-width':'0.7'
+  }));
+  /* Dirsekten label'a yatay çizgi */
+  svg.appendChild(el('line', {
+    x1:elbowX, y1:elbowY, x2:lx - 4, y2:elbowY,
+    stroke:color, 'stroke-width':'0.7', 'stroke-dasharray':'4 2'
+  }));
+  /* Nokta */
+  svg.appendChild(el('circle', { cx:px, cy:py, r:'2', fill:color }));
+
+  /* Etiket — label + değer */
+  const tg = el('text', {
+    'font-family':'JetBrains Mono, monospace', 'font-size':'10',
+    'text-anchor':'end'
+  });
+  const sp1 = el('tspan', { fill:color, 'font-weight':'600' }, lbl+' = ');
+  const sp2 = el('tspan', { fill:'#dde1f0' }, val);
+  tg.appendChild(sp1); tg.appendChild(sp2);
+  /* x/y ayarı */
+  tg.setAttribute('x', String(lx));
+  tg.setAttribute('y', String(elbowY + 3.5));
+  svg.appendChild(tg);
+}
+
+/* ── Tooth path ── */
+function buildToothPath(cx, cy, rf, ra, Z) {
+  const angPitch  = 2*PI/Z;
+  const landFrac  = 0.46;
+  const landHalf  = angPitch * landFrac / 2;
+  const grooveHalf= angPitch * (1-landFrac) / 2;
+
+  let d = '';
+  for(let i=0; i<Z; i++) {
+    const base    = angPitch*i - PI/2;
+    const gStart  = base - angPitch/2 + grooveHalf;  /* groove arc end (=land arc start) */
+    const lStart  = gStart;
+    const lEnd    = lStart + angPitch*landFrac;
+    const gEnd    = lEnd;
+    const nextG   = base + angPitch/2 - grooveHalf;
+
+    const c=Math.cos, s=Math.sin;
+
+    if(i===0) {
+      const g0 = base - angPitch/2;
+      d += `M ${cx+rf*c(g0)} ${cy+rf*s(g0)} `;
+    }
+    /* arc along rf to land start */
+    d += `A ${rf} ${rf} 0 0 1 ${cx+rf*c(lStart)} ${cy+rf*s(lStart)} `;
+    /* rise to ra */
+    d += `L ${cx+ra*c(lStart)} ${cy+ra*s(lStart)} `;
+    /* arc along ra (land) */
+    d += `A ${ra} ${ra} 0 0 1 ${cx+ra*c(lEnd)} ${cy+ra*s(lEnd)} `;
+    /* drop back to rf */
+    d += `L ${cx+rf*c(lEnd)} ${cy+rf*s(lEnd)} `;
+  }
+  return d+'Z';
+}
+
+/* ── İkili Sistem SVG ── */
+function drawDualSystem(svg) {
+  const W=448, H=210;
+  const b  = BELTS[curBelt];
+  const Z1 = parseInt(document.getElementById('z1D').value)||36;
+  const Z2 = parseInt(document.getElementById('z2D').value)||18;
+  const Ce_mm = parseFloat(document.getElementById('ceD').value)||200;
+
+  const _d1 = d0(Z1,b.p), _d2 = d0(Z2,b.p);
+  const r1mm = _d1/2, r2mm = _d2/2;
+
+  /* Ölçek: iki kasnak + Ce horizontal olarak sığsın */
+  const span_mm = r1mm + Ce_mm + r2mm;
+  const scale   = Math.min((W - 40) / span_mm, 4.0, 90 / Math.max(r1mm,r2mm));
+
+  const r1 = r1mm * scale;
+  const r2 = r2mm * scale;
+
+  /* Merkez konumları: Z2 solda, Z1 sağda */
+  const totalW  = r2 + Ce_mm*scale + r1;
+  const offX    = (W - totalW) / 2;
+  const CY      = H / 2;
+  const cx2     = offX + r2;
+  const cx1     = cx2 + Ce_mm * scale;
+
+  /* ── Belt path ── */
+  const D   = cx1 - cx2;  /* pixel center distance */
+  const sinA = Math.min(Math.max((r1-r2)/D, -1), 1);
+  const alpha = Math.asin(sinA);
+
+  const T1tx = cx1 - r1*sinA,  T1ty = CY - r1*Math.cos(alpha);
+  const T1bx = cx1 + r1*sinA,  T1by = CY + r1*Math.cos(alpha);
+  const T2tx = cx2 - r2*sinA,  T2ty = CY - r2*Math.cos(alpha);
+  const T2bx = cx2 + r2*sinA,  T2by = CY + r2*Math.cos(alpha);
+
+  /* Kapalı kayış yolu */
+  const laf1 = 1; /* Z1 sarma > 180° */
+  const laf2 = 0; /* Z2 sarma < 180° */
+
+  svg.appendChild(el('path', {
+    d: `M ${T2tx} ${T2ty} L ${T1tx} ${T1ty}
+        A ${r1} ${r1} 0 ${laf1} 1 ${T1bx} ${T1by}
+        L ${T2bx} ${T2by}
+        A ${r2} ${r2} 0 ${laf2} 0 ${T2tx} ${T2ty} Z`,
+    fill: 'rgba(167,139,250,0.06)',
+    stroke: '#a78bfa', 'stroke-width': '1.2'
+  }));
+
+  /* ── Kasnak çizim fonksiyonu ── */
+  function drawPulley(cx, cy, r, Z, col) {
+    const rfp = r * (1 - 2*b.h / (b.p*Z/PI)); /* yaklaşık root scale */
+    const rap = r;
+    if(rfp>2 && rfp<r) {
+      svg.appendChild(el('path', {
+        d: buildToothPath(cx, cy, rfp, rap, Math.min(Z,60)),
+        fill: col==='pur' ? 'rgba(167,139,250,0.14)' : 'rgba(96,165,250,0.12)',
+        stroke: col==='pur' ? '#a78bfa' : '#60a5fa',
+        'stroke-width':'0.9', 'stroke-linejoin':'round'
+      }));
+    } else {
+      svg.appendChild(el('circle', {
+        cx, cy, r,
+        fill: col==='pur' ? 'rgba(167,139,250,0.14)' : 'rgba(96,165,250,0.12)',
+        stroke: col==='pur' ? '#a78bfa' : '#60a5fa',
+        'stroke-width':'0.9'
+      }));
+    }
+    /* Bölüm dairesi */
+    svg.appendChild(el('circle', {
+      cx, cy, r,
+      fill:'none', stroke: col==='pur'?'rgba(167,139,250,0.4)':'rgba(96,165,250,0.4)',
+      'stroke-width':'0.6', 'stroke-dasharray':'4 3'
+    }));
+    /* Hub */
+    const rh2 = Math.max(r*0.18, 3);
+    svg.appendChild(el('circle', { cx, cy, r:rh2, fill:'rgba(0,0,0,0.6)', stroke:'rgba(255,255,255,0.1)', 'stroke-width':'0.6' }));
+    /* Merkez + */
+    const cl2 = rh2*1.6;
+    [[-cl2,0],[cl2,0],[0,-cl2],[0,cl2]].forEach(([dx,dy])=>
+      svg.appendChild(el('line',{x1:cx,y1:cy,x2:cx+dx,y2:cy+dy,stroke:'rgba(255,255,255,0.15)','stroke-width':'0.6'}))
+    );
+  }
+
+  drawPulley(cx2, CY, r2, Z2, 'blu');
+  drawPulley(cx1, CY, r1, Z1, 'pur');
+
+  /* ── Etiketler ── */
+  function label(x, y, txt, col, size=11) {
+    svg.appendChild(el('text', {
+      x, y, 'text-anchor':'middle',
+      'font-family':'JetBrains Mono, monospace', 'font-size':String(size),
+      fill:col
+    }, txt));
+  }
+
+  label(cx1, CY + 4, `Z₁=${Z1}`, '#a78bfa');
+  label(cx2, CY + 4, `Z₂=${Z2}`, '#60a5fa');
+
+  /* d₀ değerleri (üstte) */
+  label(cx1, CY - r1 - 8, `⌀${fmt(_d1)} mm`, 'rgba(167,139,250,0.7)', 9);
+  label(cx2, CY - r2 - 8, `⌀${fmt(_d2)} mm`, 'rgba(96,165,250,0.7)', 9);
+
+  /* Ce boyut çizgisi (altta) */
+  const dimY = Math.min(CY + Math.max(r1,r2) + 22, H - 14);
+  svg.appendChild(el('line', {
+    x1:cx2, y1:dimY, x2:cx1, y2:dimY,
+    stroke:'rgba(255,255,255,0.18)', 'stroke-width':'0.8'
+  }));
+  /* Ok başları */
+  [[cx2,dimY,1],[cx1,dimY,-1]].forEach(([ax,ay,dir])=>{
+    svg.appendChild(el('path', {
+      d:`M ${ax} ${ay} l ${dir*7} -3 l 0 6 Z`,
+      fill:'rgba(255,255,255,0.25)'
+    }));
+  });
+  label((cx1+cx2)/2, dimY - 3, `Ce = ${fmt(Ce_mm,1)} mm`, 'rgba(255,255,255,0.4)', 9);
+
+  /* L kayış boyu (üstte) */
+  const Lval = beltLen(_d1, _d2, Ce_mm);
+  const Zb   = Math.round(Lval / b.p);
+  const La   = Zb * b.p;
+  const topY = CY - Math.max(r1,r2) - 14;
+  if(topY > 8) {
+    label((cx1+cx2)/2, topY, `L ≈ ${fmt(La,1)} mm  ·  ${Zb} diş`, 'rgba(167,139,250,0.55)', 9);
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   BAŞLANGIÇ
+════════════════════════════════════════════════════════ */
+selectBelt('AT10');
+</script>
+</body>
+</html>
