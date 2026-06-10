@@ -61,3 +61,89 @@
   --fz-28: calc(28px * var(--fz));   /* 28 →   42px */
 
 }
+/* ═══════════════════════════════════════════════════════
+   MOBİL UYUMLULUK  —  ≤768px
+   ═══════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+
+  /* 1. Kaydırma kilidi kaldır */
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    overflow-x: hidden !important;
+  }
+
+  /* 2. App: yatay flex → dikey sütun */
+  .app {
+    display: flex !important;   /* dis-referans'ın grid'ini override eder */
+    flex-direction: column !important;
+    overflow: visible !important;
+    flex: unset !important;
+  }
+
+  /* 3. Nav: padding küçült, breadcrumb gizle */
+  nav {
+    padding: 0 12px !important;
+    gap: 12px !important;
+    height: 48px !important;
+  }
+  .breadcrumb { display: none !important; }
+
+  /* 4. Tüm sidebar'ları yatay kaydırılabilir şeride çevir */
+  .sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    /* scrollbar gizle (kaydırma çalışmaya devam eder) */
+    scrollbar-width: none;
+  }
+  .sidebar::-webkit-scrollbar { display: none !important; }
+
+  /* 5. Sidebar section başlıkları ve ayraçlar: gizle */
+  .sec-label, .sb-label, .sb-sep, .sb-divider { display: none !important; }
+
+  /* 6. Sidebar butonları: yatay pill formatı */
+  .type-btn, .sb-btn {
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 10px 14px !important;
+    border-left: none !important;
+    border-bottom: 3px solid transparent !important;
+    white-space: nowrap !important;
+    min-width: max-content !important;
+    font-size: 11px !important;
+    gap: 4px !important;
+  }
+  .type-btn.active, .sb-btn.active {
+    border-left-color: transparent !important;
+    border-bottom-color: var(--accent, var(--orange)) !important;
+  }
+
+  /* 7. İkincil boyut butonlarını (cıvata boyutu vs.) gizle —
+        bunlar sidebar ana seçimi değil, dropdown/select ile değiştirilebilir */
+  .sz-btn { display: none !important; }
+
+  /* 8. Ana içerik sütunu: tam genişlik */
+  .content {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-shrink: 1 !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* 9. Sağ panel (sonuç/referans): tam genişlik, alta yerleş */
+  .results-col, .ref-col, .info-col {
+    width: 100% !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border) !important;
+  }
+
+}

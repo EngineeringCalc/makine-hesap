@@ -337,26 +337,13 @@ footer {
   font-family: 'JetBrains Mono', monospace;
 }
 @media (max-width: 768px) {
-
-  /* Hero padding küçült */
-  .hero {
-    padding: 48px 20px 36px !important;
-  }
-
-  /* Nav padding */
+  html, body { overflow-x: hidden !important; }
   nav { padding: 0 16px !important; }
-
-  /* Kart ızgarası: 1 sütun */
+  .hero { padding: 48px 20px 36px !important; }
   .tools-grid {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
   }
-
-  /* Ana başlık fontunu küçült */
-  .hero-title {
-    font-size: clamp(32px, 10vw, 60px) !important;
-  }
-
 }
 </style>
 </head>

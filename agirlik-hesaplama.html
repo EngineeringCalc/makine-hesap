@@ -126,28 +126,7 @@ nav{position:relative;z-index:10;flex-shrink:0;background:rgba(7,7,14,0.92);back
 .total-label{font-family:var(--font-h);font-size: var(--fz-13);letter-spacing:2px;color:var(--dim2);text-transform:uppercase}
 .total-val{font-family:var(--font-m);font-size:24px;font-weight:600;color:var(--teal)}
 .total-items{font-size: var(--fz-11);color:var(--dim)}
-
 @media (max-width: 768px) {
-
-  /* 1. Kaydırma kilidi kaldır */
-  html, body {
-    height: auto !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-  }
-
-  /* 2. App: yatay sütunlar → dikey yığın */
-  .app {
-    flex-direction: column !important;
-    overflow: visible !important;
-    flex: unset !important;
-  }
-
-  /* 3. Nav: breadcrumb gizle, padding küçült */
-  nav { padding: 0 12px !important; gap: 12px !important; }
-  .breadcrumb { display: none !important; }
-
-  /* 4. Sol profil sütunu → yatay kaydırılabilir şerit */
   .prof-col {
     width: 100% !important;
     flex-direction: row !important;
@@ -161,8 +140,6 @@ nav{position:relative;z-index:10;flex-shrink:0;background:rgba(7,7,14,0.92);back
   }
   .prof-col::-webkit-scrollbar { display: none; }
   .col-label { display: none !important; }
-
-  /* 5. Profil butonları → yatay pill */
   .prof-btn {
     flex-direction: column !important;
     align-items: center !important;
@@ -179,16 +156,12 @@ nav{position:relative;z-index:10;flex-shrink:0;background:rgba(7,7,14,0.92);back
     border-bottom-color: var(--orange) !important;
   }
   .prof-icon { font-size: 18px !important; width: auto !important; }
-
-  /* 6. Orta sütun: tam genişlik */
   .input-col {
     width: 100% !important;
     max-width: 100% !important;
     flex-shrink: 1 !important;
     padding: 12px !important;
   }
-
-  /* 7. Sağ liste paneli: tam genişlik, altına iner */
   .list-col {
     width: 100% !important;
     max-height: 50vh;
@@ -196,12 +169,8 @@ nav{position:relative;z-index:10;flex-shrink:0;background:rgba(7,7,14,0.92);back
     border-top: 1px solid var(--border) !important;
     overflow-y: auto !important;
   }
-
-  /* 8. SVG önizleme küçült */
   .preview-svg-wrap { height: 140px !important; }
-
 }
-  
 </style>
 </head>
 <body>
