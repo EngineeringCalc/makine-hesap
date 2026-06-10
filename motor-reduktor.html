@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Motor-Redüktör Seçimi — MH Platform</title>
+  <link rel="stylesheet" href="mh-tokens.css">
+  <style>
+    :root {
+      --dim:  #52527a;
+      --dim2: #8080a8;
+      --mc:   #f97316;          /* sayfa ana vurgusu (turuncu) */
+      --mc-bg: rgba(249,115,22,0.12);
+      --mc-bd: rgba(249,115,22,0.25);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--font-b);
+      display: flex; flex-direction: column;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(7,7,14,0.92); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 20px; height: 52px; gap: 20px; flex-shrink: 0;
+    }
+    .brand { font-family: var(--font-logo); font-size: var(--fz-18); letter-spacing: 3px; color: var(--accent); text-decoration: none; }
+    .brand em { color: var(--text); font-style: normal; }
+    .breadcrumb { font-size: var(--fz-12); color: var(--dim2); font-family: var(--font-m); display: flex; align-items: center; gap: 8px; }
+    .breadcrumb .sep { color: var(--dim); }
+
+    /* ── APP ── */
+    .app { display: flex; flex: 1; overflow: hidden; position: relative; z-index: 1; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--bg2); border-right: 1px solid var(--border);
+      width: 200px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto; padding-bottom: 16px;
+    }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .sec-label {
+      font-family: var(--font-h); font-size: var(--fz-11);
+      letter-spacing: 2px; color: #9090c0; text-transform: uppercase;
+      padding: 12px 14px 5px; flex-shrink: 0;
+    }
+    .sb-div { height: 1px; background: var(--border); margin: 6px 14px; }
+
+    .app-btn {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 9px 14px;
+      background: transparent; border: none; border-left: 3px solid transparent;
+      color: var(--dim2); font-family: var(--font-b); font-size: calc(12.5px * var(--fz));
+      cursor: pointer; text-align: left; transition: all 0.15s;
+    }
+    .app-btn:hover { background: var(--surf1); color: var(--text); }
+    .app-btn.active { background: var(--surf1); color: var(--text); font-weight: 500; border-left-color: var(--mc); }
+    .app-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+    .app-ka { margin-left: auto; font-family: var(--font-m); font-size: var(--fz-10); color: var(--dim); }
+    .app-btn.active .app-ka { color: var(--mc); }
+
+    /* ── CONTENT ── */
+    .content {
+      width: 480px; max-width: 480px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto; border-right: 1px solid var(--border);
+    }
+    .content::-webkit-scrollbar { width: 3px; }
+    .content::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .page-hdr {
+      padding: 13px 16px 11px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 8px; flex-shrink: 0;
+    }
+    .page-title { font-family: var(--font-h); font-size: var(--fz-20); font-weight: 700; letter-spacing: 1px; }
+    .page-sub { font-size: var(--fz-11); color: var(--dim2); font-family: var(--font-m); margin-top: 3px; }
+
+    /* ── MODE TABS ── */
+    .mode-bar { display: flex; padding: 0 16px; background: var(--surf1); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .mode-tab {
+      padding: 13px 18px; background: transparent; border: none;
+      border-bottom: 2px solid transparent; color: var(--dim2);
+      font-family: var(--font-b); font-size: var(--fz-13);
+      cursor: pointer; transition: all 0.18s; position: relative; top: 1px;
+    }
+    .mode-tab:hover { color: var(--text); }
+    .mode-tab.active { color: var(--text); border-bottom-color: var(--mc); }
+
+    /* ── SVG PREVIEW (blok diyagram) ── */
+    .preview-wrap { padding: 10px 16px 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .preview-box { background: var(--surf1); border: 1px solid var(--border); border-radius: 10px; height: 168px; overflow: hidden; }
+    .preview-box svg { width: 100%; height: 100%; }
+
+    /* ── SECTIONS ── */
+    .section { padding: 11px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .sec-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+    .sec-ttl { font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 2px; color: #9090c0; text-transform: uppercase; }
+    .sec-tag { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); }
+
+    /* ── INPUTS ── */
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .input-row.three { grid-template-columns: 1fr 1fr 1fr; }
+    .inp-g { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .inp-g.full { grid-column: 1 / -1; }
+    .inp-label {
+      font-family: var(--font-h); font-size: var(--fz-13);
+      letter-spacing: 1px; color: #c0c0e0; text-transform: uppercase;
+      display: flex; align-items: center;
+    }
+    .opt-bdg {
+      font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim);
+      padding: 2px 5px; background: var(--surf3); border-radius: 3px; margin-left: 6px;
+    }
+    .inp-wrap {
+      display: flex; background: var(--surf2);
+      border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; transition: border-color 0.2s; min-width: 0;
+    }
+    .inp-wrap:focus-within { border-color: var(--mc); }
+    .inp-wrap input {
+      flex: 1; padding: 10px 12px;
+      background: transparent; border: none;
+      color: var(--text); font-family: var(--font-m);
+      font-size: var(--fz-15); font-weight: 600;
+      outline: none; min-width: 0;
+      -moz-appearance: textfield; appearance: textfield;
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; }
+    .inp-sfx {
+      padding: 0 11px; display: flex; align-items: center;
+      font-family: var(--font-m); font-size: var(--fz-12);
+      color: var(--dim); background: var(--surf3);
+      border-left: 1px solid var(--border); flex-shrink: 0; white-space: nowrap;
+    }
+    .inp-hint { font-family: var(--font-m); font-size: var(--fz-10); color: var(--dim2); min-height: 15px; }
+
+    /* select inside inp-wrap */
+    .inp-wrap select {
+      flex: 1; padding: 10px 12px; background: transparent; border: none;
+      color: var(--text); font-family: var(--font-m); font-size: var(--fz-13);
+      font-weight: 600; outline: none; appearance: none; cursor: pointer; min-width: 0;
+    }
+    .inp-wrap select option { color: #000; }
+
+    /* segmented (kutup, redüktör tipi) */
+    .seg { display: flex; gap: 6px; }
+    .seg-btn {
+      flex: 1; padding: 9px 4px;
+      background: var(--surf2); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--dim2); font-family: var(--font-h);
+      font-size: var(--fz-12); font-weight: 700; letter-spacing: 0.5px;
+      cursor: pointer; text-align: center; transition: all 0.15s; line-height: 1.2;
+    }
+    .seg-btn small { display: block; font-family: var(--font-m); font-size: var(--fz-9); font-weight: 400; color: var(--dim); margin-top: 2px; }
+    .seg-btn:hover { background: var(--surf3); color: var(--text); }
+    .seg-btn.active { background: var(--mc-bg); border-color: var(--mc); color: var(--mc); }
+    .seg-btn.active small { color: var(--mc); }
+
+    /* redüktör tip seçimi — dikey kart liste */
+    .red-list { display: flex; flex-direction: column; gap: 6px; }
+    .red-opt {
+      display: grid; grid-template-columns: 26px 1fr auto;
+      align-items: center; gap: 10px;
+      padding: 9px 11px; background: var(--surf2);
+      border: 1px solid var(--border); border-radius: 8px;
+      cursor: pointer; transition: all 0.15s; text-align: left;
+    }
+    .red-opt:hover { border-color: var(--surf3); background: var(--surf3); }
+    .red-opt.active { border-color: var(--mc); background: var(--mc-bg); }
+    .red-ic { font-size: 17px; text-align: center; }
+    .red-nm { font-family: var(--font-b); font-size: var(--fz-12); color: var(--text); font-weight: 500; }
+    .red-meta { font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim2); margin-top: 1px; }
+    .red-eta { font-family: var(--font-m); font-size: var(--fz-12); font-weight: 600; color: var(--teal); }
+    .red-opt.active .red-eta { color: var(--teal); }
+
+    /* ── RATIO / QUICK STRIP ── */
+    .q-strip {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 4px 12px; padding: 8px 12px;
+      background: var(--surf1); border-radius: 8px; margin-top: 10px;
+    }
+    .ql { font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 1px; color: var(--dim2); text-transform: uppercase; }
+    .qv { font-family: var(--font-m); font-size: var(--fz-14); font-weight: 600; }
+    .qv.ac { color: var(--mc); }  .qv.bl { color: var(--blue); }  .qv.tl { color: var(--teal); }
+    .qs { color: var(--dim); font-size: var(--fz-11); }
+
+    /* ── CALC BTN ── */
+    .calc-btn {
+      display: block; width: calc(100% - 32px);
+      margin: 12px 16px; padding: 14px;
+      background: var(--mc); border: none; border-radius: 10px;
+      color: white; font-family: var(--font-h);
+      font-size: var(--fz-18); font-weight: 700; letter-spacing: 2px;
+      cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    }
+    .calc-btn:hover { background: #ea6c0d; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(249,115,22,0.35); }
+    .calc-btn:active { transform: translateY(0); }
+
+    /* ── RESULTS ── */
+    .result-area { padding: 0 16px 12px; display: none; flex-shrink: 0; }
+    .result-area.visible { display: block; animation: fadeUp 0.2s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+    .res-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .res-card { background: var(--surf1); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+    .res-lbl { font-family: var(--font-h); font-size: var(--fz-10); letter-spacing: 1.5px; color: var(--dim2); text-transform: uppercase; }
+    .res-val { font-family: var(--font-m); font-size: var(--fz-20); font-weight: 600; margin: 3px 0 2px; }
+    .res-unt { font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim2); line-height: 1.4; }
+    .c-acc { color: var(--mc); } .c-teal { color: var(--teal); } .c-blue { color: var(--blue); }
+    .c-ylw { color: var(--yellow); } .c-purple { color: var(--purple); } .c-pink { color: var(--pink); }
+    .c-grn { color: var(--green); } .c-red { color: var(--red); }
+
+    /* servis kontrol satırı + listeye ekle */
+    .verdict-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surf1); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 12px;
+    }
+    .verdict-txt { flex: 1; }
+    .verdict-lbl { font-family: var(--font-h); font-size: var(--fz-10); letter-spacing: 1.5px; color: var(--dim2); text-transform: uppercase; }
+    .serv-badge {
+      display: inline-flex; align-items: center; gap: 5px; margin-top: 3px;
+      font-family: var(--font-m); font-size: var(--fz-11); font-weight: 600;
+      padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px;
+    }
+    .serv-safe { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
+    .serv-warn { background: rgba(251,191,36,0.12); color: var(--yellow); border: 1px solid rgba(251,191,36,0.25); }
+    .serv-danger { background: rgba(248,113,113,0.12); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .add-btn {
+      padding: 8px 14px; background: var(--surf2); border: 1px solid var(--teal);
+      border-radius: 7px; color: var(--teal); font-family: var(--font-h);
+      font-size: var(--fz-13); letter-spacing: 1px; cursor: pointer;
+      transition: all 0.15s; flex-shrink: 0; white-space: nowrap;
+    }
+    .add-btn:hover { background: rgba(0,212,170,0.1); }
+
+    /* ── INFO BOX (formüller) ── */
+    .info-box {
+      margin: 0 16px 14px; padding: 12px 14px;
+      background: rgba(249,115,22,0.06); border: 1px solid rgba(249,115,22,0.15);
+      border-radius: 8px; flex-shrink: 0;
+    }
+    .fml-ttl { font-family: var(--font-h); letter-spacing: 1px; font-size: var(--fz-11); color: #f0cc80; display: block; margin-bottom: 6px; }
+    .fml { font-family: var(--font-m); font-size: var(--fz-10); color: var(--dim2); line-height: 2.1; }
+    .fml .hi { color: var(--mc); }
+
+    /* ── RIGHT PANEL (karşılaştırma listesi) ── */
+    .right-panel {
+      background: var(--bg2); border-left: 1px solid var(--border);
+      width: 320px; flex-shrink: 0;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .rp-hdr {
+      padding: 12px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .rp-title { font-family: var(--font-h); font-size: var(--fz-15); font-weight: 700; letter-spacing: 1px; }
+    .clear-btn {
+      background: transparent; border: none; color: var(--dim2);
+      font-size: var(--fz-11); font-family: var(--font-b);
+      padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: all 0.15s;
+    }
+    .clear-btn:hover { background: rgba(248,113,113,0.1); color: var(--red); }
+
+    .rp-body { flex: 1; overflow-y: auto; padding: 10px; }
+    .rp-body::-webkit-scrollbar { width: 3px; }
+    .rp-body::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .empty-st { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 32px; text-align: center; }
+    .empty-st .ei { font-size: 28px; opacity: 0.22; }
+    .empty-st p { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); line-height: 1.75; }
+
+    .combo-item {
+      background: var(--surf1); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;
+      animation: slideIn 0.2s ease; position: relative;
+    }
+    @keyframes slideIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+    .ci-top { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+    .ci-tag {
+      font-family: var(--font-m); font-size: var(--fz-9); font-weight: 600;
+      padding: 2px 7px; border-radius: 4px; letter-spacing: 0.5px;
+    }
+    .ci-tag.sel { background: var(--mc-bg); color: var(--mc); border: 1px solid var(--mc-bd); }
+    .ci-tag.chk { background: rgba(96,165,250,0.12); color: var(--blue); border: 1px solid rgba(96,165,250,0.25); }
+    .ci-app { font-family: var(--font-b); font-size: var(--fz-11); color: var(--text); font-weight: 500; flex: 1; }
+    .ci-del {
+      background: transparent; border: none; color: var(--dim);
+      font-size: 15px; cursor: pointer; padding: 0 2px; line-height: 1; transition: color 0.15s;
+    }
+    .ci-del:hover { color: var(--red); }
+    .ci-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+    .ci-row { display: flex; justify-content: space-between; align-items: baseline; }
+    .ci-k { font-family: var(--font-b); font-size: var(--fz-10); color: var(--dim2); }
+    .ci-v { font-family: var(--font-m); font-size: var(--fz-11); font-weight: 600; color: var(--text); }
+    .ci-v.ac { color: var(--mc); } .ci-v.bl { color: var(--blue); } .ci-v.tl { color: var(--teal); }
+    .ci-serv { margin-top: 7px; }
+
+    /* ── uyarı kutusu (referans modu) ── */
+    .note-amber {
+      margin: 10px; padding: 12px 14px;
+      background: rgba(251,191,36,0.07); border: 1px solid rgba(251,191,36,0.2);
+      border-radius: 8px; color: #f0cc80;
+      font-size: var(--fz-11); line-height: 1.7;
+    }
+    .note-amber b { color: var(--yellow); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="brand">MH<em>Platform</em></a>
+  <div class="breadcrumb">
+    <span>Hesaplama Araçları</span>
+    <span class="sep">/</span>
+    <span>Motor-Redüktör Seçimi</span>
+  </div>
+</nav>
+
+<div class="app">
+
+  <!-- ── SOL SIDEBAR: Uygulama tipleri ─────────────── -->
+  <aside class="sidebar">
+    <div class="sec-label">Uygulama Tipi</div>
+    <div id="app-list"></div>
+    <div class="sb-div"></div>
+    <div class="note-amber" style="margin:4px 14px 0;background:rgba(96,165,250,0.06);border-color:rgba(96,165,250,0.15);color:#90b8f0">
+      Uygulama tipi seçimi <b style="color:var(--blue)">servis faktörünü (K_A)</b> otomatik atar. İhtiyaca göre orta panelden değiştirebilirsin.
+    </div>
+  </aside>
+
+  <!-- ── ORTA İÇERİK ─────────────────────────────── -->
+  <main class="content">
+
+    <div class="page-hdr">
+      <div>
+        <div class="page-title">MOTOR-REDÜKTÖR SEÇİMİ</div>
+        <div class="page-sub">IEC 60034 · ISO R20 çevrim oranları</div>
+      </div>
+    </div>
+
+    <!-- MOD SEKMELERİ -->
+    <div class="mode-bar">
+      <button class="mode-tab active" data-mode="select" onclick="setMode('select')">Yükten Seç</button>
+      <button class="mode-tab" data-mode="verify" onclick="setMode('verify')">Kombinezon Doğrula</button>
+    </div>
+
+    <!-- SVG blok diyagram (her iki modda ortak) -->
+    <div class="preview-wrap">
+      <div class="preview-box">
+        <svg id="diag-svg" viewBox="0 0 448 168" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+    <!-- ══════ MOD 1: YÜKTEN SEÇ ══════ -->
+    <div id="mode-select">
+
+      <!-- Yük Talebi -->
+      <div class="section">
+        <div class="sec-hdr"><div class="sec-ttl">Çıkış (Yük) Talebi</div></div>
+        <div class="input-row">
+          <div class="inp-g">
+            <span class="inp-label">Çıkış Devri n₂</span>
+            <div class="inp-wrap">
+              <input type="number" id="s_n2" value="60" min="0.1" step="1" oninput="liveSelect()">
+              <span class="inp-sfx">rpm</span>
+            </div>
+          </div>
+          <div class="inp-g">
+            <span class="inp-label">Çıkış Torku T₂</span>
+            <div class="inp-wrap">
+              <input type="number" id="s_t2" value="450" min="0" step="1" oninput="liveSelect()">
+              <span class="inp-sfx">N·m</span>
+            </div>
+          </div>
+          <div class="inp-g full">
+            <span class="inp-label">Servis Faktörü K_A</span>
+            <div class="inp-wrap">
+              <select id="s_ka" onchange="liveSelect()">
+                <option value="1.0">1.0 — Darbesiz / Düzgün yük</option>
+                <option value="1.25" selected>1.25 — Hafif darbeli</option>
+                <option value="1.5">1.5 — Orta darbeli</option>
+                <option value="1.75">1.75 — Ağır darbeli</option>
+                <option value="2.0">2.0 — Çok ağır / değişken</option>
+              </select>
+              <span class="inp-sfx">K_A</span>
+            </div>
+          </div>
+        </div>
+        <div class="q-strip">
+          <span class="ql">İstenen Çıkış Gücü</span><span class="qv tl" id="s_p2">—</span>
+          <span class="qs">·</span>
+          <span class="ql">Tasarım Gücü</span><span class="qv ac" id="s_pd">—</span>
+        </div>
+      </div>
+
+      <!-- Motor -->
+      <div class="section">
+        <div class="sec-hdr"><div class="sec-ttl">Motor (Giriş)</div></div>
+        <span class="inp-label" style="margin-bottom:7px">Kutup Sayısı → Senkron Hız</span>
+        <div class="seg" id="pole-seg">
+          <button class="seg-btn" data-n="2900" onclick="setPole(2900,this)">2P<small>2900</small></button>
+          <button class="seg-btn active" data-n="1450" onclick="setPole(1450,this)">4P<small>1450</small></button>
+          <button class="seg-btn" data-n="960" onclick="setPole(960,this)">6P<small>960</small></button>
+          <button class="seg-btn" data-n="720" onclick="setPole(720,this)">8P<small>720</small></button>
+        </div>
+      </div>
+
+      <!-- Redüktör tipi -->
+      <div class="section">
+        <div class="sec-hdr">
+          <div class="sec-ttl">Redüktör Tipi</div>
+          <div class="sec-tag" id="red-eta-tag">η = 0.96</div>
+        </div>
+        <div class="red-list" id="red-list"></div>
+      </div>
+
+      <button class="calc-btn" onclick="calcSelect()">SEÇİMİ HESAPLA</button>
+
+      <!-- Sonuçlar -->
+      <div class="result-area" id="s_results">
+        <div class="res-grid">
+          <div class="res-card"><div class="res-lbl">Motor Gücü</div><div class="res-val c-acc" id="r_pmot">—</div><div class="res-unt" id="r_pmot_note">kW (IEC)</div></div>
+          <div class="res-card"><div class="res-lbl">Gerçek i</div><div class="res-val c-purple" id="r_i">—</div><div class="res-unt" id="r_i_note">ISO R20</div></div>
+          <div class="res-card"><div class="res-lbl">Gerçek n₂</div><div class="res-val c-blue" id="r_n2g">—</div><div class="res-unt" id="r_n2g_note">rpm</div></div>
+        </div>
+        <div class="res-grid">
+          <div class="res-card"><div class="res-lbl">Gerçek T₂</div><div class="res-val c-teal" id="r_t2g">—</div><div class="res-unt">N·m</div></div>
+          <div class="res-card"><div class="res-lbl">Motor Torku T₁</div><div class="res-val c-ylw" id="r_t1">—</div><div class="res-unt">N·m</div></div>
+          <div class="res-card"><div class="res-lbl">Verim η</div><div class="res-val c-grn" id="r_eta">—</div><div class="res-unt">%</div></div>
+        </div>
+        <div class="verdict-row">
+          <div class="verdict-txt">
+            <div class="verdict-lbl">Servis Kontrolü</div>
+            <div id="s_serv"></div>
+          </div>
+          <button class="add-btn" onclick="addCombo('sel')">+ Listeye Ekle</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ MOD 2: KOMBİNEZON DOĞRULA ══════ -->
+    <div id="mode-verify" style="display:none">
+
+      <div class="section">
+        <div class="sec-hdr"><div class="sec-ttl">Mevcut Motor</div></div>
+        <div class="input-row">
+          <div class="inp-g">
+            <span class="inp-label">Motor Gücü P</span>
+            <div class="inp-wrap">
+              <input type="number" id="v_p" value="4" min="0" step="0.1" oninput="liveVerify()">
+              <span class="inp-sfx">kW</span>
+            </div>
+          </div>
+          <div class="inp-g">
+            <span class="inp-label">Giriş Devri n₁</span>
+            <div class="inp-wrap">
+              <input type="number" id="v_n1" value="1450" min="1" step="1" oninput="liveVerify()">
+              <span class="inp-sfx">rpm</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="sec-hdr"><div class="sec-ttl">Mevcut Redüktör</div></div>
+        <div class="input-row three">
+          <div class="inp-g">
+            <span class="inp-label">Çevrim i</span>
+            <div class="inp-wrap">
+              <input type="number" id="v_i" value="25" min="1" step="0.1" oninput="liveVerify()">
+              <span class="inp-sfx">:1</span>
+            </div>
+          </div>
+          <div class="inp-g">
+            <span class="inp-label">Verim η</span>
+            <div class="inp-wrap">
+              <input type="number" id="v_eta" value="0.94" min="0.3" max="1" step="0.01" oninput="liveVerify()">
+              <span class="inp-sfx">η</span>
+            </div>
+          </div>
+          <div class="inp-g">
+            <span class="inp-label">K_A</span>
+            <div class="inp-wrap">
+              <input type="number" id="v_ka" value="1.25" min="1" max="3" step="0.05" oninput="liveVerify()">
+              <span class="inp-sfx">K_A</span>
+            </div>
+          </div>
+        </div>
+        <div class="q-strip">
+          <span class="ql">Çıkış Devri n₂</span><span class="qv bl" id="v_n2live">—</span>
+          <span class="qs">·</span>
+          <span class="ql">Çıkış Torku T₂</span><span class="qv tl" id="v_t2live">—</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="sec-hdr"><div class="sec-ttl">Tahmini Yük Talebi <span class="opt-bdg">OPSİYONEL</span></div></div>
+        <div class="input-row">
+          <div class="inp-g">
+            <span class="inp-label">Gereken Tork T_gerek</span>
+            <div class="inp-wrap">
+              <input type="number" id="v_treq" placeholder="—" min="0" step="1" oninput="liveVerify()">
+              <span class="inp-sfx">N·m</span>
+            </div>
+          </div>
+          <div class="inp-g">
+            <span class="inp-label">&nbsp;</span>
+            <div class="inp-hint" style="padding-top:11px">Boş bırakılırsa yalnızca<br>çıkış değerleri gösterilir.</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="calc-btn" onclick="calcVerify()">KOMBİNEZONU DOĞRULA</button>
+
+      <div class="result-area" id="v_results">
+        <div class="res-grid">
+          <div class="res-card"><div class="res-lbl">Çıkış Devri n₂</div><div class="res-val c-blue" id="rv_n2">—</div><div class="res-unt">rpm</div></div>
+          <div class="res-card"><div class="res-lbl">Çıkış Torku T₂</div><div class="res-val c-teal" id="rv_t2">—</div><div class="res-unt">N·m</div></div>
+          <div class="res-card"><div class="res-lbl">Çıkış Gücü P₂</div><div class="res-val c-grn" id="rv_p2">—</div><div class="res-unt">kW</div></div>
+        </div>
+        <div class="res-grid">
+          <div class="res-card"><div class="res-lbl">Motor Torku T₁</div><div class="res-val c-ylw" id="rv_t1">—</div><div class="res-unt">N·m</div></div>
+          <div class="res-card"><div class="res-lbl">Kullanım Oranı</div><div class="res-val c-purple" id="rv_util">—</div><div class="res-unt" id="rv_util_note">talep / kapasite</div></div>
+          <div class="res-card"><div class="res-lbl">Yedek Pay</div><div class="res-val c-acc" id="rv_margin">—</div><div class="res-unt">%</div></div>
+        </div>
+        <div class="verdict-row">
+          <div class="verdict-txt">
+            <div class="verdict-lbl">Uygunluk</div>
+            <div id="v_serv"></div>
+          </div>
+          <button class="add-btn" onclick="addCombo('chk')">+ Listeye Ekle</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORMÜLLER -->
+    <div class="info-box">
+      <span class="fml-ttl">FORMÜLLER &amp; NOTLAR</span>
+      <div class="fml">
+        <span class="hi">i</span> = n₁ / n₂ &nbsp;[çevrim oranı]<br>
+        <span class="hi">P₂</span> = T₂ · n₂ / 9550 &nbsp;[kW — çıkış gücü]<br>
+        <span class="hi">P_tasarım</span> = P₂ · K_A / η &nbsp;→ IEC standart güce yuvarlanır<br>
+        <span class="hi">T₁</span> = 9550 · P / n₁ &nbsp;[N·m — motor mili torku]<br>
+        <span class="hi">T₂</span> = T₁ · i · η &nbsp;[N·m — gerçek çıkış torku]<br>
+        IEC senkron hızlar (50 Hz): 2P→2900 · 4P→1450 · 6P→960 · 8P→720
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── SAĞ PANEL: Karşılaştırma listesi ──────────── -->
+  <aside class="right-panel">
+    <div class="rp-hdr">
+      <div class="rp-title">KOMBİNEZONLARIM</div>
+      <button class="clear-btn" onclick="clearCombos()">Tümünü Sil</button>
+    </div>
+    <div class="rp-body" id="combo-list">
+      <div class="empty-st">
+        <div class="ei">⚙️</div>
+        <p>Hesapla → Listeye Ekle.<br>Kombinezonları yan yana<br>karşılaştır.</p>
+      </div>
+    </div>
+  </aside>
+
+</div><!-- .app -->
+
+<script>
+/* ══════════════════════════════════════════════
+   MOTOR-REDÜKTÖR SEÇİMİ — Hesap motoru
+   IEC 60034 · ISO R20
+══════════════════════════════════════════════ */
+
+/* ── Uygulama tipleri (K_A önerileri) ── */
+const APPS = [
+  { id:'genel',     icon:'⬛', nm:'Genel Makine',       ka:'1.0'  },
+  { id:'konveyor',  icon:'🔄', nm:'Konveyör / Bant',    ka:'1.25' },
+  { id:'pompa',     icon:'💧', nm:'Santrifüj Pompa',    ka:'1.25' },
+  { id:'fan',       icon:'🌀', nm:'Fan / Blower',       ka:'1.0'  },
+  { id:'mikser',    icon:'🔀', nm:'Karıştırıcı / Mikser', ka:'1.5' },
+  { id:'kompresor', icon:'📦', nm:'Pistonlu Kompresör', ka:'1.75' },
+  { id:'vinc',      icon:'🏗️', nm:'Vinç / Kaldırma',    ka:'1.75' },
+  { id:'kirici',    icon:'🔨', nm:'Kırıcı / Değirmen',  ka:'2.0'  },
+];
+
+/* ── Redüktör tipleri (i aralığı + verim) ── */
+const REDS = [
+  { id:'helisel',  icon:'⚙️', nm:'Helisel',          imin:1.25, imax:63,  eta:0.97, meta:'i 1.25–63 · düz/dik mil' },
+  { id:'konik',    icon:'📐', nm:'Konik-Helisel',    imin:8,    imax:250, eta:0.95, meta:'i 8–250 · 90° giriş' },
+  { id:'sonsuz',   icon:'🔩', nm:'Sonsuz Vida',      imin:5,    imax:100, eta:0.80, meta:'i 5–100 · kendi kilitlemeli' },
+  { id:'planetar', icon:'🌐', nm:'Planetar',         imin:3.15, imax:100, eta:0.97, meta:'i 3.15–100 · eş eksenli' },
+];
+
+/* ── IEC standart motor güçleri (kW) ── */
+const IEC_KW = [0.09,0.12,0.18,0.25,0.37,0.55,0.75,1.1,1.5,2.2,3,4,5.5,7.5,11,15,18.5,22,30,37,45,55,75,90,110,132,160,200];
+
+/* ── ISO R20 standart çevrim oranları ── */
+const ISO_I = [1.25,1.6,2,2.5,3.15,4,5,6.3,8,10,12.5,16,20,25,31.5,40,50,63,80,100,125,160,200,250];
+
+/* ── STATE ── */
+let mode    = 'select';
+let curApp  = null;
+let curPole = 1450;
+let curRed  = REDS[0];
+let combos  = [];
+let lastSel = null;   // son select hesabı (listeye ekle için)
+let lastChk = null;
+
+/* helpers */
+const $ = id => document.getElementById(id);
+const ceilStd = (v, arr) => arr.find(x => x >= v) ?? arr[arr.length-1];
+const nearStd = (v, arr) => arr.reduce((a,b) => Math.abs(b-v) < Math.abs(a-v) ? b : a, arr[0]);
+
+/* ── INIT ── */
+(function init(){
+  // uygulama listesi
+  $('app-list').innerHTML = APPS.map(a =>
+    `<button class="app-btn" data-id="${a.id}" onclick="selApp('${a.id}')">
+       <span class="app-icon">${a.icon}</span>${a.nm}
+       <span class="app-ka">${a.ka}</span>
+     </button>`).join('');
+  // redüktör listesi
+  $('red-list').innerHTML = REDS.map((r,i) =>
+    `<button class="red-opt${i===0?' active':''}" data-id="${r.id}" onclick="selRed('${r.id}')">
+       <span class="red-ic">${r.icon}</span>
+       <span><span class="red-nm">${r.nm}</span><span class="red-meta">${r.meta}</span></span>
+       <span class="red-eta">η ${r.eta}</span>
+     </button>`).join('');
+  selApp('konveyor');
+  liveSelect();
+  liveVerify();
+  drawDiagram();
+})();
+
+/* ── MODE ── */
+function setMode(m){
+  mode = m;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === m));
+  $('mode-select').style.display = m === 'select' ? '' : 'none';
+  $('mode-verify').style.display = m === 'verify' ? '' : 'none';
+  drawDiagram();
+}
+
+/* ── SIDEBAR: uygulama seç ── */
+function selApp(id){
+  curApp = APPS.find(a => a.id === id);
+  document.querySelectorAll('.app-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+  $('s_ka').value = curApp.ka;
+  liveSelect();
+}
+
+/* ── Motor kutup ── */
+function setPole(n, btn){
+  curPole = n;
+  document.querySelectorAll('#pole-seg .seg-btn').forEach(b => b.classList.toggle('active', b === btn));
+  liveSelect();
+}
+
+/* ── Redüktör tipi ── */
+function selRed(id){
+  curRed = REDS.find(r => r.id === id);
+  document.querySelectorAll('.red-opt').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+  $('red-eta-tag').textContent = 'η = ' + curRed.eta;
+  liveSelect();
+}
+
+/* ════════ MOD 1: YÜKTEN SEÇ ════════ */
+function liveSelect(){
+  const n2 = parseFloat($('s_n2').value) || 0;
+  const t2 = parseFloat($('s_t2').value) || 0;
+  const ka = parseFloat($('s_ka').value) || 1;
+  if(n2 > 0 && t2 > 0){
+    const p2 = t2 * n2 / 9550;                 // kW
+    const pd = p2 * ka / curRed.eta;            // tasarım gücü
+    $('s_p2').textContent = p2.toFixed(2) + ' kW';
+    $('s_pd').textContent = pd.toFixed(2) + ' kW';
+  } else {
+    $('s_p2').textContent = '—';
+    $('s_pd').textContent = '—';
+  }
+  drawDiagram();
+}
+
+function calcSelect(){
+  const n2 = parseFloat($('s_n2').value) || 0;
+  const t2 = parseFloat($('s_t2').value) || 0;
+  const ka = parseFloat($('s_ka').value) || 1;
+  if(n2 <= 0 || t2 <= 0){ return; }
+
+  const p2 = t2 * n2 / 9550;
+  const pd = p2 * ka / curRed.eta;
+  const pmot = ceilStd(pd, IEC_KW);             // IEC motor gücü
+
+  // çevrim: n1 / n2_istek → standart i'ye yuvarla, i aralığına kırp
+  let iReq = curPole / n2;
+  let iStd = nearStd(iReq, ISO_I);
+  iStd = Math.min(Math.max(iStd, curRed.imin), curRed.imax);
+
+  const n2g = curPole / iStd;                   // gerçek çıkış devri
+  const t1  = 9550 * pmot / curPole;            // motor mili torku
+  const t2g = t1 * iStd * curRed.eta;           // gerçek çıkış torku
+  const etaPct = curRed.eta * 100;
+
+  // servis kontrolü: gerçek çıkış torku, talep × K_A'yı karşılıyor mu
+  const need = t2 * ka;
+  const ratio = t2g / need;                     // >1 güvenli
+
+  $('r_pmot').textContent = pmot;
+  $('r_pmot_note').textContent = `kW · talep ${pd.toFixed(2)}`;
+  $('r_i').textContent = iStd;
+  $('r_i_note').textContent = `istek ${iReq.toFixed(1)}`;
+  $('r_n2g').textContent = n2g.toFixed(1);
+  $('r_n2g_note').textContent = `hedef ${n2}`;
+  $('r_t2g').textContent = Math.round(t2g);
+  $('r_t1').textContent = t1.toFixed(2);
+  $('r_eta').textContent = etaPct.toFixed(0);
+
+  $('s_serv').innerHTML = servBadge(ratio);
+  $('s_results').classList.add('visible');
+
+  lastSel = {
+    kind:'sel',
+    app: curApp ? curApp.nm : 'Genel',
+    red: curRed.nm,
+    pmot, i:iStd, n2:n2g.toFixed(1), t2:Math.round(t2g),
+    eta:etaPct.toFixed(0), ratio
+  };
+  drawDiagram(lastSel);
+}
+
+/* ════════ MOD 2: KOMBİNEZON DOĞRULA ════════ */
+function liveVerify(){
+  const p   = parseFloat($('v_p').value)   || 0;
+  const n1  = parseFloat($('v_n1').value)  || 0;
+  const i   = parseFloat($('v_i').value)   || 0;
+  const eta = parseFloat($('v_eta').value) || 0;
+  if(p > 0 && n1 > 0 && i > 0 && eta > 0){
+    const n2 = n1 / i;
+    const t2 = 9550 * p * eta / n2;            // = t1 * i * eta
+    $('v_n2live').textContent = n2.toFixed(1) + ' rpm';
+    $('v_t2live').textContent = Math.round(t2) + ' N·m';
+  } else {
+    $('v_n2live').textContent = '—';
+    $('v_t2live').textContent = '—';
+  }
+}
+
+function calcVerify(){
+  const p    = parseFloat($('v_p').value)    || 0;
+  const n1   = parseFloat($('v_n1').value)   || 0;
+  const i    = parseFloat($('v_i').value)    || 0;
+  const eta  = parseFloat($('v_eta').value)  || 0;
+  const ka   = parseFloat($('v_ka').value)   || 1;
+  const treq = parseFloat($('v_treq').value) || 0;
+  if(p <= 0 || n1 <= 0 || i <= 0 || eta <= 0){ return; }
+
+  const n2 = n1 / i;
+  const t1 = 9550 * p / n1;
+  const t2 = t1 * i * eta;                      // kapasite (çıkış torku)
+  const p2 = t2 * n2 / 9550;
+
+  $('rv_n2').textContent = n2.toFixed(1);
+  $('rv_t2').textContent = Math.round(t2);
+  $('rv_p2').textContent = p2.toFixed(2);
+  $('rv_t1').textContent = t1.toFixed(2);
+
+  let ratio = null;
+  if(treq > 0){
+    const need = treq * ka;                     // K_A dahil talep
+    ratio = t2 / need;                          // kapasite / talep
+    $('rv_util').textContent = (need / t2).toFixed(2);
+    $('rv_util_note').textContent = `talep ${Math.round(need)} / kap. ${Math.round(t2)}`;
+    $('rv_margin').textContent = ((ratio - 1) * 100).toFixed(0);
+    $('v_serv').innerHTML = servBadge(ratio);
+  } else {
+    $('rv_util').textContent = '—';
+    $('rv_util_note').textContent = 'T_gerek girilmedi';
+    $('rv_margin').textContent = '—';
+    $('v_serv').innerHTML = `<span class="serv-badge serv-warn">○ Yük talebi girilmedi</span>`;
+  }
+
+  $('v_results').classList.add('visible');
+
+  lastChk = {
+    kind:'chk',
+    app:'Mevcut sistem',
+    red:`i=${i} · η=${eta}`,
+    pmot:p, i:i, n2:n2.toFixed(1), t2:Math.round(t2),
+    eta:(eta*100).toFixed(0), ratio
+  };
+  drawDiagram(lastChk);
+}
+
+/* ── Servis durumu rozeti ── */
+function servBadge(ratio){
+  if(ratio === null) return `<span class="serv-badge serv-warn">○ Yük talebi yok</span>`;
+  if(ratio >= 1.15)  return `<span class="serv-badge serv-safe">✓ Güvenli · ${(ratio).toFixed(2)}× pay</span>`;
+  if(ratio >= 1.0)   return `<span class="serv-badge serv-warn">△ Sınırda · ${(ratio).toFixed(2)}× pay</span>`;
+  return `<span class="serv-badge serv-danger">✕ Yetersiz · ${(ratio).toFixed(2)}× pay</span>`;
+}
+
+/* ════════ KARŞILAŞTIRMA LİSTESİ ════════ */
+function addCombo(kind){
+  const src = kind === 'sel' ? lastSel : lastChk;
+  if(!src){ return; }
+  combos.push({ ...src, _id: Date.now() + Math.random() });
+  renderCombos();
+}
+
+function delCombo(id){
+  combos = combos.filter(c => c._id !== id);
+  renderCombos();
+}
+
+function clearCombos(){
+  combos = [];
+  renderCombos();
+}
+
+function renderCombos(){
+  const box = $('combo-list');
+  if(combos.length === 0){
+    box.innerHTML = `<div class="empty-st"><div class="ei">⚙️</div>
+      <p>Hesapla → Listeye Ekle.<br>Kombinezonları yan yana<br>karşılaştır.</p></div>`;
+    return;
+  }
+  box.innerHTML = combos.map(c => {
+    const tag = c.kind === 'sel'
+      ? `<span class="ci-tag sel">SEÇİM</span>`
+      : `<span class="ci-tag chk">DOĞRULA</span>`;
+    const serv = c.ratio === null
+      ? ''
+      : `<div class="ci-serv">${servBadge(c.ratio)}</div>`;
+    return `<div class="combo-item">
+      <div class="ci-top">
+        ${tag}
+        <span class="ci-app">${c.app}</span>
+        <button class="ci-del" onclick="delCombo(${c._id})">×</button>
+      </div>
+      <div class="ci-grid">
+        <div class="ci-row"><span class="ci-k">Motor</span><span class="ci-v ac">${c.pmot} kW</span></div>
+        <div class="ci-row"><span class="ci-k">Çevrim i</span><span class="ci-v">${c.i}</span></div>
+        <div class="ci-row"><span class="ci-k">n₂</span><span class="ci-v bl">${c.n2} rpm</span></div>
+        <div class="ci-row"><span class="ci-k">T₂</span><span class="ci-v tl">${c.t2} N·m</span></div>
+        <div class="ci-row"><span class="ci-k">Verim</span><span class="ci-v">${c.eta}%</span></div>
+        <div class="ci-row"><span class="ci-k">Tip</span><span class="ci-v" style="font-size:var(--fz-10)">${c.red}</span></div>
+      </div>
+      ${serv}
+    </div>`;
+  }).join('');
+}
+
+/* ════════ SVG BLOK DİYAGRAM ════════ */
+function drawDiagram(data){
+  const W = 448, H = 168;
+  const c = {
+    mc:'#f97316', bl:'#60a5fa', tl:'#00d4aa', dim:'#52527a',
+    line:'#1e1e34', txt:'#dde1f0', dim2:'#8080a8'
+  };
+  const fh = 'font-family:Barlow Condensed,sans-serif';
+  const fm = 'font-family:JetBrains Mono,monospace';
+
+  // değerler — hesap yapılmışsa data'dan, yoksa canlı/placeholder
+  let pmot = '—', i = '—', n2 = '—', t2 = '—', n1 = '—';
+  if(mode === 'select'){
+    n1 = curPole;
+    if(data && data.kind === 'sel'){ pmot=data.pmot+' kW'; i=data.i; n2=data.n2; t2=data.t2; }
+  } else {
+    n1 = parseFloat($('v_n1').value) || '—';
+    if(data && data.kind === 'chk'){ pmot=data.pmot+' kW'; i=data.i; n2=data.n2; t2=data.t2; }
+  }
+
+  // kutu konumları
+  const mY = 50, mH = 68;
+  const mX = 24,  mW = 96;     // motor
+  const rX = 188, rW = 110;    // redüktör
+  const shaftY = mY + mH/2;
+
+  const box = (x,w,fill,stroke) =>
+    `<rect x="${x}" y="${mY}" width="${w}" height="${mH}" rx="9"
+       fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`;
+
+  // motor (silindir hissi: gövde + iki halka)
+  const motor = `
+    ${box(mX, mW, 'rgba(96,165,250,0.10)', c.bl)}
+    <line x1="${mX+22}" y1="${mY+8}" x2="${mX+22}" y2="${mY+mH-8}" stroke="${c.bl}" stroke-width="1" opacity="0.4"/>
+    <line x1="${mX+mW-22}" y1="${mY+8}" x2="${mX+mW-22}" y2="${mY+mH-8}" stroke="${c.bl}" stroke-width="1" opacity="0.4"/>
+    <text x="${mX+mW/2}" y="${mY-8}" text-anchor="middle" style="${fh};font-size:13px;font-weight:700;fill:${c.bl}">MOTOR</text>
+    <text x="${mX+mW/2}" y="${shaftY+1}" text-anchor="middle" style="${fm};font-size:13px;font-weight:600;fill:${c.txt}">${pmot}</text>
+    <text x="${mX+mW/2}" y="${mY+mH+15}" text-anchor="middle" style="${fm};font-size:11px;fill:${c.dim2}">n₁ ${n1} rpm</text>`;
+
+  // giriş mili (motor → redüktör)
+  const inShaft = `
+    <rect x="${mX+mW}" y="${shaftY-3}" width="${rX-(mX+mW)}" height="6" fill="${c.line}"/>
+    <line x1="${mX+mW}" y1="${shaftY}" x2="${rX}" y2="${shaftY}" stroke="${c.dim}" stroke-width="1.5"/>`;
+
+  // redüktör (dişli kutusu — köşeli, içinde i)
+  const reducer = `
+    ${box(rX, rW, 'rgba(249,115,22,0.10)', c.mc)}
+    <text x="${rX+rW/2}" y="${mY-8}" text-anchor="middle" style="${fh};font-size:13px;font-weight:700;fill:${c.mc}">REDÜKTÖR</text>
+    <text x="${rX+rW/2}" y="${shaftY-4}" text-anchor="middle" style="${fm};font-size:11px;fill:${c.dim2}">çevrim</text>
+    <text x="${rX+rW/2}" y="${shaftY+13}" text-anchor="middle" style="${fm};font-size:16px;font-weight:600;fill:${c.mc}">i = ${i}</text>
+    <text x="${rX+rW/2}" y="${mY+mH+15}" text-anchor="middle" style="${fh};font-size:11px;letter-spacing:0.5px;fill:${c.dim2}">${mode==='select'?(curRed?curRed.nm.toUpperCase():''):''}</text>`;
+
+  // çıkış mili + ok
+  const outX0 = rX + rW;
+  const outX1 = W - 26;
+  const outShaft = `
+    <rect x="${outX0}" y="${shaftY-4}" width="${outX1-outX0-12}" height="8" fill="${c.line}"/>
+    <line x1="${outX0}" y1="${shaftY}" x2="${outX1-14}" y2="${shaftY}" stroke="${c.tl}" stroke-width="1.5"/>
+    <polygon points="${outX1-14},${shaftY-7} ${outX1},${shaftY} ${outX1-14},${shaftY+7}" fill="${c.tl}"/>
+    <text x="${outX0+18}" y="${mY-8}" text-anchor="start" style="${fh};font-size:13px;font-weight:700;fill:${c.tl}">ÇIKIŞ</text>
+    <text x="${(outX0+outX1)/2-4}" y="${mY+mH+15}" text-anchor="middle" style="${fm};font-size:11px;fill:${c.tl}">n₂ ${n2}</text>
+    <text x="${(outX0+outX1)/2-4}" y="${mY+mH+30}" text-anchor="middle" style="${fm};font-size:11px;fill:${c.tl}">T₂ ${t2} N·m</text>`;
+
+  $('diag-svg').innerHTML = motor + inShaft + reducer + outShaft;
+}
+</script>
+</body>
+</html>

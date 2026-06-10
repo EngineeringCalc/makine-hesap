@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kiriş / Profil Hesabı | MH Platform</title>
+<link rel="stylesheet" href="mh-tokens.css">
+<style>
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,0.016) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.016) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none}
+/* NAV */
+nav{position:relative;z-index:10;flex-shrink:0;background:rgba(7,7,14,0.92);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;height:52px;gap:20px}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:var(--fz-18);letter-spacing:3px;color:var(--orange);text-decoration:none}
+.brand em{color:var(--text);font-style:normal}
+.breadcrumb{font-size:var(--fz-12);color:var(--dim2);font-family:var(--font-m);display:flex;align-items:center;gap:8px}
+.breadcrumb span{color:var(--dim)}
+/* APP LAYOUT */
+.app{position:relative;z-index:1;display:flex;flex:1;overflow:hidden;justify-content:flex-start}
+/* SOL */
+.prof-col{width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding-bottom:16px;flex-shrink:0}
+.col-label{font-family:var(--font-h);font-size:var(--fz-13);letter-spacing:2px;color:#9090c0;text-transform:uppercase;padding:14px 14px 8px}
+.prof-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;background:transparent;
+  border:none;border-left:3px solid transparent;color:var(--dim2);font-family:var(--font-b);font-size:calc(12.5px * var(--fz));
+  cursor:pointer;text-align:left;transition:all .15s}
+.prof-btn:hover{background:var(--surf1);color:var(--text)}
+.prof-btn.active{background:var(--surf1);color:var(--text);font-weight:500;border-left-color:var(--orange)}
+.prof-icon{font-size:15px;width:30px;text-align:center;flex-shrink:0;font-family:var(--font-m);font-weight:600;color:var(--blue)}
+.prof-btn.active .prof-icon{color:var(--orange)}
+.col-sub{font-family:var(--font-m);font-size:var(--fz-11);color:var(--dim);padding:12px 14px 0;line-height:1.7}
+.col-divider{height:1px;background:var(--border);margin:12px 14px}
+/* ORTA */
+.input-col{width:420px;flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto;padding:14px 16px;gap:12px}
+.preview-card{background:#12122a;border:1px solid rgba(249,115,22,.18);border-radius:10px;padding:10px;flex-shrink:0;
+  display:flex;flex-direction:column;gap:8px}
+.preview-svg-wrap{width:100%;height:190px;flex-shrink:0;background:#09090f;border-radius:8px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center}
+#beamPreview{width:100%;height:100%;display:block}
+.preview-info{display:flex;flex-direction:column;gap:2px;padding:0 2px}
+.preview-title{font-family:var(--font-h);font-size:var(--fz-15);font-weight:700;color:var(--orange)}
+.preview-formula{font-family:var(--font-m);font-size:var(--fz-11);color:#7878a8;line-height:1.7}
+/* Inputs */
+.inp-group{display:flex;flex-direction:column;gap:5px}
+.inp-label{font-size:var(--fz-14);color:#c0c0e0;font-family:var(--font-h);letter-spacing:1px;text-transform:uppercase}
+.inp-wrap{display:flex;background:var(--surf2);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .2s}
+.inp-wrap:focus-within{border-color:var(--orange)}
+.inp-wrap input{flex:1;padding:10px 12px;background:transparent;border:none;color:var(--text);
+  font-family:var(--font-m);font-size:var(--fz-15);font-weight:600;outline:none;-moz-appearance:textfield;appearance:none}
+.inp-wrap input::-webkit-outer-spin-button,.inp-wrap input::-webkit-inner-spin-button{-webkit-appearance:none}
+.inp-unit{padding:0 12px;display:flex;align-items:center;font-family:var(--font-m);font-size:var(--fz-12);
+  color:var(--dim);background:var(--surf3);border-left:1px solid var(--border);min-width:54px;justify-content:center}
+.std-select{padding:10px 12px;background:var(--surf2);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:var(--font-m);font-size:var(--fz-13);cursor:pointer;outline:none;appearance:none;transition:border-color .2s;width:100%}
+.std-select:focus{border-color:var(--orange)}
+.mat-select{font-family:var(--font-b)}
+.row-toggle{display:flex;gap:0}
+.row-toggle .inp-wrap{flex:1;border-radius:8px 0 0 8px}
+.unit-toggle{display:flex}
+.unit-btn{padding:0 13px;background:var(--surf3);border:1px solid var(--border);border-left:none;
+  color:var(--dim2);cursor:pointer;font-family:var(--font-m);font-size:var(--fz-12);transition:all .15s}
+.unit-btn:last-child{border-radius:0 8px 8px 0}
+.unit-btn.on{background:var(--orange);color:white;border-color:var(--orange)}
+.calc-btn{width:100%;padding:14px;background:var(--orange);border:none;border-radius:10px;color:white;
+  font-family:var(--font-h);font-size:var(--fz-18);font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.calc-btn:hover{background:#ea6c0d;transform:translateY(-1px);box-shadow:0 6px 24px rgba(249,115,22,.35)}
+.calc-btn:active{transform:translateY(0)}
+.result-strip{display:none;background:var(--surf1);border:1px solid var(--border);border-radius:10px;padding:14px 16px;flex-direction:column;gap:8px}
+.result-strip.show{display:flex}
+.strip-row{display:flex;gap:20px;align-items:baseline}
+.strip-item{display:flex;flex-direction:column;gap:2px}
+.strip-k{font-size:var(--fz-11);color:var(--dim2);font-family:var(--font-h);letter-spacing:1px;text-transform:uppercase}
+.strip-v{font-family:var(--font-m);font-size:22px;font-weight:600;color:var(--teal)}
+.strip-v.warn{color:var(--yellow)}
+.strip-v.bad{color:var(--red)}
+.strip-sub{font-family:var(--font-m);font-size:var(--fz-12);color:var(--dim2)}
+/* SAĞ — Sonuç Paneli */
+.res-col{background:var(--bg2);border-left:1px solid var(--border);width:340px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden}
+.res-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.res-head-title{font-family:var(--font-h);font-size:var(--fz-15);font-weight:700;letter-spacing:1px}
+.res-head-mat{font-family:var(--font-m);font-size:var(--fz-11);color:var(--dim2)}
+.res-body{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.res-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--dim);font-size:var(--fz-13);text-align:center;padding:30px}
+.res-empty-icon{font-size:36px;opacity:.3}
+.res-verdict{margin:14px 14px 4px;padding:11px;border-radius:10px;text-align:center;font-family:var(--font-h);
+  font-size:var(--fz-18);font-weight:700;letter-spacing:2px;border:1px solid}
+.res-verdict.ok{background:rgba(74,222,128,.1);color:var(--green);border-color:rgba(74,222,128,.3)}
+.res-verdict.warn{background:rgba(251,191,36,.1);color:var(--yellow);border-color:rgba(251,191,36,.3)}
+.res-verdict.bad{background:rgba(248,113,113,.1);color:var(--red);border-color:rgba(248,113,113,.3)}
+.res-verdict-sub{display:block;font-family:var(--font-b);font-size:var(--fz-11);font-weight:400;letter-spacing:0;margin-top:3px;opacity:.85}
+.res-sec{padding:12px 14px;border-bottom:1px solid var(--border)}
+.res-sec-label{font-family:var(--font-h);font-size:var(--fz-12);letter-spacing:2px;color:#9090c0;text-transform:uppercase;margin-bottom:8px}
+.res-row{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;gap:10px}
+.res-k{font-family:var(--font-b);font-size:var(--fz-12);color:var(--dim2)}
+.res-v{font-family:var(--font-m);font-size:var(--fz-13);font-weight:600;color:var(--text);text-align:right}
+.res-v small{font-weight:400;color:var(--dim);font-size:var(--fz-11)}
+.util-bar{height:8px;background:var(--surf3);border-radius:4px;overflow:hidden;margin-top:8px}
+.util-fill{height:100%;width:0;border-radius:4px;transition:width .35s ease}
+.util-cap{display:flex;justify-content:space-between;margin-top:4px;font-family:var(--font-m);font-size:var(--fz-10);color:var(--dim)}
+.xsec-wrap{display:flex;align-items:center;gap:12px;margin-top:6px}
+.xsec-svg{width:74px;height:74px;flex-shrink:0;background:#09090f;border-radius:6px}
+.xsec-dims{flex:1;display:flex;flex-direction:column;gap:2px}
+</style>
+</head>
+<body>
+<nav>
+  <a class="brand" href="index.html">MH<em>Platform</em></a>
+  <div class="breadcrumb"><span>/</span> Kiriş / Profil Hesabı</div>
+</nav>
+<div class="app">
+  <aside class="prof-col">
+    <p class="col-label">Profil Tipi</p>
+    <div id="profList"></div>
+    <div class="col-divider"></div>
+    <p class="col-sub">Standart haddelenmiş profil kesit değerleri (EN 10025 / EN 10034 nominal).
+      Kritik tasarımlarda üretici tablosuyla doğrulayın.</p>
+  </aside>
+  <div class="input-col">
+    <div class="preview-card">
+      <div class="preview-svg-wrap">
+        <svg id="beamPreview" viewBox="0 0 280 175" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="preview-info">
+        <div class="preview-title" id="prevTitle">—</div>
+        <div class="preview-formula" id="prevFormula">—</div>
+      </div>
+    </div>
+
+    <div class="inp-group">
+      <span class="inp-label">Profil Boyutu</span>
+      <select class="std-select" id="sizeSelect"></select>
+    </div>
+
+    <div class="inp-group">
+      <span class="inp-label">Statik Sistem</span>
+      <select class="std-select" id="caseSelect"></select>
+    </div>
+
+    <div class="inp-group">
+      <span class="inp-label">Açıklık (L)</span>
+      <div class="row-toggle">
+        <div class="inp-wrap"><input type="number" id="lenInput" value="2000" min="0"></div>
+        <div class="unit-toggle">
+          <button class="unit-btn on" id="lmm" onclick="setLenUnit('mm',this)">mm</button>
+          <button class="unit-btn"    id="lm"  onclick="setLenUnit('m',this)">m</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="inp-group">
+      <span class="inp-label" id="loadLabel">Tekil Yük (P)</span>
+      <div class="row-toggle">
+        <div class="inp-wrap">
+          <input type="number" id="loadInput" value="10" min="0" step="0.1">
+          <span class="inp-unit" id="loadUnit">kN</span>
+        </div>
+        <div class="unit-toggle">
+          <button class="unit-btn"    id="fN"  onclick="setLoadUnit('N',this)">N</button>
+          <button class="unit-btn on" id="fkN" onclick="setLoadUnit('kN',this)">kN</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="inp-group">
+      <span class="inp-label">Malzeme</span>
+      <select class="std-select mat-select" id="matSelect"></select>
+    </div>
+
+    <div class="inp-group">
+      <span class="inp-label">Sehim Limiti</span>
+      <select class="std-select" id="deflLimit">
+        <option value="200">L / 200 — çatı / az kritik</option>
+        <option value="250">L / 250</option>
+        <option value="300" selected>L / 300 — genel kiriş</option>
+        <option value="360">L / 360 — döşeme / hassas</option>
+        <option value="500">L / 500 — çok hassas</option>
+      </select>
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">HESAPLA</button>
+
+    <div class="result-strip" id="resultStrip">
+      <div class="strip-row">
+        <div class="strip-item">
+          <span class="strip-k">Eğilme Gerilmesi σ</span>
+          <span class="strip-v" id="stripSigma">—</span>
+        </div>
+        <div class="strip-item">
+          <span class="strip-k">Maks. Sehim δ</span>
+          <span class="strip-v" id="stripDefl">—</span>
+        </div>
+      </div>
+      <span class="strip-sub" id="stripSub">—</span>
+    </div>
+  </div><div class="res-col">
+    <div class="res-head">
+      <span class="res-head-title">Sonuçlar</span>
+      <span class="res-head-mat" id="resMat">—</span>
+    </div>
+    <div class="res-body" id="resBody">
+      <div class="res-empty" id="resEmpty">
+        <span class="res-empty-icon">📐</span>
+        <span>Profil, sistem ve yükü girin.<br>HESAPLA ile mukavemet sonuçları burada görünür.</span>
+      </div>
+      <div id="resContent" style="display:none">
+        <div class="res-verdict" id="resVerdict">—<span class="res-verdict-sub" id="resVerdictSub">—</span></div>
+
+        <div class="res-sec">
+          <div class="res-sec-label">İç Kuvvetler</div>
+          <div class="res-row"><span class="res-k">Maks. eğilme momenti M<sub>maks</sub></span><span class="res-v" id="rM">—</span></div>
+          <div class="res-row"><span class="res-k">Maks. kesme kuvveti V<sub>maks</sub></span><span class="res-v" id="rV">—</span></div>
+        </div>
+
+        <div class="res-sec">
+          <div class="res-sec-label">Gerilmeler</div>
+          <div class="res-row"><span class="res-k">Eğilme gerilmesi σ = M / W<sub>x</sub></span><span class="res-v" id="rSigma">—</span></div>
+          <div class="res-row"><span class="res-k">Kayma gerilmesi τ ≈ V / A<sub>gövde</sub></span><span class="res-v" id="rTau">—</span></div>
+          <div class="res-row"><span class="res-k">σ / f<sub>y</sub> kullanım oranı</span><span class="res-v" id="rUtil">—</span></div>
+          <div class="util-bar"><div class="util-fill" id="utilFill"></div></div>
+          <div class="util-cap"><span>0</span><span>f<sub>y</sub> = <span id="rFy">—</span></span></div>
+        </div>
+
+        <div class="res-sec">
+          <div class="res-sec-label">Sehim</div>
+          <div class="res-row"><span class="res-k">Maks. sehim δ<sub>maks</sub></span><span class="res-v" id="rDefl">—</span></div>
+          <div class="res-row"><span class="res-k">İzin verilen δ<sub>izin</sub></span><span class="res-v" id="rDeflLim">—</span></div>
+          <div class="res-row"><span class="res-k">Oran L / δ</span><span class="res-v" id="rDeflRatio">—</span></div>
+        </div>
+
+        <div class="res-sec" style="border-bottom:none">
+          <div class="res-sec-label">Kesit Özellikleri</div>
+          <div class="xsec-wrap">
+            <svg class="xsec-svg" id="xsecSvg" viewBox="0 0 74 74" xmlns="http://www.w3.org/2000/svg"></svg>
+            <div class="xsec-dims">
+              <div class="res-row"><span class="res-k">Atalet momenti I<sub>x</sub></span><span class="res-v" id="rIx">—</span></div>
+              <div class="res-row"><span class="res-k">Mukavemet momenti W<sub>x</sub></span><span class="res-v" id="rWx">—</span></div>
+              <div class="res-row"><span class="res-k">Kesit alanı A</span><span class="res-v" id="rArea">—</span></div>
+            </div>
+          </div>
+          <div class="res-row" style="margin-top:6px"><span class="res-k">h × b · t<sub>w</sub> / t<sub>f</sub></span><span class="res-v" id="rGeom">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ KESİT VERİTABANI (EN 10025 / EN 10034 nominal) ═══════════════════
+// A: cm² · Ix: cm⁴ · Wx: cm³ · h,b,tw,tf: mm
+const PROFILES = {
+  IPE: { label:'IPE Profil', icon:'I', sizes:{
+    'IPE 80' :{A:7.64, Ix:80.1,  Wx:20.0, h:80, b:46, tw:3.8, tf:5.2},
+    'IPE 100':{A:10.3, Ix:171,   Wx:34.2, h:100,b:55, tw:4.1, tf:5.7},
+    'IPE 120':{A:13.2, Ix:318,   Wx:53.0, h:120,b:64, tw:4.4, tf:6.3},
+    'IPE 140':{A:16.4, Ix:541,   Wx:77.3, h:140,b:73, tw:4.7, tf:6.9},
+    'IPE 160':{A:20.1, Ix:869,   Wx:109,  h:160,b:82, tw:5.0, tf:7.4},
+    'IPE 180':{A:23.9, Ix:1317,  Wx:146,  h:180,b:91, tw:5.3, tf:8.0},
+    'IPE 200':{A:28.5, Ix:1943,  Wx:194,  h:200,b:100,tw:5.6, tf:8.5},
+    'IPE 220':{A:33.4, Ix:2772,  Wx:252,  h:220,b:110,tw:5.9, tf:9.2},
+    'IPE 240':{A:39.1, Ix:3892,  Wx:324,  h:240,b:120,tw:6.2, tf:9.8},
+    'IPE 270':{A:45.9, Ix:5790,  Wx:429,  h:270,b:135,tw:6.6, tf:10.2},
+    'IPE 300':{A:53.8, Ix:8356,  Wx:557,  h:300,b:150,tw:7.1, tf:10.7},
+    'IPE 330':{A:62.6, Ix:11770, Wx:713,  h:330,b:160,tw:7.5, tf:11.5},
+    'IPE 360':{A:72.7, Ix:16270, Wx:904,  h:360,b:170,tw:8.0, tf:12.7},
+    'IPE 400':{A:84.5, Ix:23130, Wx:1156, h:400,b:180,tw:8.6, tf:13.5},
+    'IPE 450':{A:98.8, Ix:33740, Wx:1500, h:450,b:190,tw:9.4, tf:14.6},
+    'IPE 500':{A:116,  Ix:48200, Wx:1928, h:500,b:200,tw:10.2,tf:16.0},
+    'IPE 550':{A:134,  Ix:67120, Wx:2441, h:550,b:210,tw:11.1,tf:17.2},
+    'IPE 600':{A:156,  Ix:92080, Wx:3069, h:600,b:220,tw:12.0,tf:19.0},
+  }},
+  HEB: { label:'HEB Profil', icon:'H', sizes:{
+    'HEB 100':{A:26.0, Ix:449.5, Wx:89.9, h:100,b:100,tw:6.0, tf:10.0},
+    'HEB 120':{A:34.0, Ix:864,   Wx:144,  h:120,b:120,tw:6.5, tf:11.0},
+    'HEB 140':{A:43.0, Ix:1509,  Wx:216,  h:140,b:140,tw:7.0, tf:12.0},
+    'HEB 160':{A:54.3, Ix:2492,  Wx:311,  h:160,b:160,tw:8.0, tf:13.0},
+    'HEB 180':{A:65.3, Ix:3831,  Wx:426,  h:180,b:180,tw:8.5, tf:14.0},
+    'HEB 200':{A:78.1, Ix:5696,  Wx:570,  h:200,b:200,tw:9.0, tf:15.0},
+    'HEB 220':{A:91.0, Ix:8091,  Wx:736,  h:220,b:220,tw:9.5, tf:16.0},
+    'HEB 240':{A:106,  Ix:11260, Wx:938,  h:240,b:240,tw:10.0,tf:17.0},
+    'HEB 260':{A:118,  Ix:14920, Wx:1148, h:260,b:260,tw:10.0,tf:17.5},
+    'HEB 280':{A:131,  Ix:19270, Wx:1376, h:280,b:280,tw:10.5,tf:18.0},
+    'HEB 300':{A:149,  Ix:25170, Wx:1678, h:300,b:300,tw:11.0,tf:19.0},
+    'HEB 320':{A:161,  Ix:30820, Wx:1926, h:320,b:300,tw:11.5,tf:20.5},
+    'HEB 340':{A:171,  Ix:36660, Wx:2156, h:340,b:300,tw:12.0,tf:21.5},
+    'HEB 360':{A:181,  Ix:43190, Wx:2400, h:360,b:300,tw:12.5,tf:22.5},
+    'HEB 400':{A:198,  Ix:57680, Wx:2884, h:400,b:300,tw:13.5,tf:24.0},
+    'HEB 450':{A:218,  Ix:79890, Wx:3551, h:450,b:300,tw:14.0,tf:26.0},
+    'HEB 500':{A:239,  Ix:107200,Wx:4287, h:500,b:300,tw:14.5,tf:28.0},
+    'HEB 600':{A:270,  Ix:171000,Wx:5701, h:600,b:300,tw:15.5,tf:30.0},
+  }},
+  HEA: { label:'HEA Profil', icon:'H', sizes:{
+    'HEA 100':{A:21.2, Ix:349.2, Wx:72.8, h:96, b:100,tw:5.0, tf:8.0},
+    'HEA 120':{A:25.3, Ix:606,   Wx:106,  h:114,b:120,tw:5.0, tf:8.0},
+    'HEA 140':{A:31.4, Ix:1033,  Wx:155,  h:133,b:140,tw:5.5, tf:8.5},
+    'HEA 160':{A:38.8, Ix:1673,  Wx:220,  h:152,b:160,tw:6.0, tf:9.0},
+    'HEA 180':{A:45.3, Ix:2510,  Wx:294,  h:171,b:180,tw:6.0, tf:9.5},
+    'HEA 200':{A:53.8, Ix:3692,  Wx:389,  h:190,b:200,tw:6.5, tf:10.0},
+    'HEA 220':{A:64.3, Ix:5410,  Wx:515,  h:210,b:220,tw:7.0, tf:11.0},
+    'HEA 240':{A:76.8, Ix:7763,  Wx:675,  h:230,b:240,tw:7.5, tf:12.0},
+    'HEA 260':{A:86.8, Ix:10450, Wx:836,  h:250,b:260,tw:7.5, tf:12.5},
+    'HEA 280':{A:97.3, Ix:13670, Wx:1013, h:270,b:280,tw:8.0, tf:13.0},
+    'HEA 300':{A:112,  Ix:18260, Wx:1260, h:290,b:300,tw:8.5, tf:14.0},
+    'HEA 320':{A:124,  Ix:22930, Wx:1479, h:310,b:300,tw:9.0, tf:15.5},
+    'HEA 340':{A:133,  Ix:27690, Wx:1678, h:330,b:300,tw:9.5, tf:16.5},
+    'HEA 360':{A:143,  Ix:33090, Wx:1891, h:350,b:300,tw:10.0,tf:17.5},
+    'HEA 400':{A:159,  Ix:45070, Wx:2311, h:390,b:300,tw:11.0,tf:19.0},
+    'HEA 450':{A:178,  Ix:63720, Wx:2896, h:440,b:300,tw:11.5,tf:21.0},
+    'HEA 500':{A:198,  Ix:86970, Wx:3550, h:490,b:300,tw:12.0,tf:23.0},
+    'HEA 600':{A:226,  Ix:141200,Wx:4787, h:590,b:300,tw:13.0,tf:25.0},
+  }},
+  UPN: { label:'UPN Profil (U)', icon:'U', sizes:{
+    'UPN 80' :{A:11.0, Ix:106,   Wx:26.5, h:80, b:45, tw:6.0, tf:8.0},
+    'UPN 100':{A:13.5, Ix:206,   Wx:41.2, h:100,b:50, tw:6.0, tf:8.5},
+    'UPN 120':{A:17.0, Ix:364,   Wx:60.7, h:120,b:55, tw:7.0, tf:9.0},
+    'UPN 140':{A:20.4, Ix:605,   Wx:86.4, h:140,b:60, tw:7.0, tf:10.0},
+    'UPN 160':{A:24.0, Ix:925,   Wx:116,  h:160,b:65, tw:7.5, tf:10.5},
+    'UPN 180':{A:28.0, Ix:1350,  Wx:150,  h:180,b:70, tw:8.0, tf:11.0},
+    'UPN 200':{A:32.2, Ix:1910,  Wx:191,  h:200,b:75, tw:8.5, tf:11.5},
+    'UPN 220':{A:37.4, Ix:2690,  Wx:245,  h:220,b:80, tw:9.0, tf:12.5},
+    'UPN 240':{A:42.3, Ix:3600,  Wx:300,  h:240,b:85, tw:9.5, tf:13.0},
+    'UPN 260':{A:48.3, Ix:4820,  Wx:371,  h:260,b:90, tw:10.0,tf:14.0},
+    'UPN 280':{A:53.3, Ix:6280,  Wx:448,  h:280,b:95, tw:10.0,tf:15.0},
+    'UPN 300':{A:58.8, Ix:8030,  Wx:535,  h:300,b:100,tw:10.0,tf:16.0},
+    'UPN 320':{A:75.8, Ix:10870, Wx:679,  h:320,b:100,tw:14.0,tf:17.5},
+    'UPN 350':{A:77.3, Ix:12840, Wx:734,  h:350,b:100,tw:14.0,tf:16.0},
+    'UPN 380':{A:80.4, Ix:15760, Wx:829,  h:380,b:102,tw:13.5,tf:16.0},
+    'UPN 400':{A:91.5, Ix:20350, Wx:1020, h:400,b:110,tw:14.0,tf:18.0},
+  }},
+};
+
+// ═══ STATİK SİSTEMLER ═══════════════════════════════════════════════
+// P: N · w: N/mm · L: mm · E: N/mm² · I: mm⁴  →  M: N·mm · δ: mm
+const CASES = {
+  'ss-point':  {label:'Basit Kiriş — Ortada Tekil Yük', load:'point', diagram:'ssPoint',
+    M:(F,L)=>F*L/4,   V:(F,L)=>F/2,   d:(F,L,E,I)=>F*Math.pow(L,3)/(48*E*I),
+    formula:'M = P·L / 4   ·   δ = P·L³ / 48·E·I'},
+  'ss-udl':    {label:'Basit Kiriş — Yayılı Yük', load:'dist', diagram:'ssUdl',
+    M:(w,L)=>w*L*L/8, V:(w,L)=>w*L/2, d:(w,L,E,I)=>5*w*Math.pow(L,4)/(384*E*I),
+    formula:'M = q·L² / 8   ·   δ = 5·q·L⁴ / 384·E·I'},
+  'cant-point':{label:'Konsol — Uç Tekil Yük', load:'point', diagram:'cantPoint',
+    M:(F,L)=>F*L,     V:(F,L)=>F,     d:(F,L,E,I)=>F*Math.pow(L,3)/(3*E*I),
+    formula:'M = P·L   ·   δ = P·L³ / 3·E·I'},
+  'cant-udl':  {label:'Konsol — Yayılı Yük', load:'dist', diagram:'cantUdl',
+    M:(w,L)=>w*L*L/2, V:(w,L)=>w*L,   d:(w,L,E,I)=>w*Math.pow(L,4)/(8*E*I),
+    formula:'M = q·L² / 2   ·   δ = q·L⁴ / 8·E·I'},
+};
+
+// ═══ MALZEME ════════════════════════════════════════════════════════
+const MAT = {
+  'S235': {name:'S235 Yapı Çeliği', E:210000, fy:235},
+  'S275': {name:'S275 Yapı Çeliği', E:210000, fy:275},
+  'S355': {name:'S355 Yapı Çeliği', E:210000, fy:355},
+  'SS304':{name:'Paslanmaz 304',    E:193000, fy:215},
+  'AL6061':{name:'Alüminyum 6061-T6',E:70000, fy:240},
+  'AL6082':{name:'Alüminyum 6082-T6',E:70000, fy:260},
+};
+
+// ═══ DURUM ══════════════════════════════════════════════════════════
+let curProf='IPE', lenUnit='mm', loadUnit='kN';
+
+// ═══ SVG ÇİZİM YARDIMCILARI ═════════════════════════════════════════
+const PW=280, PH=175;
+const BX1=46, BX2=234, BY=88;          // kiriş ekseni
+const FC='rgba(249,115,22,.32)', SC='#f97316', DC='#60a5fa', LC='#fbbf24';
+
+function hDim(x1,x2,y,txt,col=DC){
+  const mx=(x1+x2)/2;
+  return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${col}" stroke-width=".9"/>
+    <polygon points="${x1},${y} ${x1+7},${y-3} ${x1+7},${y+3}" fill="${col}"/>
+    <polygon points="${x2},${y} ${x2-7},${y-3} ${x2-7},${y+3}" fill="${col}"/>
+    <rect x="${mx-txt.length*3}" y="${y+3}" width="${txt.length*6+2}" height="13" fill="#09090f" rx="2"/>
+    <text x="${mx}" y="${y+13}" text-anchor="middle" font-size="10" fill="${col}" font-family="JetBrains Mono,monospace">${txt}</text>`;
+}
+function ground(x1,x2,y){
+  let s=`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${DC}" stroke-width="1"/>`;
+  for(let gx=x1+2; gx<x2; gx+=6) s+=`<line x1="${gx}" y1="${y}" x2="${gx-5}" y2="${y+6}" stroke="${DC}" stroke-width=".7"/>`;
+  return s;
+}
+function pin(x,y){
+  return `<polygon points="${x},${y} ${x-8},${y+15} ${x+8},${y+15}" fill="none" stroke="${DC}" stroke-width="1.3"/>`+ground(x-12,x+12,y+15);
+}
+function roller(x,y){
+  return `<polygon points="${x},${y} ${x-8},${y+13} ${x+8},${y+13}" fill="none" stroke="${DC}" stroke-width="1.3"/>
+    <circle cx="${x-4}" cy="${y+16.5}" r="2.4" fill="none" stroke="${DC}" stroke-width="1"/>
+    <circle cx="${x+4}" cy="${y+16.5}" r="2.4" fill="none" stroke="${DC}" stroke-width="1"/>`+ground(x-12,x+12,y+19);
+}
+function wall(x,yTop,yBot){
+  let s=`<line x1="${x}" y1="${yTop-6}" x2="${x}" y2="${yBot+6}" stroke="${DC}" stroke-width="1.4"/>`;
+  for(let gy=yTop-6; gy<yBot+6; gy+=6) s+=`<line x1="${x}" y1="${gy}" x2="${x-6}" y2="${gy+6}" stroke="${DC}" stroke-width=".7"/>`;
+  return s;
+}
+function beam(x1,x2,y){
+  return `<rect x="${x1}" y="${y-3}" width="${x2-x1}" height="6" fill="${FC}" stroke="${SC}" stroke-width="1.6" rx="1"/>`;
+}
+function pArrow(x,yTop,yBot){
+  return `<line x1="${x}" y1="${yTop}" x2="${x}" y2="${yBot}" stroke="${LC}" stroke-width="1.6"/>
+    <polygon points="${x},${yBot} ${x-3.4},${yBot-7} ${x+3.4},${yBot-7}" fill="${LC}"/>`;
+}
+function udl(x1,x2,yTop,yBot){
+  let s=`<line x1="${x1}" y1="${yTop}" x2="${x2}" y2="${yTop}" stroke="${LC}" stroke-width="1.3"/>`;
+  const n=8, step=(x2-x1)/n;
+  for(let i=0;i<=n;i++){const x=x1+i*step; s+=`<line x1="${x}" y1="${yTop}" x2="${x}" y2="${yBot}" stroke="${LC}" stroke-width="1"/>
+    <polygon points="${x},${yBot} ${x-2.6},${yBot-5} ${x+2.6},${yBot-5}" fill="${LC}"/>`;}
+  return s;
+}
+function loadTxt(x,y,t){return `<text x="${x}" y="${y}" text-anchor="middle" font-size="11" fill="${LC}" font-family="JetBrains Mono,monospace" font-weight="600">${t}</text>`;}
+
+// ── Diyagramlar ──
+const DIAG={
+  ssPoint(){const m=(BX1+BX2)/2;return beam(BX1,BX2,BY)+pin(BX1,BY+3)+roller(BX2,BY+3)+pArrow(m,BY-36,BY-5)+loadTxt(m,BY-42,'P')+hDim(BX1,BX2,BY+38,'L');},
+  ssUdl(){return beam(BX1,BX2,BY)+pin(BX1,BY+3)+roller(BX2,BY+3)+udl(BX1,BX2,BY-30,BY-5)+loadTxt((BX1+BX2)/2,BY-36,'q')+hDim(BX1,BX2,BY+38,'L');},
+  cantPoint(){return wall(BX1,BY-26,BY+26)+beam(BX1,BX2,BY)+pArrow(BX2,BY-36,BY-5)+loadTxt(BX2,BY-42,'P')+hDim(BX1,BX2,BY+38,'L');},
+  cantUdl(){return wall(BX1,BY-26,BY+26)+beam(BX1,BX2,BY)+udl(BX1,BX2,BY-30,BY-5)+loadTxt((BX1+BX2)/2,BY-36,'q')+hDim(BX1,BX2,BY+38,'L');},
+};
+
+function drawPreview(){
+  const c=CASES[document.getElementById('caseSelect').value];
+  document.getElementById('beamPreview').innerHTML=DIAG[c.diagram]();
+  document.getElementById('prevTitle').textContent=c.label;
+  document.getElementById('prevFormula').textContent=c.formula;
+}
+
+// ── Kesit (I / U) mini çizimi ──
+function drawXsec(d,type){
+  const pad=8, vb=74, maxd=vb-2*pad;
+  const s=Math.min(maxd/d.h, maxd/d.b);
+  const sh=d.h*s, sb=d.b*s, stf=Math.max(d.tf*s,1.4), stw=Math.max(d.tw*s,1.4);
+  const x0=(vb-sb)/2, y0=(vb-sh)/2;
+  let inner;
+  if(type==='UPN'){
+    const pts=`${x0},${y0} ${x0+sb},${y0} ${x0+sb},${y0+stf} ${x0+stw},${y0+stf} ${x0+stw},${y0+sh-stf} ${x0+sb},${y0+sh-stf} ${x0+sb},${y0+sh} ${x0},${y0+sh}`;
+    inner=`<polygon points="${pts}" fill="${FC}" stroke="${SC}" stroke-width="1.2"/>`;
+  } else {
+    const wx=x0+(sb-stw)/2;
+    inner=`<rect x="${x0}" y="${y0}" width="${sb}" height="${stf}" fill="${FC}" stroke="${SC}" stroke-width="1"/>
+      <rect x="${wx}" y="${y0+stf}" width="${stw}" height="${sh-2*stf}" fill="${FC}" stroke="${SC}" stroke-width="1"/>
+      <rect x="${x0}" y="${y0+sh-stf}" width="${sb}" height="${stf}" fill="${FC}" stroke="${SC}" stroke-width="1"/>`;
+  }
+  document.getElementById('xsecSvg').innerHTML=inner;
+}
+
+// ═══ BİRİM / SEÇİM ═══════════════════════════════════════════════════
+function setLenUnit(u,btn){lenUnit=u;document.getElementById('lmm').classList.toggle('on',u==='mm');document.getElementById('lm').classList.toggle('on',u==='m');}
+function setLoadUnit(u,btn){loadUnit=u;document.getElementById('fN').classList.toggle('on',u==='N');document.getElementById('fkN').classList.toggle('on',u==='kN');refreshLoadUnit();}
+function getLenMm(){const v=parseFloat(document.getElementById('lenInput').value)||0;return lenUnit==='m'?v*1000:v;}
+
+function refreshLoadUnit(){
+  const c=CASES[document.getElementById('caseSelect').value];
+  const isDist=c.load==='dist';
+  document.getElementById('loadLabel').textContent=isDist?'Yayılı Yük (q)':'Tekil Yük (P)';
+  document.getElementById('loadUnit').textContent=loadUnit+(isDist?'/m':'');
+}
+
+// ═══ PROFİL LİSTESİ ══════════════════════════════════════════════════
+(function init(){
+  const list=document.getElementById('profList');
+  for(const key in PROFILES){
+    const p=PROFILES[key];
+    const btn=document.createElement('button');
+    btn.className='prof-btn'+(key===curProf?' active':'');
+    btn.dataset.key=key;
+    btn.innerHTML=`<span class="prof-icon">${p.icon}</span>${p.label}`;
+    btn.onclick=()=>selectProf(key);
+    list.appendChild(btn);
+  }
+  // statik sistem dropdown
+  const cs=document.getElementById('caseSelect');
+  for(const k in CASES) cs.innerHTML+=`<option value="${k}">${CASES[k].label}</option>`;
+  cs.onchange=()=>{drawPreview();refreshLoadUnit();};
+  // malzeme dropdown
+  const ms=document.getElementById('matSelect');
+  for(const k in MAT) ms.innerHTML+=`<option value="${k}">${MAT[k].name} — E=${(MAT[k].E/1000)} GPa · fy=${MAT[k].fy}</option>`;
+
+  selectProf(curProf);
+  drawPreview();
+  refreshLoadUnit();
+})();
+
+function selectProf(key){
+  curProf=key;
+  document.querySelectorAll('.prof-btn').forEach(b=>b.classList.toggle('active',b.dataset.key===key));
+  const sel=document.getElementById('sizeSelect');
+  const sizes=PROFILES[key].sizes;
+  sel.innerHTML=Object.keys(sizes).map(s=>`<option value="${s}">${s}</option>`).join('');
+  // makul varsayılan: ortalarda bir kesit
+  const keys=Object.keys(sizes); sel.value=keys[Math.min(6,keys.length-1)];
+}
+
+// ═══ HESAPLAMA ══════════════════════════════════════════════════════
+function fmt(v,d=2){
+  if(!isFinite(v)) return '—';
+  const a=Math.abs(v);
+  if(a!==0 && (a>=1e5||a<1e-2)) return v.toExponential(2);
+  return v.toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+
+function calculate(){
+  const sizeKey=document.getElementById('sizeSelect').value;
+  const sec=PROFILES[curProf].sizes[sizeKey];
+  const c=CASES[document.getElementById('caseSelect').value];
+  const m=MAT[document.getElementById('matSelect').value];
+  const L=getLenMm();
+  let loadRaw=parseFloat(document.getElementById('loadInput').value)||0;
+
+  if(L<=0){alert('Lütfen geçerli bir açıklık (L) girin.');return;}
+  if(loadRaw<=0){alert('Lütfen geçerli bir yük girin.');return;}
+
+  // Yükü temel birime çevir:  tekil → N ,  yayılı → N/mm
+  let loadN = loadUnit==='kN' ? loadRaw*1000 : loadRaw;          // N (tekil) veya N/m (yayılı, kN→N)
+  let F = c.load==='dist' ? loadN/1000 : loadN;                  // yayılı: N/m → N/mm
+
+  // Birimler:  Ix(cm⁴)→mm⁴  Wx(cm³)→mm³  A(cm²)→mm²
+  const I = sec.Ix*1e4, W = sec.Wx*1e3, Amm = sec.A*100;
+  const Aw = Math.max((sec.h-2*sec.tf)*sec.tw, 1);               // gövde alanı (mm²)
+  const E = m.E;
+
+  const Mmax = c.M(F,L);            // N·mm
+  const Vmax = c.V(F,L);            // N
+  const sigma = Mmax/W;             // MPa
+  const tau   = Vmax/Aw;            // MPa (yaklaşık)
+  const defl  = c.d(F,L,E,I);       // mm
+  const util  = sigma/m.fy;
+
+  const limDiv = parseInt(document.getElementById('deflLimit').value);
+  const deflLim = L/limDiv;
+  const deflOk  = defl<=deflLim;
+
+  // ── Verdict ──
+  let cls,word,sub;
+  if(util>1){cls='bad';word='YETERSİZ';sub='Eğilme gerilmesi akma sınırını aşıyor — daha büyük kesit seçin.';}
+  else if(util>0.66||!deflOk){cls='warn';word='KONTROL ET';
+    sub=!deflOk?'Sehim limiti aşıldı (δ > δ_izin).':'Yüksek kullanım oranı — güvenlik katsayısını değerlendirin.';}
+  else{cls='ok';word='GÜVENLİ';sub='Gerilme ve sehim sınırların içinde.';}
+
+  // ── Sonuç paneli ──
+  document.getElementById('resEmpty').style.display='none';
+  document.getElementById('resContent').style.display='block';
+  document.getElementById('resMat').textContent=`${sizeKey} · ${m.name.split(' ')[0]}`;
+
+  const verdict=document.getElementById('resVerdict');
+  verdict.className='res-verdict '+cls;
+  verdict.firstChild.textContent=word;
+  document.getElementById('resVerdictSub').textContent=sub;
+
+  document.getElementById('rM').innerHTML=`${fmt(Mmax/1e6,2)} <small>kN·m</small>`;
+  document.getElementById('rV').innerHTML=`${fmt(Vmax/1000,2)} <small>kN</small>`;
+  document.getElementById('rSigma').innerHTML=`${fmt(sigma,1)} <small>MPa</small>`;
+  document.getElementById('rTau').innerHTML=`${fmt(tau,1)} <small>MPa</small>`;
+  document.getElementById('rUtil').innerHTML=`${fmt(util*100,1)} <small>%</small>`;
+  document.getElementById('rFy').textContent=`${m.fy} MPa`;
+
+  const fill=document.getElementById('utilFill');
+  fill.style.width=Math.min(util*100,100)+'%';
+  fill.style.background = util>1?'var(--red)' : util>0.66?'var(--yellow)' : 'var(--green)';
+
+  document.getElementById('rDefl').innerHTML=`${fmt(defl,2)} <small>mm</small>`;
+  document.getElementById('rDeflLim').innerHTML=`${fmt(deflLim,2)} <small>mm (L/${limDiv})</small>`;
+  document.getElementById('rDeflRatio').innerHTML= defl>0?`L / ${fmt(L/defl,0)}`:'—';
+
+  document.getElementById('rIx').innerHTML=`${fmt(sec.Ix,0)} <small>cm⁴</small>`;
+  document.getElementById('rWx').innerHTML=`${fmt(sec.Wx,1)} <small>cm³</small>`;
+  document.getElementById('rArea').innerHTML=`${fmt(sec.A,2)} <small>cm²</small>`;
+  document.getElementById('rGeom').innerHTML=`${sec.h}×${sec.b} · ${sec.tw}/${sec.tf} <small>mm</small>`;
+  drawXsec(sec,curProf);
+
+  // ── Orta şerit ──
+  const strip=document.getElementById('resultStrip');
+  strip.classList.add('show');
+  const sg=document.getElementById('stripSigma'), df=document.getElementById('stripDefl');
+  sg.textContent=`${fmt(sigma,1)} MPa`;
+  sg.className='strip-v'+(util>1?' bad':util>0.66?' warn':'');
+  df.textContent=`${fmt(defl,2)} mm`;
+  df.className='strip-v'+(!deflOk?' warn':'');
+  document.getElementById('stripSub').textContent=`Kullanım %${fmt(util*100,1)} · M=${fmt(Mmax/1e6,2)} kN·m · V=${fmt(Vmax/1000,2)} kN`;
+}
+</script>
+</body>
+</html>

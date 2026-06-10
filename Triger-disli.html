@@ -43,7 +43,7 @@
     .breadcrumb .sep { color: var(--dim); }
 
     /* ── APP ── */
-    .app { display: flex; flex: 1; overflow: hidden; position: relative; z-index: 1; }
+    .app { display: flex; flex: 1; overflow: hidden; position: relative; z-index: 1; justify-content: flex-start; }
 
     /* ── SIDEBAR ── */
     .sidebar {
@@ -239,7 +239,7 @@
     /* ── RIGHT PANEL ── */
     .right-panel {
       background: var(--bg2); border-left: 1px solid var(--border);
-      flex: 1; display: flex; flex-direction: column; overflow: hidden;
+      width: 340px; flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden;
     }
     .rp-hdr {
       padding: 12px 14px; border-bottom: 1px solid var(--border);

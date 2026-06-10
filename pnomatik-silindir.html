@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pnömatik Silindir | MH Platform</title>
+<link rel="stylesheet" href="mh-tokens.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none;z-index:0}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:10;flex-shrink:0;background:rgba(7,7,14,.92);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;height:52px;gap:20px}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:var(--fz-18);letter-spacing:3px;
+  color:var(--orange);text-decoration:none}
+.brand em{color:var(--text);font-style:normal}
+.breadcrumb{font-size:var(--fz-12);color:#8080a8;font-family:var(--font-m);
+  display:flex;align-items:center;gap:8px}
+.breadcrumb .sep{color:#52527a}
+
+/* APP LAYOUT */
+.app{position:relative;z-index:1;display:flex;flex:1;overflow:hidden}
+
+/* SOL SIDEBAR */
+.sbar{background:var(--bg2);border-right:1px solid var(--border);width:200px;flex-shrink:0;
+  display:flex;flex-direction:column;overflow-y:auto;padding-bottom:16px}
+.sbar::-webkit-scrollbar{width:3px}
+.sbar::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:2px}
+.col-label{font-family:var(--font-h);font-size:var(--fz-13);letter-spacing:2px;
+  color:#9090c0;text-transform:uppercase;padding:14px 14px 8px;flex-shrink:0}
+.type-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;
+  background:transparent;border:none;border-left:3px solid transparent;
+  color:#8080a8;font-family:var(--font-b);font-size:calc(12.5px * var(--fz));
+  cursor:pointer;text-align:left;transition:all .15s}
+.type-btn:hover{background:var(--surf1);color:var(--text)}
+.type-btn.active{background:var(--surf1);color:var(--text);font-weight:500}
+.tdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.tinfo{display:flex;flex-direction:column}
+.tsub{font-size:var(--fz-10);color:#52527a;margin-top:1px}
+.type-btn.active .tsub{color:#8080a8}
+.sb-div{height:1px;background:var(--border);margin:12px 14px;flex-shrink:0}
+.bore-btn{display:flex;align-items:center;justify-content:space-between;
+  width:100%;padding:7px 14px;background:transparent;
+  border:none;border-left:3px solid transparent;color:#8080a8;
+  font-family:var(--font-m);font-size:var(--fz-13);
+  cursor:pointer;transition:all .15s}
+.bore-btn:hover{background:var(--surf1);color:var(--text)}
+.bore-btn.active{background:var(--surf1);color:var(--text);border-left-color:var(--orange)}
+.bore-std{font-size:var(--fz-10);color:#52527a;font-family:var(--font-m)}
+.bore-btn.active .bore-std{color:#8080a8}
+
+/* ORTA SÜTUN */
+.mid-col{width:480px;max-width:480px;flex-shrink:0;display:flex;flex-direction:column;
+  overflow-y:auto;padding:12px 16px;gap:8px}
+.mid-col::-webkit-scrollbar{width:3px}
+.mid-col::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:2px}
+
+/* ÖNİZLEME */
+.preview-card{background:#12122a;border:1px solid rgba(249,115,22,.18);
+  border-radius:10px;padding:10px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+.preview-svg-wrap{width:100%;height:160px;flex-shrink:0;background:#09090f;
+  border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#cylPreview{width:100%;height:100%;display:block}
+.preview-info{display:flex;flex-direction:column;gap:2px;padding:0 2px}
+.preview-title{font-family:var(--font-h);font-size:var(--fz-15);font-weight:700;color:var(--orange)}
+.preview-formula{font-family:var(--font-m);font-size:var(--fz-11);color:#7878a8;line-height:1.7}
+
+/* BÖLÜM ETİKETİ */
+.sec-lbl{font-family:var(--font-h);font-size:var(--fz-13);letter-spacing:2px;
+  color:#9090c0;text-transform:uppercase}
+
+/* INPUT GRUBU */
+.inp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.inp-group{display:flex;flex-direction:column;gap:5px}
+.inp-label{font-size:var(--fz-14);color:#c0c0e0;font-family:var(--font-h);
+  letter-spacing:1px;text-transform:uppercase}
+.inp-wrap{display:flex;background:var(--surf2);border:1px solid var(--border);
+  border-radius:8px;overflow:hidden;transition:border-color .2s}
+.inp-wrap:focus-within{border-color:var(--orange)}
+.inp-wrap input{flex:1;padding:10px 12px;background:transparent;border:none;
+  color:var(--text);font-family:var(--font-m);font-size:var(--fz-15);font-weight:600;
+  outline:none;-moz-appearance:textfield;appearance:none}
+.inp-wrap input::-webkit-outer-spin-button,
+.inp-wrap input::-webkit-inner-spin-button{-webkit-appearance:none}
+.inp-unit{padding:0 12px;display:flex;align-items:center;font-family:var(--font-m);
+  font-size:var(--fz-12);color:#52527a;background:var(--surf3);border-left:1px solid var(--border)}
+
+/* HESAPLA */
+.calc-btn{width:100%;padding:14px;background:var(--orange);border:none;border-radius:10px;
+  color:white;font-family:var(--font-h);font-size:var(--fz-18);font-weight:700;
+  letter-spacing:2px;cursor:pointer;transition:all .2s}
+.calc-btn:hover{background:#ea6c0d;transform:translateY(-1px);box-shadow:0 6px 24px rgba(249,115,22,.35)}
+.calc-btn:active{transform:translateY(0)}
+
+/* SONUÇ STRIP */
+.result-strip{display:none;background:var(--surf1);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden}
+.result-strip.show{display:block}
+.res-block{padding:9px 12px;border-bottom:1px solid var(--border)}
+.res-block-lbl{font-family:var(--font-h);font-size:var(--fz-12);letter-spacing:1.5px;
+  color:#8080a8;text-transform:uppercase;margin-bottom:7px}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.res-grid4{display:grid;grid-template-columns:1fr 1fr;gap:7px 10px}
+.res-cell{display:flex;flex-direction:column;gap:3px}
+.rc-name{font-size:var(--fz-11);color:#8080a8}
+.rc-val{font-family:var(--font-m);font-weight:600;line-height:1.1}
+.rc-val.teal{color:var(--teal)}
+.rc-val.blue{color:var(--blue)}
+.rc-val.purple{color:var(--purple)}
+.rc-val.yellow{color:var(--yellow)}
+.rc-val.muted{color:#52527a}
+.rc-sub{font-family:var(--font-m);font-size:var(--fz-11);color:#52527a}
+.add-btn{display:block;width:calc(100% - 24px);margin:8px 12px 10px;padding:8px 14px;
+  background:var(--surf2);border:1px solid var(--teal);border-radius:7px;
+  color:var(--teal);font-family:var(--font-h);font-size:var(--fz-13);letter-spacing:1px;
+  cursor:pointer;transition:all .15s;text-align:center}
+.add-btn:hover{background:rgba(0,212,170,.1)}
+
+/* SAĞ PANEL */
+.list-col{background:var(--bg2);border-left:1px solid var(--border);
+  width:320px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden}
+.list-header{padding:12px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.list-title{font-family:var(--font-h);font-size:var(--fz-15);font-weight:700;letter-spacing:1px}
+.clear-btn{font-size:var(--fz-11);color:#8080a8;background:transparent;border:none;
+  cursor:pointer;font-family:var(--font-b);padding:4px 8px;border-radius:4px;transition:all .15s}
+.clear-btn:hover{background:rgba(248,113,113,.1);color:var(--red)}
+.list-items{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.list-items::-webkit-scrollbar{width:3px}
+.list-items::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:2px}
+.list-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;color:#52527a;font-size:var(--fz-13);text-align:center;padding:30px}
+.list-empty-icon{font-size:36px;opacity:.3}
+.list-item{background:var(--surf1);border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;animation:slideIn .2s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.li-top{display:flex;justify-content:space-between;align-items:flex-start}
+.li-name{font-family:var(--font-m);font-size:var(--fz-12);color:var(--text);line-height:1.4}
+.li-del{background:transparent;border:none;color:#52527a;cursor:pointer;
+  font-size:var(--fz-14);padding:0 0 0 8px;line-height:1;transition:color .15s}
+.li-del:hover{color:var(--red)}
+.li-meta{font-size:var(--fz-11);color:#8080a8;margin-top:2px}
+.li-forces{display:flex;gap:14px;margin-top:5px}
+.li-force{display:flex;flex-direction:column;gap:1px}
+.li-fval{font-family:var(--font-m);font-size:var(--fz-13);font-weight:600}
+.li-fval.teal{color:var(--teal)}
+.li-fval.blue{color:var(--blue)}
+.li-fval.muted{color:#52527a}
+.li-flbl{font-size:var(--fz-10);color:#52527a}
+.li-air{font-family:var(--font-m);font-size:var(--fz-11);color:var(--purple);margin-top:4px}
+
+/* TOPLAM */
+.list-total{padding:14px;border-top:1px solid var(--border);background:var(--surf1);
+  flex-shrink:0;display:flex;flex-direction:column;gap:4px}
+.total-row{display:flex;justify-content:space-between;align-items:baseline}
+.total-label{font-family:var(--font-h);font-size:var(--fz-13);letter-spacing:2px;
+  color:#8080a8;text-transform:uppercase}
+.total-val{font-family:var(--font-m);font-size:24px;font-weight:600;color:var(--purple)}
+.total-items{font-size:var(--fz-11);color:#52527a}
+</style>
+</head>
+<body>
+<nav>
+  <a class="brand" href="index.html">MH<em>Platform</em></a>
+  <div class="breadcrumb"><span class="sep">/</span> Pnömatik Silindir</div>
+</nav>
+
+<div class="app">
+  <!-- SOL SIDEBAR -->
+  <aside class="sbar">
+    <p class="col-label">Tip</p>
+    <div id="typeList"></div>
+    <div class="sb-div"></div>
+    <p class="col-label">Standart Çap</p>
+    <div id="boreList"></div>
+  </aside>
+
+  <!-- ORTA -->
+  <div class="mid-col">
+
+    <!-- Önizleme -->
+    <div class="preview-card">
+      <div class="preview-svg-wrap">
+        <svg id="cylPreview" viewBox="0 0 280 175"
+          preserveAspectRatio="xMidYMid meet"
+          xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="preview-info">
+        <div class="preview-title" id="prevTitle">Çift Etkili Silindir</div>
+        <div class="preview-formula" id="prevFormula">
+          F₁ = P · A₁ · η &nbsp;|&nbsp; F₂ = P · A₂ · η &nbsp;|&nbsp; A₁ = πD²/4 &nbsp;|&nbsp; A₂ = π(D²−d²)/4
+        </div>
+      </div>
+    </div>
+
+    <!-- Silindir Ölçüleri -->
+    <p class="sec-lbl">Silindir Ölçüleri</p>
+    <div class="inp-grid">
+      <div class="inp-group">
+        <span class="inp-label">Silindir Çapı D</span>
+        <div class="inp-wrap">
+          <input type="number" id="boreInp" value="63" min="1" max="500" step="1">
+          <span class="inp-unit">mm</span>
+        </div>
+      </div>
+      <div class="inp-group">
+        <span class="inp-label">Kol Çapı d</span>
+        <div class="inp-wrap">
+          <input type="number" id="rodInp" value="25" min="1" max="400" step="1">
+          <span class="inp-unit">mm</span>
+        </div>
+      </div>
+      <div class="inp-group" style="grid-column:1/-1">
+        <span class="inp-label">Strok L</span>
+        <div class="inp-wrap">
+          <input type="number" id="strokeInp" value="100" min="1" max="5000" step="5">
+          <span class="inp-unit">mm</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Çalışma Koşulları -->
+    <p class="sec-lbl">Çalışma Koşulları</p>
+    <div class="inp-grid">
+      <div class="inp-group">
+        <span class="inp-label">Basınç P</span>
+        <div class="inp-wrap">
+          <input type="number" id="pressInp" value="6" min="0.5" max="25" step="0.5">
+          <span class="inp-unit">bar</span>
+        </div>
+      </div>
+      <div class="inp-group">
+        <span class="inp-label">Verimlilik η</span>
+        <div class="inp-wrap">
+          <input type="number" id="effInp" value="95" min="1" max="100" step="1">
+          <span class="inp-unit">%</span>
+        </div>
+      </div>
+      <div class="inp-group" style="grid-column:1/-1">
+        <span class="inp-label">Çevrim / Dakika</span>
+        <div class="inp-wrap">
+          <input type="number" id="cyclesInp" value="10" min="0.1" max="1000" step="1">
+          <span class="inp-unit">1/dk</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">HESAPLA</button>
+
+    <!-- Sonuç Bölümü -->
+    <div class="result-strip" id="resultStrip">
+      <div class="res-block">
+        <div class="res-block-lbl">Kuvvet</div>
+        <div class="res-grid" id="forceGrid"></div>
+      </div>
+      <div class="res-block" style="border-bottom:none">
+        <div class="res-block-lbl">Efektif Alan &amp; Hava Tüketimi</div>
+        <div class="res-grid4" id="areaAirGrid"></div>
+      </div>
+      <button class="add-btn" onclick="addToList()">+ Listeye Ekle</button>
+    </div>
+
+  </div><!-- .mid-col sonu -->
+
+  <!-- SAĞ PANEL — boşluk yok, mid-col'a yapışık -->
+  <div class="list-col">
+    <div class="list-header">
+      <span class="list-title">HESAPLAMALARIM</span>
+      <button class="clear-btn" onclick="clearAll()">Tümünü Sil</button>
+    </div>
+    <div class="list-items" id="listItems">
+      <div class="list-empty" id="listEmpty">
+        <div class="list-empty-icon">🔩</div>
+        <div>Henüz kaydedilmedi</div>
+        <div style="font-size:var(--fz-11);margin-top:4px">Hesapla → Listeye Ekle</div>
+      </div>
+    </div>
+    <div class="list-total">
+      <div class="total-row">
+        <span class="total-label">Toplam Hava</span>
+        <span class="total-val" id="totalVal">—</span>
+      </div>
+      <div class="total-items" id="totalItems">0 silindir</div>
+    </div>
+  </div>
+</div><!-- .app sonu -->
+
+<script>
+/* ═══════════════════════════════════════════════════
+   VERİ TANIMLARI
+   ═══════════════════════════════════════════════════ */
+const TYPES = {
+  da: {
+    label: 'Çift Etkili',
+    sub: 'Double Acting',
+    color: '#f97316',
+    formula: 'F₁ = P · A₁ · η  |  F₂ = P · A₂ · η  |  A₁ = πD²/4  |  A₂ = π(D²−d²)/4'
+  },
+  sa_push: {
+    label: 'Tek Etkili İleri',
+    sub: 'Push · Single Acting',
+    color: '#60a5fa',
+    formula: 'F = P · A₁ · η  |  A₁ = πD²/4  |  Geri: Yay dönüşü (basınçsız)'
+  },
+  sa_pull: {
+    label: 'Tek Etkili Geri',
+    sub: 'Pull · Single Acting',
+    color: '#a78bfa',
+    formula: 'F = P · A₂ · η  |  A₂ = π(D²−d²)/4  |  İleri: Yay dönüşü (basınçsız)'
+  }
+};
+
+// ISO 6432 / ISO 15552 standart çap–kol çifti
+const BORES = [
+  {bore:12,  rod:4,   std:'6432'},
+  {bore:16,  rod:6,   std:'6432'},
+  {bore:20,  rod:8,   std:'6432'},
+  {bore:25,  rod:10,  std:'6432'},
+  {bore:32,  rod:12,  std:'15552'},
+  {bore:40,  rod:16,  std:'15552'},
+  {bore:50,  rod:20,  std:'15552'},
+  {bore:63,  rod:25,  std:'15552'},
+  {bore:80,  rod:32,  std:'15552'},
+  {bore:100, rod:32,  std:'15552'},
+  {bore:125, rod:40,  std:'15552'},
+  {bore:160, rod:50,  std:'15552'},
+  {bore:200, rod:63,  std:'15552'},
+  {bore:250, rod:80,  std:'15552'},
+  {bore:320, rod:100, std:'15552'},
+];
+
+/* ═══════════════════════════════════════════════════
+   DURUM
+   ═══════════════════════════════════════════════════ */
+let curType = 'da';
+let listData = [];
+let lastResult = null;
+let idCtr = 0;
+
+/* ═══════════════════════════════════════════════════
+   BAŞLAT
+   ═══════════════════════════════════════════════════ */
+function init() {
+  renderTypeBtns();
+  renderBoreBtns();
+  attachListeners();
+  drawPreview();
+}
+
+function renderTypeBtns() {
+  document.getElementById('typeList').innerHTML =
+    Object.entries(TYPES).map(([k,t]) => `
+      <button class="type-btn${k===curType?' active':''}"
+        onclick="selType('${k}')"
+        style="${k===curType?`border-left-color:${t.color}`:''}">
+        <span class="tdot" style="background:${t.color}"></span>
+        <span class="tinfo">
+          <span>${t.label}</span>
+          <span class="tsub">${t.sub}</span>
+        </span>
+      </button>`).join('');
+}
+
+function renderBoreBtns() {
+  const cur = parseInt(document.getElementById('boreInp').value)||63;
+  document.getElementById('boreList').innerHTML =
+    BORES.map(b => `
+      <button class="bore-btn${b.bore===cur?' active':''}"
+        onclick="selBore(${b.bore},${b.rod})">
+        <span>Ø${b.bore}</span>
+        <span class="bore-std">d${b.rod}</span>
+      </button>`).join('');
+}
+
+function attachListeners() {
+  ['boreInp','rodInp','strokeInp','pressInp','effInp','cyclesInp'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      if (id === 'boreInp') renderBoreBtns();
+      clearResult();
+      drawPreview();
+    });
+  });
+}
+
+function clearResult() {
+  document.getElementById('resultStrip').classList.remove('show');
+  lastResult = null;
+}
+
+function selType(k) {
+  curType = k;
+  renderTypeBtns();
+  clearResult();
+  drawPreview();
+}
+
+function selBore(bore, rod) {
+  document.getElementById('boreInp').value = bore;
+  document.getElementById('rodInp').value = rod;
+  renderBoreBtns();
+  clearResult();
+  drawPreview();
+}
+
+/* ═══════════════════════════════════════════════════
+   SVG ÇİZİM SİSTEMİ
+   Koordinat sistemi: viewBox "0 0 280 175"
+   ═══════════════════════════════════════════════════ */
+const PW = 280, PH = 175;
+
+// Yatay ölçü oku (label'lı)
+function hDim(x1,x2,y,txt,col='#60a5fa'){
+  const mx=(x1+x2)/2;
+  return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${col}" stroke-width=".9"/>
+    <polygon points="${x1},${y} ${x1+6},${y-3} ${x1+6},${y+3}" fill="${col}"/>
+    <polygon points="${x2},${y} ${x2-6},${y-3} ${x2-6},${y+3}" fill="${col}"/>
+    <rect x="${mx-txt.length*2.9}" y="${y-15}" width="${txt.length*5.8+4}" height="12" fill="#09090f" rx="2"/>
+    <text x="${mx}" y="${y-6}" text-anchor="middle" font-size="9.5" fill="${col}"
+      font-family="JetBrains Mono,monospace">${txt}</text>`;
+}
+
+// Dikey ölçü oku (label'lı, sağ tarafta)
+function vDim(y1,y2,x,txt,col='#60a5fa'){
+  const my=(y1+y2)/2;
+  return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${col}" stroke-width=".9"/>
+    <polygon points="${x},${y1} ${x-3},${y1+6} ${x+3},${y1+6}" fill="${col}"/>
+    <polygon points="${x},${y2} ${x-3},${y2-6} ${x+3},${y2-6}" fill="${col}"/>
+    <rect x="${x+4}" y="${my-7}" width="${txt.length*5.8+3}" height="12" fill="#09090f" rx="2"/>
+    <text x="${x+6}" y="${my+4}" font-size="9.5" fill="${col}"
+      font-family="JetBrains Mono,monospace">${txt}</text>`;
+}
+
+// Dikey ölçü oku (label solda — sol kenar için)
+function vDimLeft(y1,y2,x,txt,col='#60a5fa'){
+  const my=(y1+y2)/2;
+  const bw = txt.length*5.8+3;
+  return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${col}" stroke-width=".9"/>
+    <polygon points="${x},${y1} ${x-3},${y1+6} ${x+3},${y1+6}" fill="${col}"/>
+    <polygon points="${x},${y2} ${x-3},${y2-6} ${x+3},${y2-6}" fill="${col}"/>
+    <rect x="${x-bw-4}" y="${my-7}" width="${bw}" height="12" fill="#09090f" rx="2"/>
+    <text x="${x-5}" y="${my+4}" text-anchor="end" font-size="9.5" fill="${col}"
+      font-family="JetBrains Mono,monospace">${txt}</text>`;
+}
+
+// Yay çizimi (zigzag)
+function spring(x1,x2,cy,hw,col){
+  const n=9, sw=(x2-x1)/n;
+  let p=`M${x1},${cy}`;
+  for(let i=0;i<n;i++) p+=` L${x1+(i+.5)*sw},${cy+(i%2===0?hw:-hw)}`;
+  p+=` L${x2},${cy}`;
+  return `<path d="${p}" stroke="${col}" stroke-width="1.1" fill="none" opacity=".6"/>`;
+}
+
+// Küçük metin etiketi
+function lbl(x,y,txt,col,anchor='middle'){
+  return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="9"
+    fill="${col}" font-family="JetBrains Mono,monospace">${txt}</text>`;
+}
+
+function drawPreview() {
+  const D = parseFloat(document.getElementById('boreInp').value)||63;
+  const d = parseFloat(document.getElementById('rodInp').value)||25;
+  const L = parseFloat(document.getElementById('strokeInp').value)||100;
+  const P = parseFloat(document.getElementById('pressInp').value)||6;
+  const t = TYPES[curType];
+
+  // Önizleme bilgi metni güncelle
+  document.getElementById('prevTitle').textContent =
+    `${t.label} · Ø${D}/d${Math.min(d,D-0.5)} · L=${L} mm · P=${P} bar`;
+  document.getElementById('prevFormula').textContent = t.formula;
+
+  const svg = document.getElementById('cylPreview');
+
+  /* ── Ölçek & Geometri ── */
+  // Bore görsel yüksekliği (maks 64px)
+  const maxBH = 64;
+  const scl   = Math.min(maxBH / Math.max(D,20), 2.2);
+  const BH    = D * scl;
+  const dSafe = Math.min(d, D*0.92);
+  const RH    = Math.max(dSafe*scl, 5);
+
+  // Konum sabitler
+  const WT=5, capW=13, gW=15, pistW=8;
+  const cy=84;
+
+  // Silindir ana bloğu: bx–bx2 arası
+  // Sol kenar ölçü oku için ~30px sol boşluk, sağda rod+label için ~42px
+  const bx  = 34;   // gövde sol x
+  const BW  = 152;  // gövde genişliği (px)
+  const bx2 = bx+BW; // = 186
+  const ibx = bx+capW;    // iç sol = 47
+  const ibx2= bx2-gW;     // iç sağ = 171
+  const ibW = ibx2-ibx;   // = 124
+  const rodExt = 38;      // silindir dışı kol uzunluğu
+  const rodX2  = bx2+rodExt; // = 224
+
+  // Piston konumu (tip bazlı)
+  const pistRatio = curType==='sa_pull' ? 0.62 : 0.40;
+  const pistX = ibx + ibW*pistRatio;
+  const rodY1 = cy - RH/2;
+  const rodY2 = cy + RH/2;
+
+  let s = `<rect width="${PW}" height="${PH}" fill="#09090f"/>`;
+
+  /* ── Gövde duvarları ── */
+  // Üst duvar
+  s+=`<rect x="${bx}" y="${cy-BH/2-WT}" width="${BW-gW+1}" height="${WT}"
+    fill="rgba(249,115,22,.2)" stroke="#f97316" stroke-width="1"/>`;
+  // Alt duvar
+  s+=`<rect x="${bx}" y="${cy+BH/2}" width="${BW-gW+1}" height="${WT}"
+    fill="rgba(249,115,22,.2)" stroke="#f97316" stroke-width="1"/>`;
+  // Sol kapak
+  s+=`<rect x="${bx-capW/2}" y="${cy-BH/2-WT}" width="${capW}" height="${BH+WT*2}"
+    fill="rgba(249,115,22,.22)" stroke="#f97316" stroke-width="1"/>`;
+  // Sağ kapak (üst parça, rod'un üstü)
+  const gTop=cy-BH/2-WT, gBot=cy+BH/2+WT;
+  s+=`<rect x="${ibx2}" y="${gTop}" width="${gW}" height="${rodY1-gTop}"
+    fill="rgba(249,115,22,.22)" stroke="#f97316" stroke-width="1"/>`;
+  // Sağ kapak (alt parça, rod'un altı)
+  s+=`<rect x="${ibx2}" y="${rodY2}" width="${gW}" height="${gBot-rodY2}"
+    fill="rgba(249,115,22,.22)" stroke="#f97316" stroke-width="1"/>`;
+  // Conta/sızdırmazlık çizgisi (rod deliği)
+  for(let i=1;i<=3;i++){
+    const ly=rodY1+RH*i/4;
+    s+=`<line x1="${ibx2+1}" y1="${ly}" x2="${ibx2+gW-1}" y2="${ly}"
+      stroke="#f97316" stroke-width=".8" opacity=".4"/>`;
+  }
+
+  /* ── Hava portları ── */
+  const portTop = cy-BH/2-WT-9;
+  if(curType==='sa_pull'){
+    // SA-Pull: port sağ odada (A2 basınçlı)
+    const px = pistX+pistW/2+(ibx2-pistX-pistW/2)*0.5;
+    s+=`<rect x="${px-4}" y="${portTop}" width="8" height="9"
+      fill="rgba(249,115,22,.22)" stroke="#f97316" stroke-width=".7" rx="1"/>`;
+    s+=lbl(px,portTop-2,'A','#f97316');
+  } else {
+    // DA / SA-Push: port sol odada (A1 basınçlı)
+    const px = ibx+(pistX-ibx)*0.55;
+    s+=`<rect x="${px-4}" y="${portTop}" width="8" height="9"
+      fill="rgba(249,115,22,.22)" stroke="#f97316" stroke-width=".7" rx="1"/>`;
+    s+=lbl(px,portTop-2,'A','#f97316');
+    if(curType==='da'){
+      // DA: sağ odada da port var
+      const px2=pistX+pistW/2+(ibx2-pistX-pistW/2)*0.5;
+      s+=`<rect x="${px2-4}" y="${portTop}" width="8" height="9"
+        fill="rgba(249,115,22,.22)" stroke="#f97316" stroke-width=".7" rx="1"/>`;
+      s+=lbl(px2,portTop-2,'B','#f97316');
+    }
+  }
+
+  /* ── Yay (tek etkili) ── */
+  if(curType==='sa_push'){
+    const sx1=pistX+pistW/2+3, sx2=ibx2-3;
+    if(sx2>sx1+12) s+=spring(sx1,sx2,cy,BH*.28,'#60a5fa');
+  } else if(curType==='sa_pull'){
+    const sx1=ibx+3, sx2=pistX-pistW/2-3;
+    if(sx2>sx1+12) s+=spring(sx1,sx2,cy,BH*.28,'#a78bfa');
+  }
+
+  /* ── Oda etiketleri ── */
+  const lcy=cy+4;
+  const a1w=pistX-ibx, a2w=ibx2-pistX-pistW/2;
+  if(curType==='da'){
+    if(a1w>20) s+=lbl(ibx+a1w/2,lcy,'A₁','rgba(249,115,22,.55)');
+    if(a2w>20) s+=lbl(pistX+pistW/2+a2w/2,lcy,'A₂','rgba(96,165,250,.55)');
+  } else if(curType==='sa_push'){
+    if(a1w>20) s+=lbl(ibx+a1w/2,lcy,'A₁','rgba(249,115,22,.55)');
+  } else {
+    if(a2w>20) s+=lbl(pistX+pistW/2+a2w/2,lcy,'A₂','rgba(167,139,250,.55)');
+  }
+
+  /* ── Piston ── */
+  s+=`<rect x="${pistX-pistW/2}" y="${cy-BH/2}" width="${pistW}" height="${BH}"
+    fill="rgba(249,115,22,.78)" stroke="#f97316" stroke-width=".8" rx="1"/>`;
+  // Piston segman çizgileri
+  [-BH*.26,BH*.26].forEach(oy=>{
+    s+=`<line x1="${pistX-pistW/2+1}" y1="${cy+oy}" x2="${pistX+pistW/2-1}" y2="${cy+oy}"
+      stroke="#f97316" stroke-width="1.5" opacity=".5"/>`;
+  });
+
+  /* ── Piston kolu (rod) ── */
+  s+=`<rect x="${pistX+pistW/2}" y="${rodY1}" width="${rodX2-pistX-pistW/2}" height="${RH}"
+    fill="rgba(96,165,250,.17)" stroke="#60a5fa" stroke-width="1"/>`;
+
+  /* ── Ölçü Okları ── */
+  // D (bore): sol tarafta dikey — vDimLeft kullan (label sola)
+  const dimDx = bx-capW/2-10;  // ok x konumu, solda
+  // Clamp: minimum x=10 olacak şekilde
+  const safeDimDx = Math.max(10, dimDx);
+  s += vDimLeft(cy-BH/2, cy+BH/2, safeDimDx, `Ø${D}`, '#60a5fa');
+
+  // d (rod): sağda dikey — ok ve label sağa
+  if(RH>=6){
+    const dimDRx = rodX2+10;
+    const dTxt = `Ø${d}`;
+    // Sağdaki metin sınır kontrolü (280px max)
+    const needW = dTxt.length*5.8+3;
+    const textX = Math.min(dimDRx+6, PW-needW-2);
+    s+=`<line x1="${dimDRx}" y1="${cy-RH/2}" x2="${dimDRx}" y2="${cy+RH/2}"
+      stroke="#00d4aa" stroke-width=".9"/>
+    <polygon points="${dimDRx},${cy-RH/2} ${dimDRx-3},${cy-RH/2+6} ${dimDRx+3},${cy-RH/2+6}" fill="#00d4aa"/>
+    <polygon points="${dimDRx},${cy+RH/2} ${dimDRx-3},${cy+RH/2-6} ${dimDRx+3},${cy+RH/2-6}" fill="#00d4aa"/>
+    <rect x="${textX-1}" y="${cy-7}" width="${needW}" height="12" fill="#09090f" rx="2"/>
+    <text x="${textX+1}" y="${cy+4}" font-size="9.5" fill="#00d4aa"
+      font-family="JetBrains Mono,monospace">${dTxt}</text>`;
+  }
+
+  // L (strok): alt yatay
+  const dimLy = cy+BH/2+WT+15;
+  s += hDim(ibx, ibx2, dimLy, `L=${L}mm`, '#60a5fa');
+  // Kesik dikey referans çizgileri
+  s+=`<line x1="${ibx}" y1="${cy+BH/2+WT}" x2="${ibx}" y2="${dimLy}"
+    stroke="#60a5fa" stroke-width=".6" stroke-dasharray="2,2"/>`;
+  s+=`<line x1="${ibx2}" y1="${cy+BH/2+WT}" x2="${ibx2}" y2="${dimLy}"
+    stroke="#60a5fa" stroke-width=".6" stroke-dasharray="2,2"/>`;
+
+  svg.innerHTML = s;
+}
+
+/* ═══════════════════════════════════════════════════
+   HESAPLAMA
+   ═══════════════════════════════════════════════════ */
+function calculate() {
+  const D   = parseFloat(document.getElementById('boreInp').value);
+  const d   = parseFloat(document.getElementById('rodInp').value);
+  const L   = parseFloat(document.getElementById('strokeInp').value);
+  const P   = parseFloat(document.getElementById('pressInp').value);
+  const eta = parseFloat(document.getElementById('effInp').value)/100;
+  const n   = parseFloat(document.getElementById('cyclesInp').value);
+
+  if(!D||D<=0||!L||L<=0||!P||P<=0)  { alert('Lütfen tüm değerleri doğru girin.'); return; }
+  if(!d||d<=0||d>=D)                 { alert('Kol çapı (d) silindir çapından (D) küçük olmalıdır.'); return; }
+  if(!eta||eta<=0||eta>1)            { alert('Verimlilik 1–100 arasında olmalıdır.'); return; }
+  if(!n||n<=0)                       { alert('Çevrim/dakika değeri pozitif olmalıdır.'); return; }
+
+  // Alanlar [mm²]
+  const A1 = Math.PI * D * D / 4;
+  const A2 = Math.PI * (D*D - d*d) / 4;
+
+  // Kuvvetler [N] — 1 bar = 0.1 N/mm²
+  const F_push = P * 0.1 * A1 * eta;
+  const F_pull = P * 0.1 * A2 * eta;
+
+  // Çevrim başı hava hacmi [mm³]
+  let V_cycle;
+  if(curType==='da')       V_cycle = (A1+A2)*L;
+  else if(curType==='sa_push') V_cycle = A1*L;
+  else                     V_cycle = A2*L;
+
+  // Dönüşümler
+  const V_L    = V_cycle / 1e6;                  // [L/çevrim]
+  const Q_wp   = V_L * n;                        // [L/dk] — çalışma basıncında
+  const Q_fad  = Q_wp * (P+1.013) / 1.013;      // [L/dk] — serbest hava (FAD)
+  const Q_nm3h = Q_fad * 60 / 1000;             // [Nm³/sa]
+
+  lastResult = {
+    D, d, L, P, eta_pct: eta*100, n,
+    type: curType, typeLabel: TYPES[curType].label,
+    A1, A2, F_push, F_pull,
+    V_L, Q_fad, Q_nm3h
+  };
+
+  renderResult(lastResult);
+}
+
+function renderResult(r) {
+  document.getElementById('resultStrip').classList.add('show');
+
+  // Kuvvet
+  let forceHTML;
+  if(r.type==='da'){
+    forceHTML =
+      cell('İleri · İtme',  nf(r.F_push), `${(r.F_push/1000).toFixed(2)} kN`, 'teal',   '--fz-18') +
+      cell('Geri · Çekme',  nf(r.F_pull), `${(r.F_pull/1000).toFixed(2)} kN`, 'blue',   '--fz-18');
+  } else if(r.type==='sa_push'){
+    forceHTML =
+      cell('İtme Kuvveti',  nf(r.F_push), `${(r.F_push/1000).toFixed(2)} kN`, 'teal', '--fz-18') +
+      cell('Geri (Yay)', '—', 'Basınçsız dönüş', 'muted', '--fz-18');
+  } else {
+    forceHTML =
+      cell('İleri (Yay)', '—', 'Basınçsız dönüş', 'muted', '--fz-18') +
+      cell('Çekme Kuvveti', nf(r.F_pull), `${(r.F_pull/1000).toFixed(2)} kN`, 'blue', '--fz-18');
+  }
+  document.getElementById('forceGrid').innerHTML = forceHTML;
+
+  // Alan + Hava tüketimi — birleşik 2×2 ızgara
+  document.getElementById('areaAirGrid').innerHTML =
+    cell('A₁ — Piston',        `${r.A1.toFixed(1)} mm²`,      `${(r.A1/100).toFixed(2)} cm²`,      'teal',   '--fz-14') +
+    cell('Çevrim Başı Hacim',  `${r.V_L.toFixed(3)} L`,        `${(r.V_L*1000).toFixed(0)} cm³`,    'purple', '--fz-14') +
+    cell('A₂ — Kol Tarafı',   `${r.A2.toFixed(1)} mm²`,      `${(r.A2/100).toFixed(2)} cm²`,      'blue',   '--fz-14') +
+    cell('Serbest Hava (FAD)', `${r.Q_fad.toFixed(1)} L/dk`,   `${r.Q_nm3h.toFixed(3)} Nm³/sa`,    'yellow', '--fz-14');
+
+  // Sonuç görünür olana kadar scroll et
+  setTimeout(() => {
+    const col = document.querySelector('.mid-col');
+    col.scrollTo({ top: col.scrollHeight, behavior: 'smooth' });
+  }, 40);
+}
+
+function cell(name, val, sub, cls, fz){
+  return `<div class="res-cell">
+    <span class="rc-name">${name}</span>
+    <span class="rc-val ${cls}" style="font-size:var(${fz})">${val}</span>
+    <span class="rc-sub">${sub}</span>
+  </div>`;
+}
+
+// Newton formatla: kuvvete göre N veya kN
+function nf(v){
+  if(v>=10000) return `${(v/1000).toFixed(2)} kN`;
+  if(v>=1000)  return `${v.toFixed(0)} N`;
+  return `${v.toFixed(1)} N`;
+}
+
+/* ═══════════════════════════════════════════════════
+   LİSTE YÖNETİMİ
+   ═══════════════════════════════════════════════════ */
+function addToList(){
+  if(!lastResult) return;
+  listData.push({id:++idCtr, ...lastResult});
+  renderList();
+}
+
+function removeItem(id){
+  listData = listData.filter(x=>x.id!==id);
+  renderList();
+}
+
+function clearAll(){
+  if(listData.length && !confirm('Tüm hesaplamalar silinecek. Emin misiniz?')) return;
+  listData = [];
+  renderList();
+}
+
+function renderList(){
+  const c     = document.getElementById('listItems');
+  const empty = document.getElementById('listEmpty');
+
+  if(!listData.length){
+    c.innerHTML='';
+    c.appendChild(empty);
+    document.getElementById('totalVal').textContent='—';
+    document.getElementById('totalItems').textContent='0 silindir';
+    return;
+  }
+
+  const totalFAD  = listData.reduce((s,x)=>s+x.Q_fad,0);
+  const totalNm3  = listData.reduce((s,x)=>s+x.Q_nm3h,0);
+  document.getElementById('totalVal').textContent=`${totalFAD.toFixed(1)} L/dk`;
+  document.getElementById('totalItems').textContent=
+    `${listData.length} silindir · ${totalNm3.toFixed(3)} Nm³/sa`;
+
+  c.innerHTML = listData.map(item => {
+    const pushStr = item.type==='sa_pull' ? '—' : nf(item.F_push);
+    const pullStr = item.type==='sa_push' ? '—' : nf(item.F_pull);
+    const pushCls = item.type==='sa_pull' ? 'muted' : 'teal';
+    const pullCls = item.type==='sa_push' ? 'muted' : 'blue';
+    const typeColor = TYPES[item.type].color;
+    return `
+    <div class="list-item" id="li-${item.id}" style="border-left:3px solid ${typeColor}20">
+      <div class="li-top">
+        <span class="li-name">Ø${item.D}/d${item.d} · L=${item.L} mm</span>
+        <button class="li-del" onclick="removeItem(${item.id})" title="Sil">✕</button>
+      </div>
+      <div class="li-meta">${item.typeLabel} · ${item.P} bar · η=${item.eta_pct}% · ${item.n} çev/dk</div>
+      <div class="li-forces">
+        <div class="li-force">
+          <span class="li-fval ${pushCls}">${pushStr}</span>
+          <span class="li-flbl">İtme</span>
+        </div>
+        <div class="li-force">
+          <span class="li-fval ${pullCls}">${pullStr}</span>
+          <span class="li-flbl">Çekme</span>
+        </div>
+      </div>
+      <div class="li-air">FAD ${item.Q_fad.toFixed(1)} L/dk · ${item.Q_nm3h.toFixed(3)} Nm³/sa</div>
+    </div>`;
+  }).join('');
+}
+
+/* Başlat */
+init();
+</script>
+</body>
+</html>
