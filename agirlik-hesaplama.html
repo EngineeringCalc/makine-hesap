@@ -126,6 +126,62 @@ nav{position:relative;z-index:10;flex-shrink:0;background:rgba(7,7,14,0.92);back
 .total-label{font-family:var(--font-h);font-size: var(--fz-13);letter-spacing:2px;color:var(--dim2);text-transform:uppercase}
 .total-val{font-family:var(--font-m);font-size:24px;font-weight:600;color:var(--teal)}
 .total-items{font-size: var(--fz-11);color:var(--dim)}
+@media (max-width: 768px) {
+
+  /* Sol profil sütunu → yatay şerit */
+  .prof-col {
+    width: 100% !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    scrollbar-width: none;
+  }
+  .prof-col::-webkit-scrollbar { display: none; }
+  .col-label { display: none !important; }
+
+  /* Profil seçim butonları → yatay pill */
+  .prof-btn {
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 10px 12px !important;
+    border-left: none !important;
+    border-bottom: 3px solid transparent !important;
+    white-space: nowrap !important;
+    min-width: max-content !important;
+    font-size: 11px !important;
+    gap: 3px !important;
+  }
+  .prof-btn.active {
+    border-left-color: transparent !important;
+    border-bottom-color: var(--orange) !important;
+  }
+  .prof-icon { font-size: 18px !important; width: auto !important; }
+
+  /* Orta sütun: tam genişlik */
+  .input-col {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-shrink: 1 !important;
+  }
+
+  /* Sağ liste paneli: tam genişlik, alta */
+  .list-col {
+    width: 100% !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border) !important;
+    /* Liste üst yükseklik sınırı: ekranın yarısı */
+    max-height: 50vh;
+    overflow-y: auto !important;
+  }
+
+  /* Preview SVG biraz küçült */
+  .preview-svg-wrap { height: 140px !important; }
+
+}
 </style>
 </head>
 <body>
