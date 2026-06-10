@@ -128,7 +128,6 @@
 
   /* 7. İkincil boyut butonlarını (cıvata boyutu vs.) gizle —
         bunlar sidebar ana seçimi değil, dropdown/select ile değiştirilebilir */
-  .sz-btn { display: none !important; }
 
   /* 8. Ana içerik sütunu: tam genişlik */
   .content {

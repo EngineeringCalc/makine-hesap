@@ -183,6 +183,53 @@ nav{position:relative;z-index:10;flex-shrink:0;
 .casc-list::-webkit-scrollbar,.conv-col::-webkit-scrollbar,.cat-col::-webkit-scrollbar{width:4px}
 .casc-list::-webkit-scrollbar-track,.conv-col::-webkit-scrollbar-track,.cat-col::-webkit-scrollbar-track{background:transparent}
 .casc-list::-webkit-scrollbar-thumb,.conv-col::-webkit-scrollbar-thumb,.cat-col::-webkit-scrollbar-thumb{background:#1e1e34;border-radius:2px}
+@media (max-width: 768px) {
+  .cat-col {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    scrollbar-width: none;
+  }
+  .cat-col::-webkit-scrollbar { display: none; }
+  .col-label, .col-section { display: none !important; }
+  .cat-btn {
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 10px 12px !important;
+    border-left: none !important;
+    border-bottom: 3px solid transparent !important;
+    white-space: nowrap !important;
+    min-width: max-content !important;
+    font-size: 11px !important;
+    gap: 3px !important;
+  }
+  .cat-btn.active {
+    border-left-color: transparent !important;
+    border-bottom-color: var(--cc) !important;
+  }
+  .conv-col {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .casc-col {
+    width: 100% !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border) !important;
+    max-height: 40vh;
+  }
+  /* Birim select genişlik sorunu */
+  .conv-row { flex-wrap: wrap !important; gap: 6px !important; }
+  .sel-wrap { width: 100% !important; }
+  .unit-sel { width: 100% !important; min-width: unset !important; height: 44px !important; }
+  .flex-space { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -192,7 +239,8 @@ nav{position:relative;z-index:10;flex-shrink:0;
   <div class="breadcrumb">
     <a href="index.html" style="color:var(--dim2);text-decoration:none">Ana Sayfa</a>
     <span class="sep">/</span>
-    <span style="color:var(--text)">Birim Çevirici</span>
+    <span id="navCrumb" style="color:var(--text)">Birim Çevirici</span>
+  </div>
 </nav>
 <div class="app" id="app">
 

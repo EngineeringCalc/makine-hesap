@@ -193,6 +193,77 @@ nav{position:sticky;top:0;z-index:10;flex-shrink:0;background:rgba(7,7,14,.92);
   color:#8080a8;text-transform:uppercase}
 .total-val{font-family:var(--font-m);font-size:24px;font-weight:600;color:var(--purple)}
 .total-items{font-size:var(--fz-11);color:#52527a}
+@media (max-width: 768px) {
+
+  /* App yükseklik kilidini kaldır */
+  .app { height: auto !important; }
+
+  /* Sbar → yatay şerit */
+  .sbar {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    min-height: unset !important;
+    scrollbar-width: none;
+  }
+  .sbar::-webkit-scrollbar { display: none; }
+  .col-label, .sb-div { display: none !important; }
+
+  /* Tip butonları → pill */
+  .type-btn {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 10px 12px !important;
+    border-left: none !important;
+    border-bottom: 3px solid transparent !important;
+    white-space: nowrap !important;
+    min-width: max-content !important;
+    font-size: 11px !important;
+    gap: 3px !important;
+  }
+  .type-btn.active {
+    border-left-color: transparent !important;
+    border-bottom-color: var(--orange) !important;
+  }
+
+  /* Çap butonları → kompakt pill */
+  .bore-btn {
+    padding: 8px 10px !important;
+    white-space: nowrap !important;
+    min-width: max-content !important;
+    border-left: none !important;
+    border-bottom: 3px solid transparent !important;
+    font-size: 11px !important;
+  }
+  .bore-btn.active {
+    border-left-color: transparent !important;
+    border-bottom-color: var(--orange) !important;
+  }
+
+  /* Orta sütun → tam genişlik */
+  .mid-col {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-shrink: 1 !important;
+  }
+
+  /* Sağ liste → tam genişlik, alta */
+  .list-col {
+    width: 100% !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border) !important;
+    max-height: 50vh;
+  }
+
+}
 </style>
 </head>
 <body>
