@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Malzeme Veritabanı — MH Platform</title>
+<link rel="stylesheet" href="mh-tokens.css">
+<style>
+/* ─── OVERRIDE: mh-tokens.css dim değerlerini düzelt ─── */
+:root {
+  --dim:  #52527a;
+  --dim2: #8080a8;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,0.016) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.016) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none}
+
+/* ─── NAV ─── */
+nav{position:relative;z-index:10;flex-shrink:0;background:rgba(7,7,14,0.92);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;height:52px;gap:20px}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;
+  color:var(--orange);text-decoration:none}
+.brand em{color:var(--text);font-style:normal}
+.breadcrumb{font-size:12px;color:var(--dim2);font-family:var(--font-m);
+  display:flex;align-items:center;gap:8px}
+.breadcrumb .sep{color:var(--dim)}
+.nav-badge{font-family:var(--font-m);font-size:10px;padding:3px 8px;border-radius:4px;
+  background:rgba(0,212,170,0.12);color:var(--teal);border:1px solid rgba(0,212,170,0.25);
+  font-weight:600;letter-spacing:0.5px;margin-left:auto}
+
+/* ─── APP ─── */
+.app{position:relative;z-index:1;display:flex;flex:1;overflow:hidden}
+
+/* ─── SOL SİDEBAR ─── */
+.sidebar{width:210px;flex-shrink:0;background:var(--bg2);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  overflow-y:auto;padding-bottom:16px}
+.sb-label{font-family:var(--font-h);font-size:11px;letter-spacing:2px;
+  color:var(--dim2);text-transform:uppercase;padding:14px 14px 8px}
+.sb-divider{height:1px;background:var(--border);margin:8px 14px}
+.cat-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 14px;
+  background:transparent;border:none;border-left:3px solid transparent;
+  color:var(--dim2);cursor:pointer;font-family:var(--font-b);font-size:12.5px;
+  text-align:left;transition:all .15s}
+.cat-btn:hover{background:var(--surf1);color:var(--text)}
+.cat-btn.active{background:var(--surf1);color:var(--text);font-weight:500}
+.cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cat-count{margin-left:auto;font-family:var(--font-m);font-size:10px;
+  color:var(--dim);background:var(--surf2);padding:1px 5px;border-radius:3px;flex-shrink:0}
+
+/* ─── ORTA ALAN ─── */
+.content{flex:1;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.search-bar{flex-shrink:0;background:rgba(7,7,14,0.95);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);padding:10px 14px;display:flex;gap:8px;
+  position:sticky;top:0;z-index:5}
+.search-wrap{flex:1;display:flex;background:var(--surf2);
+  border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .2s}
+.search-wrap:focus-within{border-color:var(--orange)}
+.search-ico{padding:0 10px;display:flex;align-items:center;
+  font-size:13px;color:var(--dim);pointer-events:none}
+.search-input{flex:1;padding:8px 8px;background:transparent;border:none;
+  color:var(--text);font-family:var(--font-m);font-size:12px;outline:none}
+.search-input::placeholder{color:var(--dim)}
+.sort-sel{padding:8px 10px;background:var(--surf2);border:1px solid var(--border);
+  border-radius:8px;color:var(--dim2);font-family:var(--font-m);font-size:11px;
+  cursor:pointer;outline:none;transition:border-color .2s}
+.sort-sel:focus{border-color:var(--orange)}
+
+.cards-wrap{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.count-line{font-family:var(--font-m);font-size:10px;color:var(--dim2)}
+.count-line span{color:var(--orange)}
+
+.mat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:8px}
+
+/* ─── MALZEMEKartı ─── */
+.mat-card{background:var(--surf1);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;cursor:pointer;transition:all .18s;position:relative;
+  display:flex;flex-direction:column}
+.mat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.45)}
+.mat-card.in-cmp{box-shadow:0 0 0 1.5px var(--cc,#f97316)}
+.mat-card.slot-full:not(.in-cmp) .cmp-btn{opacity:.3;pointer-events:none}
+.card-stripe{height:2px;flex-shrink:0;background:var(--cc,#52527a);opacity:.55;transition:opacity .2s}
+.mat-card:hover .card-stripe,.mat-card.in-cmp .card-stripe{opacity:1}
+.card-body{padding:10px 11px 8px;flex:1;display:flex;flex-direction:column;gap:6px}
+
+.card-top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:4px}
+.card-cat-badge{font-family:var(--font-m);font-size:8.5px;font-weight:600;
+  letter-spacing:.5px;padding:2px 5px;border-radius:3px;text-transform:uppercase;
+  white-space:nowrap;flex-shrink:0}
+.card-std{font-family:var(--font-m);font-size:9px;color:var(--dim);
+  text-align:right;line-height:1.3}
+
+.card-name{font-family:var(--font-h);font-size:15px;font-weight:700;
+  color:var(--text);line-height:1.2;letter-spacing:.5px}
+
+.card-specs{display:grid;grid-template-columns:1fr 1fr;gap:5px 8px}
+.spec-item{}
+.spec-l{font-family:var(--font-m);font-size:8.5px;color:var(--dim);
+  text-transform:uppercase;letter-spacing:.5px}
+.spec-v{font-family:var(--font-m);font-size:12px;font-weight:600;color:var(--text);line-height:1.2}
+.spec-v em{font-style:normal;font-size:9px;color:var(--dim2);font-weight:400}
+
+.card-note{font-family:var(--font-b);font-size:10.5px;color:var(--dim2);
+  line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+.card-foot{border-top:1px solid var(--border);padding:6px 11px;
+  display:flex;align-items:center;justify-content:space-between;gap:6px;flex-shrink:0}
+.card-uses{font-family:var(--font-m);font-size:9px;color:var(--dim2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmp-btn{width:22px;height:22px;flex-shrink:0;border-radius:5px;
+  background:var(--surf3);border:1px solid var(--border);
+  color:var(--dim2);font-size:15px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .15s}
+.cmp-btn:hover{background:var(--cc,#f97316);border-color:var(--cc,#f97316);color:#000}
+.mat-card.in-cmp .cmp-btn{background:var(--cc,#f97316);border-color:var(--cc,#f97316);color:#000}
+
+/* slideIn animasyonu */
+@keyframes slideIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+.mat-card{animation:slideIn .15s ease both}
+
+/* ─── SAĞ PANEL: KARŞILAŞTIRMA ─── */
+.cmp-panel{width:390px;flex-shrink:0;background:var(--bg2);
+  border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.cp-hdr{padding:12px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cp-title{font-family:var(--font-h);font-size:15px;font-weight:700;
+  letter-spacing:1px;color:var(--text);display:flex;align-items:center;gap:8px}
+.cp-cnt{font-family:var(--font-m);font-size:10px;padding:2px 6px;border-radius:3px;
+  background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.25)}
+.cp-clr{background:transparent;border:none;color:var(--dim2);
+  font-family:var(--font-b);font-size:11px;padding:4px 8px;
+  border-radius:4px;cursor:pointer;transition:all .15s}
+.cp-clr:hover{background:rgba(248,113,113,.1);color:var(--red)}
+
+/* Slot row */
+.cp-slots{display:flex;gap:6px;padding:10px 12px;
+  border-bottom:1px solid var(--border);flex-shrink:0}
+.cp-slot{flex:1;min-height:54px;background:var(--surf1);
+  border:1px dashed rgba(255,255,255,0.1);border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:2px;padding:6px 4px;
+  font-family:var(--font-m);font-size:9px;color:var(--dim);
+  position:relative;overflow:hidden;transition:all .15s}
+.cp-slot.filled{border-style:solid}
+.cp-slot-bar{position:absolute;top:0;left:0;right:0;height:2px}
+.cp-slot-n{font-family:var(--font-h);font-size:12px;font-weight:700;
+  color:var(--text);text-align:center;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90%}
+.cp-slot-cat{font-family:var(--font-m);font-size:8.5px;color:var(--dim2);text-align:center}
+.cp-slot-rm{position:absolute;top:3px;right:3px;width:14px;height:14px;
+  background:rgba(248,113,113,.15);border:none;border-radius:50%;
+  color:var(--red);font-size:10px;cursor:pointer;
+  display:none;align-items:center;justify-content:center}
+.cp-slot.filled .cp-slot-rm{display:flex}
+.cp-slot-num{font-family:var(--font-m);font-size:9px;font-weight:600}
+
+/* Karşılaştırma tablosu sarıcı */
+.cp-scroll{flex:1;overflow-y:auto}
+.cp-empty{padding:40px 20px;text-align:center}
+.cp-empty-icon{font-size:36px;margin-bottom:14px;opacity:.4}
+.cp-empty-text{font-family:var(--font-b);font-size:13px;color:var(--dim2);line-height:1.7}
+.cp-empty-text strong{color:var(--dim);display:block;margin-bottom:6px}
+
+/* Tablo */
+.cpt{width:100%;border-collapse:collapse;table-layout:fixed}
+.cpt thead tr{position:sticky;top:0;z-index:4;background:var(--bg2)}
+.cpt th{padding:10px 6px 8px;border-bottom:2px solid var(--border);
+  font-family:var(--font-h);font-size:11px;font-weight:700;
+  letter-spacing:.5px;vertical-align:bottom}
+.cpt th.prop-h{text-align:left;padding-left:14px;color:var(--dim);
+  font-size:10px;letter-spacing:1px;width:88px}
+.cpt th.val-h{text-align:center;border-right:1px solid var(--border)}
+.cpt th.val-h:last-child{border-right:none}
+.th-slot-lbl{font-size:9px;letter-spacing:0;font-weight:400;opacity:.7;display:block}
+
+/* Section row */
+.cpt .sec-row td{padding:6px 14px 4px;background:var(--surf1);
+  border-top:1px solid var(--border)}
+.sec-lbl{font-family:var(--font-h);font-size:10px;letter-spacing:2px;
+  color:var(--dim2);text-transform:uppercase}
+
+/* Data row */
+.cpt .dr td{padding:5px 6px;border-bottom:1px solid var(--border);
+  border-right:1px solid var(--border);vertical-align:middle}
+.cpt .dr td:last-child{border-right:none}
+.cpt .dr td.prop-c{padding-left:14px;font-family:var(--font-m);
+  font-size:10px;color:var(--dim2);line-height:1.3}
+.cpt .dr td.val-c{text-align:center}
+
+/* Bar cell */
+.bar-cell{display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar-num{font-family:var(--font-m);font-size:11px;font-weight:600;color:var(--text)}
+.bar-num em{font-style:normal;font-size:8.5px;color:var(--dim2);font-weight:400}
+.bar-bg{width:68px;height:4px;background:var(--surf3);border-radius:2px;overflow:hidden}
+.bar-fg{height:100%;border-radius:2px;transition:width .4s ease}
+
+/* Dots cell */
+.dots-cell{display:flex;gap:3px;justify-content:center;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%}
+.dot.off{background:var(--surf3);border:1px solid var(--dim)}
+
+/* Uses row */
+.uses-cell{font-family:var(--font-m);font-size:9px;color:var(--dim2);
+  line-height:1.5;text-align:center;padding:6px 6px}
+
+/* Note row */
+.note-cell{font-family:var(--font-b);font-size:10px;color:var(--dim2);
+  line-height:1.5;text-align:left;padding:6px 8px}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav>
+  <a class="brand" href="index.html">MH<em>Platform</em></a>
+  <div class="breadcrumb">
+    <a href="index.html" style="color:var(--dim2);text-decoration:none">Ana Sayfa</a>
+    <span class="sep">/</span>
+    <span style="color:var(--text)">Malzeme Veritabanı</span>
+  </div>
+  <span class="nav-badge">VERİTABANI</span>
+</nav>
+
+<!-- ─── APP ─── -->
+<div class="app">
+
+  <!-- SOL: KATEGORİ FİLTRESİ -->
+  <div class="sidebar" id="sidebar">
+    <div class="sb-label">Kategoriler</div>
+    <!-- JS ile doldurulur -->
+    <div class="sb-divider"></div>
+    <div class="sb-label" style="padding-top:10px">Sıralama</div>
+    <div style="padding:0 10px 6px">
+      <select class="sort-sel" style="width:100%;padding:7px 10px" id="sortSel" onchange="renderCards()">
+        <option value="default">Varsayılan</option>
+        <option value="yield_asc">Akma Muk. ↑</option>
+        <option value="yield_desc">Akma Muk. ↓</option>
+        <option value="tensile_desc">Çekme Muk. ↓</option>
+        <option value="density_asc">Yoğunluk ↑</option>
+        <option value="density_desc">Yoğunluk ↓</option>
+        <option value="hardness_desc">Sertlik ↓</option>
+        <option value="name_asc">Ada Göre A→Z</option>
+      </select>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-label" style="padding-top:10px">Hızlı Filtre</div>
+    <button class="cat-btn" id="uf-weld" onclick="setUseFilter('weld')" style="font-size:11px">
+      <span style="font-size:12px">🔧</span> Kaynaklanabilir
+    </button>
+    <button class="cat-btn" id="uf-corr" onclick="setUseFilter('corr')" style="font-size:11px">
+      <span style="font-size:12px">🛡</span> Korozyon Dayanımlı
+    </button>
+    <button class="cat-btn" id="uf-heat" onclick="setUseFilter('heat')" style="font-size:11px">
+      <span style="font-size:12px">🔥</span> Isıya Dayanıklı
+    </button>
+    <button class="cat-btn" id="uf-machin" onclick="setUseFilter('machin')" style="font-size:11px">
+      <span style="font-size:12px">⚙️</span> İyi İşlenebilir
+    </button>
+    <button class="cat-btn" id="uf-light" onclick="setUseFilter('light')" style="font-size:11px">
+      <span style="font-size:12px">⚖️</span> Hafif (&lt; 5 g/cm³)
+    </button>
+    <div class="sb-divider"></div>
+    <div style="padding:10px 14px">
+      <div style="font-family:var(--font-m);font-size:9px;color:var(--dim);line-height:1.6">
+        Karşılaştırmak için kartın sağ alt köşesindeki <strong style="color:var(--orange)">+</strong> butonuna tıklayın.<br>
+        Maks. 3 malzeme seçilebilir.
+      </div>
+    </div>
+  </div>
+
+  <!-- ORTA: KARTLAR -->
+  <div class="content">
+    <div class="search-bar">
+      <div class="search-wrap">
+        <span class="search-ico">🔍</span>
+        <input class="search-input" id="searchIn" type="text"
+          placeholder="Malzeme ara… S355, PEEK, 6061, bronz, PA6…"
+          oninput="renderCards()">
+      </div>
+    </div>
+    <div class="cards-wrap">
+      <div class="count-line" id="countLine"></div>
+      <div class="mat-grid" id="matGrid"></div>
+      <div id="emptyState" style="display:none;padding:40px 0;text-align:center">
+        <div style="font-size:28px;opacity:.3;margin-bottom:10px">🔎</div>
+        <div style="font-family:var(--font-b);font-size:13px;color:var(--dim2)">
+          Aramanızla eşleşen malzeme bulunamadı.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAĞ: KARŞILAŞTIRMA -->
+  <div class="cmp-panel">
+    <div class="cp-hdr">
+      <div class="cp-title">
+        KARŞILAŞTIRMA
+        <span class="cp-cnt" id="cpCnt">0/3</span>
+      </div>
+      <button class="cp-clr" onclick="clearCompare()">Temizle</button>
+    </div>
+    <div class="cp-slots" id="cpSlots"></div>
+    <div class="cp-scroll" id="cpScroll">
+      <div class="cp-empty" id="cpEmpty">
+        <div class="cp-empty-icon">⚖️</div>
+        <div class="cp-empty-text">
+          <strong>Malzeme Karşılaştırma</strong>
+          Kartların üzerindeki <span style="color:var(--orange);font-weight:600">+</span> butonuna
+          tıklayarak 3 malzemeye kadar karşılaştırabilirsiniz.<br><br>
+          Çelik · Alüminyum · Plastik · Bronz · Titanyum…<br>
+          40+ malzeme mekanik, fiziksel ve teknolojik özelliklerle karşılaştırılır.
+        </div>
+      </div>
+      <table class="cpt" id="cpTable" style="display:none"></table>
+    </div>
+  </div>
+
+</div><!-- .app -->
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   MALZEMEVERİTABANI — MH Platform
+   ════════════════════════════════════════════════════════════ */
+
+/* ─── KATEGORİLER ─── */
+const CATS = {
+  tumu:      { name:'Tümü',                   color:'#8080a8' },
+  yapi:      { name:'Yapı Çeliği',            color:'#60a5fa' },
+  karbon:    { name:'Karbon / İmalat Çeliği', color:'#f97316' },
+  paslanmaz: { name:'Paslanmaz Çelik',        color:'#4ade80' },
+  aluminyum: { name:'Alüminyum',              color:'#00d4aa' },
+  bronz:     { name:'Bronz & Bakır',          color:'#fbbf24' },
+  plastik:   { name:'Müh. Plastiği',          color:'#a78bfa' },
+  dokme:     { name:'Dökme Demir',            color:'#f472b6' },
+  titanyum:  { name:'Titanyum',               color:'#67e8f9' },
+};
+
+/* Karşılaştırma sütun renkleri */
+const COLS = ['#f97316','#00d4aa','#a78bfa'];
+
+/* ─── MALZEMEVERİ ───
+   density: g/cm³  |  yield/tensile: MPa  |  hardness: HBW  |  emod: GPa
+   machin/weld/form/corr/heat: 1–5 (5=en iyi)  |  cost: 1–5 (1=ucuz) */
+const MATS = [
+  /* YAPISAL ÇELİKLER */
+  { id:'s185',   name:'S185',            std:'EN 10025-2 · 1.0035',
+    cat:'yapi',  density:7.85, yield:185, tensile:355, tStr:'310–410', hardness:115, emod:200,
+    machin:4, weld:4, form:4, corr:1, heat:3, cost:1,
+    uses:['Hafif konstrüksiyon','Basit makine parçaları','Çit ve boru sistemleri'],
+    note:'En düşük mukavemetli yapı çeliği. Düşük yük taşıyan ekonomik uygulamalar için.' },
+
+  { id:'s235jr', name:'S235JR',          std:'EN 10025-2 · 1.0037',
+    cat:'yapi',  density:7.85, yield:235, tensile:430, tStr:'360–510', hardness:130, emod:200,
+    machin:4, weld:5, form:4, corr:1, heat:3, cost:1,
+    uses:['Kiriş ve profiller','Kaynaklı konstrüksiyon','Makine gövdeleri','Çelik yapılar'],
+    note:'En yaygın kullanılan yapı çeliği. Mükemmel kaynak uyumu ve ekonomik fiyatıyla benchmark malzeme.' },
+
+  { id:'s275jr', name:'S275JR',          std:'EN 10025-2 · 1.0044',
+    cat:'yapi',  density:7.85, yield:275, tensile:480, tStr:'410–560', hardness:140, emod:200,
+    machin:3, weld:4, form:3, corr:1, heat:3, cost:1,
+    uses:['Taşıyıcı konstrüksiyon','Köprüler','Vinç parçaları','Makine kasaları'],
+    note:'Orta-yüksek mukavemetli yapı çeliği. İnşaat ve makine sanayinde S235JR\'in güçlü alternatifi.' },
+
+  { id:'s355jr', name:'S355JR',          std:'EN 10025-2 · 1.0045',
+    cat:'yapi',  density:7.85, yield:355, tensile:550, tStr:'470–630', hardness:165, emod:200,
+    machin:3, weld:4, form:3, corr:1, heat:3, cost:2,
+    uses:['Çelik şasiler','Vinç kolları','Baskı kapları','Gemi yapımı'],
+    note:'Yüksek mukavemetli yapı çeliği. Ağır yük taşıyan yapılarda endüstri standardı.' },
+
+  { id:'s355n',  name:'S355N',           std:'EN 10025-3 · 1.0545',
+    cat:'yapi',  density:7.85, yield:355, tensile:550, tStr:'450–630', hardness:165, emod:200,
+    machin:3, weld:4, form:3, corr:1, heat:3, cost:2,
+    uses:['Soğuk ortam yapıları (−20°C)','Kaynaklı yapılar','Offshore','Baskı kapları'],
+    note:'Normalize edilmiş S355. −20°C\'de darbe dayanımı garantili; soğuk iklim uygulamaları için şart.' },
+
+  { id:'s460n',  name:'S460N',           std:'EN 10025-3 · 1.8901',
+    cat:'yapi',  density:7.85, yield:460, tensile:630, tStr:'540–720', hardness:195, emod:200,
+    machin:2, weld:3, form:2, corr:1, heat:3, cost:3,
+    uses:['Yüksek gerilimli yapılar','Viyadük ve köprü','Ağır sanayi'],
+    note:'Çok yüksek mukavemetli yapı çeliği. Kaynak öncesi ön ısıtma gerekebilir.' },
+
+  { id:'dc01',   name:'DC01 (DKP Sac)',  std:'EN 10130 · 1.0330',
+    cat:'yapi',  density:7.85, yield:175, tensile:340, tStr:'270–410', hardness:100, emod:200,
+    machin:5, weld:5, form:5, corr:1, heat:2, cost:1,
+    uses:['Derin çekme','Otomotiv karoser','Beyaz eşya sacı','İnce sac işleme'],
+    note:'Soğuk haddelenmiş derin çekme sac. En yüksek şekillendirilebilirliğe sahip sac çeliği.' },
+
+  { id:'st52',   name:'ST52-3 (S355J2)', std:'EN 10025-2 · 1.0577',
+    cat:'yapi',  density:7.85, yield:355, tensile:560, tStr:'490–630', hardness:175, emod:200,
+    machin:3, weld:5, form:3, corr:1, heat:3, cost:2,
+    uses:['Şasi üretimi','Vinç yapımı','Makine konstrüksiyonu','Hidrolik silindir'],
+    note:'Eski DIN ST52-3\'ün EN karşılığı. Çok iyi kaynak kabiliyetiyle makine sanayinin vazgeçilmezi.' },
+
+  /* KARBON / İMALAT ÇELİKLERİ */
+  { id:'c30',    name:'C30 / SAE 1030',  std:'EN 10083-2 / SAE J403',
+    cat:'karbon',density:7.85, yield:380, tensile:580, tStr:'~580', hardness:165, emod:200,
+    machin:5, weld:4, form:4, corr:1, heat:3, cost:1,
+    uses:['Makine parçaları','Otomotiv şasi','Hafif miller','Bağlantı elemanları'],
+    note:'Düşük karbon, iyi işlenebilirlik. Kaynaklanabilirlik ve süneklik açısından en iyi karbon çeliği.' },
+
+  { id:'c40',    name:'C40 / SAE 1040',  std:'EN 10083-2 / SAE J403',
+    cat:'karbon',density:7.85, yield:415, tensile:620, tStr:'~620', hardness:185, emod:200,
+    machin:4, weld:3, form:3, corr:1, heat:3, cost:1,
+    uses:['Dişliler','Miller ve akslar','Krank milleri','Cıvatalar'],
+    note:'Orta karbon çeliği. Dengeli mukavemet ve işlenebilirliğiyle makine sanayinin temel malzemesi.' },
+
+  { id:'c45',    name:'C45 / SAE 1045',  std:'EN 10083-2 / SAE J403',
+    cat:'karbon',density:7.85, yield:450, tensile:650, tStr:'~650', hardness:200, emod:200,
+    machin:3, weld:3, form:3, corr:1, heat:3, cost:1,
+    uses:['Şaftlar','Dişli çarklar','Krank milleri','Piston milleri'],
+    note:'Endüstrinin en yaygın karbon çeliği. Isıl işlemle sertleştirilebilir; iyi darbe ve aşınma direnci.' },
+
+  { id:'c50',    name:'C50 / SAE 1050',  std:'EN 10083-2 / SAE J403',
+    cat:'karbon',density:7.85, yield:470, tensile:690, tStr:'~690', hardness:210, emod:200,
+    machin:3, weld:2, form:2, corr:1, heat:3, cost:2,
+    uses:['Yaylar','Takım parçaları','Ağır yük milleri','Demiryolu parçaları'],
+    note:'Yüksek karbon, daha yüksek aşınma direnci. Kaynaklanabilirliği sınırlı; ısıl işlemle değer kazanır.' },
+
+  { id:'c60',    name:'C60 / SAE 1060',  std:'EN 10083-2 / SAE J403',
+    cat:'karbon',density:7.85, yield:490, tensile:750, tStr:'~750', hardness:225, emod:200,
+    machin:2, weld:2, form:2, corr:1, heat:3, cost:2,
+    uses:['Bıçaklar ve kesici takımlar','Yüksek aşınma parçaları','Yaylar'],
+    note:'Yüksek sertlik ve aşınma direnci. Kaynaklanması ve işlenmesi zor; kırılganlık riski taşır.' },
+
+  /* PASLANMAZ ÇELİKLER */
+  { id:'ss303',  name:'303 (X8CrNiS18-9)',       std:'EN 1.4305 / AISI 303',
+    cat:'paslanmaz',density:7.93, yield:200, tensile:500, tStr:'500–700', hardness:190, emod:193,
+    machin:5, weld:2, form:3, corr:3, heat:4, cost:3,
+    uses:['CNC parçalar','Bağlantı elemanları','Makine aksanı','Otomatik torna parçaları'],
+    note:'Kükürt katkısıyla serinin en iyi işlenebiliri. Kaynaklanması zordur; korozyon direnci orta.' },
+
+  { id:'ss304',  name:'304 (X5CrNi18-10)',       std:'EN 1.4301 / AISI 304',
+    cat:'paslanmaz',density:7.93, yield:210, tensile:520, tStr:'520–720', hardness:200, emod:193,
+    machin:3, weld:4, form:4, corr:4, heat:4, cost:3,
+    uses:['Gıda ekipmanları','Mutfak araçları','Kimya tesisleri','Tıbbi cihazlar'],
+    note:'En yaygın paslanmaz çelik. İyi korozyon direnci, manyetik değil. Gıda ve tıp sanayinin standardı.' },
+
+  { id:'ss316l', name:'316L (X2CrNiMo17-12-2)', std:'EN 1.4404 / AISI 316L',
+    cat:'paslanmaz',density:7.98, yield:200, tensile:500, tStr:'500–700', hardness:215, emod:193,
+    machin:3, weld:4, form:3, corr:5, heat:4, cost:4,
+    uses:['Denizcilik','Kimya endüstrisi','Boru sistemleri','Cerrahi implant'],
+    note:'Molibden katkısıyla mükemmel korozyon direnci. Klorürlü ortamlar ve deniz suyu için tercih edilir.' },
+
+  { id:'ss316ti',name:'316Ti (X6CrNiMoTi17-12-2)',std:'EN 1.4571 / AISI 316Ti',
+    cat:'paslanmaz',density:7.98, yield:240, tensile:530, tStr:'530–730', hardness:220, emod:200,
+    machin:3, weld:3, form:3, corr:5, heat:5, cost:4,
+    uses:['Yüksek sıcaklık tesisleri','Egzoz sistemleri','Kimyasal reaktörler'],
+    note:'Titanyum stabilize edilmiş 316. Yüksek sıcaklıkta karbon çökmesine karşı dayanımlı.' },
+
+  { id:'ss410',  name:'410 (X12Cr13)',           std:'EN 1.4006 / AISI 410',
+    cat:'paslanmaz',density:7.75, yield:270, tensile:480, tStr:'480–680', hardness:230, emod:200,
+    machin:4, weld:3, form:3, corr:3, heat:4, cost:3,
+    uses:['Valfler ve pompalar','Bıçaklar','Türbin kanatları'],
+    note:'Martensitik paslanmaz. Isıl işlemle sertleştirilebilir; orta korozyon direnci.' },
+
+  { id:'ss430',  name:'430 (X6Cr17)',            std:'EN 1.4016 / AISI 430',
+    cat:'paslanmaz',density:7.73, yield:210, tensile:450, tStr:'450–600', hardness:200, emod:200,
+    machin:3, weld:3, form:3, corr:3, heat:4, cost:3,
+    uses:['Dekoratif yüzeyler','Beyaz eşya','Mimari','İç mekân'],
+    note:'Ferritik paslanmaz. Manyetiktir. 304\'ten daha ucuz; korozyon direnci daha düşük.' },
+
+  /* ALÜMİNYUM */
+  { id:'al6061', name:'6061-T6',    std:'EN AW-6061 / AA6061',
+    cat:'aluminyum',density:2.70, yield:275, tensile:310, tStr:'~310', hardness:95, emod:69,
+    machin:4, weld:4, form:3, corr:4, heat:2, cost:2,
+    uses:['Otomotiv parçaları','Makine parçaları','Denizcilik ekipmanı','Bisiklet çerçeveleri'],
+    note:'Dengeli alaşım. Orta-yüksek mukavemet, iyi işlenebilirlik. En popüler alüminyum alaşımı.' },
+
+  { id:'al6063', name:'6063-T5',    std:'EN AW-6063 / AA6063',
+    cat:'aluminyum',density:2.69, yield:170, tensile:215, tStr:'~215', hardness:80, emod:69,
+    machin:5, weld:5, form:5, corr:4, heat:2, cost:2,
+    uses:['Mimari profiller','Pencere ve kapı doğramaları','Dekoratif uygulamalar'],
+    note:'En iyi şekillendirilebilir 6000 serisi. Mükemmel yüzey kalitesi; mimari ve ekstrüzyon için ideal.' },
+
+  { id:'al6082', name:'6082-T6',    std:'EN AW-6082 / AA6082',
+    cat:'aluminyum',density:2.71, yield:260, tensile:325, tStr:'~325', hardness:105, emod:70,
+    machin:4, weld:3, form:2, corr:4, heat:2, cost:2,
+    uses:['Ağır yük yapıları','Köprü bileşenleri','Demiryolu','Vinç kolları'],
+    note:'6000 serisinin en yüksek mukavemetlisi. Ağır yük taşıyan yapısal uygulamalar için tercih edilir.' },
+
+  { id:'al7075', name:'7075-T6',    std:'EN AW-7075 / AA7075',
+    cat:'aluminyum',density:2.81, yield:503, tensile:572, tStr:'~572', hardness:155, emod:72,
+    machin:3, weld:1, form:2, corr:2, heat:2, cost:4,
+    uses:['Havacılık gövdesi','Yüksek performanslı otomotiv','Savunma','Bisiklet yarış çerçeveleri'],
+    note:'Çelik kadar güçlü ancak hafif. Düşük korozyon direci; havacılıkta anodik kaplama zorunludur.' },
+
+  { id:'al7050', name:'7050-T7451', std:'EN AW-7050 / AA7050',
+    cat:'aluminyum',density:2.83, yield:450, tensile:515, tStr:'~515', hardness:145, emod:71,
+    machin:3, weld:1, form:2, corr:3, heat:2, cost:5,
+    uses:['Uçak gövde çerçevesi','Askeri zırh','Yüksek dayanımlı yapılar'],
+    note:'7075\'ten daha iyi korozyon direnciyle havacılık ve savunmada tercih edilen alaşım.' },
+
+  { id:'al5083', name:'5083-H111',  std:'EN AW-5083 / AA5083',
+    cat:'aluminyum',density:2.66, yield:145, tensile:290, tStr:'~290', hardness:75, emod:70,
+    machin:3, weld:5, form:4, corr:5, heat:2, cost:2,
+    uses:['Gemi gövdeleri','Deniz araçları','Baskılı kaplar','Kriyojenik tanklar'],
+    note:'En yüksek korozyon direncine sahip alüminyum alaşımı. Denizcilik uygulamalarının vazgeçilmezi.' },
+
+  /* BRONZ & BAKIR */
+  { id:'cusn6',  name:'CuSn6 — Fosfor Bronzu',        std:'EN CW452K / CuSn6',
+    cat:'bronz',density:8.80, yield:150, tensile:350, tStr:'~350', hardness:90, emod:110,
+    machin:4, weld:3, form:4, corr:4, heat:3, cost:3,
+    uses:['Burç ve yataklar','Yaylar','Dişli çarklar','Elektrik kontakları'],
+    note:'İyi aşınma direnci ve yay özelliği. Elektrik ve makine sanayinde yaygın kullanım.' },
+
+  { id:'cusn12', name:'CuSn12 — Kalay Bronzu',        std:'EN CW457K / CuSn12',
+    cat:'bronz',density:8.90, yield:180, tensile:400, tStr:'~400', hardness:110, emod:105,
+    machin:3, weld:2, form:3, corr:4, heat:3, cost:4,
+    uses:['Ağır yük burçları','Pompa bileşenleri','Valf gövdeleri'],
+    note:'Yüksek kalay içeriği ile üstün aşınma ve yorulma direnci. Ağır yük uygulamaları için.' },
+
+  { id:'cual10', name:'CuAl10Fe5Ni5 — Alüminyum Bronzu', std:'EN CW307G / CuAl10Fe5Ni5',
+    cat:'bronz',density:7.80, yield:400, tensile:850, tStr:'~850', hardness:180, emod:120,
+    machin:3, weld:3, form:2, corr:5, heat:4, cost:5,
+    uses:['Gemi pervaneleri','Pompa çarkları','Yüksek aşınma parçaları','Dişliler'],
+    note:'En yüksek mukavemetli bronz. Mükemmel korozyon ve deniz suyu direnciyle denizcilik standardı.' },
+
+  { id:'cuzn37', name:'CuZn37 — Pirinç',             std:'EN CW508L / CuZn37',
+    cat:'bronz',density:8.44, yield:170, tensile:380, tStr:'~380', hardness:100, emod:100,
+    machin:5, weld:3, form:4, corr:3, heat:2, cost:2,
+    uses:['Bağlantı elemanları','Döküm parçalar','Soğutma fittingsleri','Dekoratif parçalar'],
+    note:'Mükemmel işlenebilirlik. Otomatik torna ve döküm uygulamalarının birincil tercihi.' },
+
+  /* MÜHENDİSLİK PLASTİKLERİ */
+  { id:'ptfe',   name:'PTFE (Teflon)',      std:'ISO 13000 / ASTM D3308',
+    cat:'plastik',density:2.20, yield:14, tensile:24, tStr:'20–35', hardness:15, emod:0.5,
+    machin:3, weld:1, form:3, corr:5, heat:4, cost:4,
+    uses:['Conta ve sızdırmazlık','Kaydırıcı yüzeyler','Kimyasal boru astarlama','Gıda işleme'],
+    note:'En düşük sürtünme katsayısına sahip mühendislik plastiği. Neredeyse tüm kimyasallara dirençli.' },
+
+  { id:'pom',    name:'POM (Delrin / Asetal)',std:'ISO 9988 / ASTM D4181',
+    cat:'plastik',density:1.41, yield:65, tensile:70, tStr:'60–75', hardness:100, emod:3.2,
+    machin:5, weld:1, form:4, corr:4, heat:2, cost:2,
+    uses:['Dişli çarklar','Yataklar','Kaplinler','Hassas makine parçaları'],
+    note:'En iyi işlenebilir plastik. Boyut kararlılığı ve düşük nem emilimi ile hassas parçalar için ideal.' },
+
+  { id:'pa6',    name:'PA6 (Naylon 6)',      std:'ISO 1874 / ASTM D4066',
+    cat:'plastik',density:1.14, yield:60, tensile:75, tStr:'65–80', hardness:85, emod:2.8,
+    machin:4, weld:1, form:4, corr:3, heat:2, cost:2,
+    uses:['Rulman burçları','Kılavuz raylar','Kaplinler','Gövde parçaları'],
+    note:'İyi mekanik özellikler ve düşük maliyet. Nem absorpsiyonu boyutsal değişime neden olabilir.' },
+
+  { id:'pa66',   name:'PA66 (Naylon 66)',    std:'ISO 1874 / ASTM D4066',
+    cat:'plastik',density:1.14, yield:80, tensile:85, tStr:'75–90', hardness:90, emod:3.0,
+    machin:4, weld:1, form:4, corr:3, heat:3, cost:2,
+    uses:['Yüksek sıcaklık dişliler','Otomotiv altı kaput parçaları','Elektrik izolasyon'],
+    note:'PA6\'dan daha yüksek sertlik ve ısıl direnç. Otomotiv ve elektrik endüstrisinde tercih edilir.' },
+
+  { id:'peek',   name:'PEEK',               std:'ISO 10350 / ASTM D6356',
+    cat:'plastik',density:1.32, yield:100, tensile:120, tStr:'100–130', hardness:125, emod:4.0,
+    machin:3, weld:1, form:3, corr:4, heat:5, cost:5,
+    uses:['250°C ortam parçaları','Medikal implant','Havacılık','Yüksek vakum ekipmanı'],
+    note:'Mühendislik plastiklerinin zirvesi. 250°C\'ye kadar mekanik özelliklerini korur. Çok pahalı.' },
+
+  { id:'uhmwpe', name:'UHMW-PE',            std:'ISO 11542 / ASTM D4020',
+    cat:'plastik',density:0.94, yield:20, tensile:40, tStr:'35–45', hardness:30, emod:0.8,
+    machin:3, weld:1, form:3, corr:5, heat:2, cost:2,
+    uses:['Konveyör kılavuzları','Kayar yüzeyler','Gıda işleme bileşenleri','Darbe tamponlayıcı'],
+    note:'En düşük yoğunluklu ve en yüksek darbe direncine sahip plastik. Mükemmel aşınma direnci.' },
+
+  { id:'pc',     name:'PC (Polikarbonat)',   std:'ISO 7391 / ASTM D3935',
+    cat:'plastik',density:1.20, yield:60, tensile:65, tStr:'55–75', hardness:100, emod:2.5,
+    machin:4, weld:1, form:4, corr:3, heat:3, cost:3,
+    uses:['Şeffaf kapaklar','Makine koruyucuları','Optik bileşenler','Kasklar'],
+    note:'Optik şeffaflık + yüksek darbe direnci kombinasyonu. UV stabilizasyon gerektirir.' },
+
+  /* DÖKME DEMİR */
+  { id:'gg25',   name:'GG25 (EN-GJL-250)',  std:'EN 1561 / ISO 185',
+    cat:'dokme',density:7.20, yield:150, tensile:350, tStr:'250–350', hardness:180, emod:105,
+    machin:5, weld:2, form:1, corr:2, heat:4, cost:1,
+    uses:['Makine yatakları','Silindir gövdeleri','Pres gövdeleri','Titreşim sönümleyici'],
+    note:'Lamel grafitli dökme demir. Mükemmel işlenebilirlik ve titreşim sönümleme. Kırılgan yapılıdır.' },
+
+  { id:'ggg40',  name:'GGG40 (EN-GJS-400)', std:'EN 1563 / ISO 1083',
+    cat:'dokme',density:7.10, yield:250, tensile:400, tStr:'400–500', hardness:190, emod:170,
+    machin:4, weld:3, form:1, corr:2, heat:4, cost:1,
+    uses:['Borular ve fittingsler','Pompa gövdeleri','Fren diskleri','Aks gövdeleri'],
+    note:'Küresel grafitli (nodüler) dökme demir. GG25\'ten daha sünek ve daha az kırılgandır.' },
+
+  { id:'ggg50',  name:'GGG50 (EN-GJS-500)', std:'EN 1563 / ISO 1083',
+    cat:'dokme',density:7.10, yield:350, tensile:500, tStr:'500–600', hardness:250, emod:170,
+    machin:3, weld:3, form:1, corr:2, heat:4, cost:2,
+    uses:['Dişli kutusu gövdeleri','Krank milleri','Pres kolları','Ağır makine parçaları'],
+    note:'Yüksek mukavemetli nodüler dökme demir. İyi mukavemet-maliyet dengesi ile ağır sanayi tercihi.' },
+
+  /* TİTANYUM */
+  { id:'ti2',    name:'Ti Grade 2',          std:'ASTM B265 / AMS 4902',
+    cat:'titanyum',density:4.50, yield:275, tensile:450, tStr:'~450', hardness:160, emod:105,
+    machin:2, weld:4, form:3, corr:5, heat:4, cost:5,
+    uses:['Medikal implant','Denizcilik ekipmanı','Kimya tesisleri','Havacılık yapısı'],
+    note:'Ticari saflıkta titanyum. Mükemmel biyouyumluluk ve korozyon direnci. İşlemesi zordur.' },
+
+  { id:'ti5',    name:'Ti-6Al-4V (Grade 5)', std:'ASTM B265 Gr.5 / AMS 4928',
+    cat:'titanyum',density:4.43, yield:830, tensile:900, tStr:'~900', hardness:340, emod:114,
+    machin:1, weld:3, form:2, corr:5, heat:4, cost:5,
+    uses:['Havacılık motor parçaları','Yarış araçları','Ortopedik implant','Uzay araçları'],
+    note:'En yaygın titanyum alaşımı. Çelikle yarışan mukavemet, çeliğin yarı ağırlığında. Premium maliyet.' },
+];
+
+/* ─── STATE ─── */
+let activeCat = 'tumu';
+let useFilter = null; // 'weld','corr','heat','machin','light'
+let compareIds = [];
+
+/* ─── YARDIMCI ─── */
+function hexRgba(hex, a) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function ratingLabel(n) {
+  return ['','Çok Zayıf','Zayıf','Orta','İyi','Mükemmel'][n] || '-';
+}
+function costLabel(n) {
+  return ['','Çok Düşük','Düşük','Orta','Yüksek','Çok Yüksek'][n] || '-';
+}
+function slotIdxOf(id) { return compareIds.indexOf(id); }
+
+/* ─── KATEGORİ KENAR RENGİ ─── */
+function activeBorderColor(id) {
+  const i = slotIdxOf(id);
+  return i>=0 ? COLS[i] : null;
+}
+
+/* ─── SİDEBAR ─── */
+function renderSidebar() {
+  const sb = document.getElementById('sidebar');
+  // Insert category buttons after the label (first child)
+  const label = sb.querySelector('.sb-label');
+  // Remove existing cat buttons
+  sb.querySelectorAll('.cat-btn-cat').forEach(el => el.remove());
+
+  // Insert all buttons before the divider
+  const divider = sb.querySelector('.sb-divider');
+  Object.entries(CATS).forEach(([key, cat]) => {
+    const count = key === 'tumu' ? MATS.length : MATS.filter(m=>m.cat===key).length;
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn cat-btn-cat';
+    if (key === activeCat) {
+      btn.classList.add('active');
+      btn.style.borderLeftColor = cat.color;
+    }
+    btn.innerHTML = `<span class="cat-dot" style="background:${cat.color}"></span>
+      ${cat.name}<span class="cat-count">${count}</span>`;
+    btn.onclick = () => { activeCat = key; useFilter = null; renderAll(); };
+    sb.insertBefore(btn, divider);
+  });
+}
+
+/* ─── KART FİLTRE & SIRALA ─── */
+function filteredAndSorted() {
+  const q = (document.getElementById('searchIn')?.value || '').toLowerCase().trim();
+  const sort = document.getElementById('sortSel')?.value || 'default';
+
+  let list = MATS.filter(m => {
+    if (activeCat !== 'tumu' && m.cat !== activeCat) return false;
+    if (useFilter === 'weld' && m.weld < 4) return false;
+    if (useFilter === 'corr' && m.corr < 4) return false;
+    if (useFilter === 'heat' && m.heat < 4) return false;
+    if (useFilter === 'machin' && m.machin < 4) return false;
+    if (useFilter === 'light' && m.density >= 5) return false;
+    if (q) {
+      const hay = `${m.name} ${m.std} ${m.cat} ${CATS[m.cat].name} ${m.uses.join(' ')} ${m.note}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  list.sort((a,b) => {
+    if (sort==='yield_asc')     return a.yield - b.yield;
+    if (sort==='yield_desc')    return b.yield - a.yield;
+    if (sort==='tensile_desc')  return b.tensile - a.tensile;
+    if (sort==='density_asc')   return a.density - b.density;
+    if (sort==='density_desc')  return b.density - a.density;
+    if (sort==='hardness_desc') return b.hardness - a.hardness;
+    if (sort==='name_asc')      return a.name.localeCompare(b.name);
+    return 0;
+  });
+  return list;
+}
+
+/* ─── KARTLAR ─── */
+function renderCards() {
+  const grid = document.getElementById('matGrid');
+  const countLine = document.getElementById('countLine');
+  const emptyState = document.getElementById('emptyState');
+  const list = filteredAndSorted();
+  const isFull = compareIds.length >= 3;
+
+  countLine.innerHTML = `<span>${list.length}</span> malzeme · ${MATS.length} malzeme toplamda`;
+  emptyState.style.display = list.length ? 'none' : 'block';
+  grid.innerHTML = '';
+
+  list.forEach(m => {
+    const cat = CATS[m.cat];
+    const si = slotIdxOf(m.id);
+    const inCmp = si >= 0;
+    const col = inCmp ? COLS[si] : cat.color;
+
+    const card = document.createElement('div');
+    card.className = 'mat-card' + (inCmp ? ' in-cmp' : '') + (isFull && !inCmp ? ' slot-full' : '');
+    card.style.setProperty('--cc', col);
+    if (inCmp) card.style.setProperty('--cc', COLS[si]);
+
+    card.innerHTML = `
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="card-top-row">
+          <span class="card-cat-badge" style="background:${hexRgba(cat.color,0.13)};color:${cat.color};border:1px solid ${hexRgba(cat.color,0.28)}">${cat.name}</span>
+          <div class="card-std">${m.std.split(' / ')[0]}</div>
+        </div>
+        <div class="card-name">${m.name.split(' — ')[0].split(' / ')[0]}</div>
+        <div class="card-specs">
+          <div class="spec-item">
+            <div class="spec-l">AKMA</div>
+            <div class="spec-v">${m.yield}<em> MPa</em></div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-l">ÇEKME</div>
+            <div class="spec-v">${m.tensile}<em> MPa</em></div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-l">SERTLİK</div>
+            <div class="spec-v">${m.hardness}<em> HBW</em></div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-l">YOĞUNLUK</div>
+            <div class="spec-v">${m.density}<em> g/cm³</em></div>
+          </div>
+        </div>
+        <div class="card-note">${m.note}</div>
+      </div>
+      <div class="card-foot">
+        <div class="card-uses">${m.uses.slice(0,3).join(' · ')}</div>
+        <button class="cmp-btn" title="${inCmp?'Karşılaştırmadan çıkar':'Karşılaştırmaya ekle'}"
+          onclick="event.stopPropagation();toggleCompare('${m.id}')">${inCmp?'−':'+'}</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+/* ─── KARŞILAŞTIRMA SLOT BAR ─── */
+function renderSlots() {
+  const slotWrap = document.getElementById('cpSlots');
+  const cnt = document.getElementById('cpCnt');
+  slotWrap.innerHTML = '';
+  cnt.textContent = `${compareIds.length}/3`;
+
+  for (let i=0; i<3; i++) {
+    const id = compareIds[i];
+    const mat = id ? MATS.find(m=>m.id===id) : null;
+    const col = COLS[i];
+    const slot = document.createElement('div');
+    slot.className = 'cp-slot' + (mat ? ' filled' : '');
+    slot.style.setProperty('--slot-color', col);
+    if (mat) slot.style.borderColor = col;
+
+    if (mat) {
+      const cat = CATS[mat.cat];
+      slot.innerHTML = `
+        <div class="cp-slot-bar" style="background:${col}"></div>
+        <div class="cp-slot-n">${mat.name.split(' — ')[0].split(' / ')[0]}</div>
+        <div class="cp-slot-cat" style="color:${cat.color}">${cat.name}</div>
+        <button class="cp-slot-rm" onclick="removeCompare('${id}')">×</button>
+      `;
+    } else {
+      slot.innerHTML = `
+        <div class="cp-slot-num" style="color:${col}">${i+1}</div>
+        <div style="font-size:9px;margin-top:2px">BOŞ</div>
+      `;
+    }
+    slotWrap.appendChild(slot);
+  }
+}
+
+/* ─── KARŞILAŞTIRMA TABLOSU ─── */
+function renderCompareTable() {
+  const cpEmpty = document.getElementById('cpEmpty');
+  const cpTable = document.getElementById('cpTable');
+  const mats = compareIds.map(id => MATS.find(m=>m.id===id));
+
+  if (mats.length === 0) {
+    cpEmpty.style.display = 'block';
+    cpTable.style.display = 'none';
+    return;
+  }
+  cpEmpty.style.display = 'none';
+  cpTable.style.display = 'table';
+
+  /* Normalize helpers */
+  function bar(vals, idx, propKey) {
+    const v = vals[idx][propKey];
+    const maxV = Math.max(...vals.map(m=>m[propKey]));
+    const pct = maxV > 0 ? Math.round((v/maxV)*100) : 0;
+    const col = COLS[idx];
+    return `<div class="bar-cell">
+      <div class="bar-num">${v}<em> ${propKey==='density'?'g/cm³':propKey==='emod'?'GPa':'MPa'}</em></div>
+      <div class="bar-bg"><div class="bar-fg" style="width:${pct}%;background:${col}"></div></div>
+    </div>`;
+  }
+  function dots(val, idx) {
+    const col = COLS[idx];
+    let d = '';
+    for (let i=1;i<=5;i++) d += `<div class="dot ${i<=val?'':'off'}" style="${i<=val?'background:'+col:''}"></div>`;
+    return `<div class="dots-cell">${d}</div>`;
+  }
+  function empty(colSpan=1) { return `<td class="val-c" colspan="${colSpan}">—</td>`; }
+  function colHdr(i) {
+    if (!mats[i]) return `<th class="val-h" style="color:${COLS[i]};opacity:.3">—</th>`;
+    const cat = CATS[mats[i].cat];
+    return `<th class="val-h" style="color:${COLS[i]};border-bottom-color:${COLS[i]}">
+      ${mats[i].name.split(' — ')[0].split(' / ')[0]}
+      <span class="th-slot-lbl" style="color:${cat.color}">${cat.name}</span>
+    </th>`;
+  }
+
+  function secRow(label) {
+    return `<tr class="sec-row"><td colspan="${1+mats.length}"><span class="sec-lbl">${label}</span></td></tr>`;
+  }
+  function propRow(label, cells) {
+    let tds = cells.map((c,i) => `<td class="val-c">${mats[i] ? c : '—'}</td>`).join('');
+    return `<tr class="dr"><td class="prop-c">${label}</td>${tds}</tr>`;
+  }
+
+  // Columns: up to 3
+  const thCols = [colHdr(0), colHdr(1), colHdr(2)].slice(0, 3);
+
+  let html = `
+    <thead>
+      <tr>
+        <th class="prop-h">ÖZELLİK</th>
+        ${colHdr(0)}${colHdr(1)}${colHdr(2)}
+      </tr>
+    </thead>
+    <tbody>
+  `;
+
+  // MEKANİK
+  html += secRow('MEKANİK ÖZELLİKLER');
+  const allMats = [mats[0], mats[1], mats[2]];
+
+  function numRow(label, propKey, unit) {
+    const maxV = Math.max(...allMats.filter(Boolean).map(m=>m[propKey]));
+    const cells = [0,1,2].map(i => {
+      const m = allMats[i];
+      if (!m) return '<td class="val-c">—</td>';
+      const pct = maxV>0 ? Math.round((m[propKey]/maxV)*100) : 0;
+      const col = COLS[i];
+      return `<td class="val-c"><div class="bar-cell">
+        <div class="bar-num">${m[propKey]}<em> ${unit}</em></div>
+        <div class="bar-bg"><div class="bar-fg" style="width:${pct}%;background:${col}"></div></div>
+      </div></td>`;
+    }).join('');
+    return `<tr class="dr"><td class="prop-c">${label}</td>${cells}</tr>`;
+  }
+  function dotRow(label, propKey) {
+    const cells = [0,1,2].map(i => {
+      const m = allMats[i];
+      if (!m) return '<td class="val-c">—</td>';
+      return `<td class="val-c">${dots(m[propKey],i)}</td>`;
+    }).join('');
+    return `<tr class="dr"><td class="prop-c">${label}</td>${cells}</tr>`;
+  }
+  function textRow(label, fn) {
+    const cells = [0,1,2].map(i => {
+      const m = allMats[i];
+      if (!m) return '<td class="val-c">—</td>';
+      return `<td class="val-c">${fn(m)}</td>`;
+    }).join('');
+    return `<tr class="dr"><td class="prop-c">${label}</td>${cells}</tr>`;
+  }
+
+  html += numRow('Akma Muk.', 'yield', 'MPa');
+  html += numRow('Çekme Muk.', 'tensile', 'MPa');
+  html += numRow('Sertlik', 'hardness', 'HBW');
+  html += numRow('E Modülü', 'emod', 'GPa');
+
+  // FİZİKSEL
+  html += secRow('FİZİKSEL');
+  html += numRow('Yoğunluk', 'density', 'g/cm³');
+
+  // TEKNOLOJİK
+  html += secRow('TEKNOLOJİK');
+  html += dotRow('Kaynaklana-bilirlik', 'weld');
+  html += dotRow('İşlenebilirlik', 'machin');
+  html += dotRow('Şekillend.', 'form');
+  html += dotRow('Korozyon Direnci', 'corr');
+  html += dotRow('Isıl Direnç', 'heat');
+
+  // EKONOMİ
+  html += secRow('EKONOMİ');
+  html += dotRow('Maliyet Seviyesi', 'cost');
+
+  // STANDART
+  html += secRow('STANDART & SINIF');
+  html += textRow('Std.', m => `<div style="font-family:var(--font-m);font-size:9px;color:var(--dim2);line-height:1.5">${m.std}</div>`);
+
+  // KULLANIM ALANLARI
+  html += secRow('KULLANIM ALANLARI');
+  const usesRow = [0,1,2].map(i => {
+    const m = allMats[i];
+    if (!m) return '<td class="val-c">—</td>';
+    return `<td style="padding:6px 5px;vertical-align:top;border-right:1px solid var(--border)">
+      <div style="font-family:var(--font-m);font-size:9px;color:var(--dim2);line-height:1.6">
+        ${m.uses.map(u=>`· ${u}`).join('<br>')}
+      </div>
+    </td>`;
+  }).join('');
+  html += `<tr class="dr"><td class="prop-c">Kullanım</td>${usesRow}</tr>`;
+
+  // NOT
+  html += secRow('KISA TANIM');
+  const noteRow = [0,1,2].map(i => {
+    const m = allMats[i];
+    if (!m) return '<td class="val-c">—</td>';
+    return `<td style="padding:6px 6px;vertical-align:top;border-right:1px solid var(--border)">
+      <div class="note-cell" style="padding:0;font-size:9.5px">${m.note}</div>
+    </td>`;
+  }).join('');
+  html += `<tr class="dr"><td class="prop-c" style="vertical-align:top;padding-top:8px">Açıklama</td>${noteRow}</tr>`;
+
+  html += '</tbody>';
+  cpTable.innerHTML = html;
+}
+
+/* ─── TOGGLE / EKLE / ÇIKAR ─── */
+function toggleCompare(id) {
+  const i = compareIds.indexOf(id);
+  if (i >= 0) {
+    compareIds.splice(i, 1);
+  } else if (compareIds.length < 3) {
+    compareIds.push(id);
+  }
+  renderAll();
+}
+function removeCompare(id) {
+  compareIds = compareIds.filter(x => x !== id);
+  renderAll();
+}
+function clearCompare() {
+  compareIds = [];
+  renderAll();
+}
+function setUseFilter(f) {
+  useFilter = useFilter === f ? null : f;
+  activeCat = 'tumu';
+  // Update filter button states
+  ['weld','corr','heat','machin','light'].forEach(k => {
+    const btn = document.getElementById('uf-'+k);
+    if (btn) {
+      btn.style.borderLeftColor = useFilter===k ? 'var(--orange)' : 'transparent';
+      btn.style.background = useFilter===k ? 'var(--surf1)' : 'transparent';
+      btn.style.color = useFilter===k ? 'var(--text)' : 'var(--dim2)';
+    }
+  });
+  renderAll();
+}
+
+/* ─── HEPSINI RENDER ET ─── */
+function renderAll() {
+  renderSidebar();
+  renderCards();
+  renderSlots();
+  renderCompareTable();
+}
+
+/* ─── İLK RENDER ─── */
+renderAll();
+</script>
+</body>
+</html>
