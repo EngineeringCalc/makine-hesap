@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vidalı Mil Hesabı — MH Platform</title>
+  <link rel="stylesheet" href="mh-tokens.css">
+  <style>
+    :root {
+      --dim:  #52527a;
+      --dim2: #8080a8;
+      --mc:    #e879f9;          /* sayfa ana vurgusu (vidalı mil — fuşya) */
+      --mc-bg: rgba(232,121,249,0.12);
+      --mc-bd: rgba(232,121,249,0.28);
+      --kin:  #f97316;           /* Kinematik paneli */
+      --stab: #60a5fa;           /* Stabilite paneli  */
+      --life: #00d4aa;           /* Ömür paneli       */
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--font-b);
+      display: flex; flex-direction: column;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(7,7,14,0.92); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 20px; height: 52px; gap: 20px; flex-shrink: 0;
+    }
+    .brand { font-family: var(--font-logo); font-size: var(--fz-18); letter-spacing: 3px; color: var(--accent); text-decoration: none; }
+    .brand em { color: var(--text); font-style: normal; }
+    .breadcrumb { font-size: var(--fz-12); color: var(--dim2); font-family: var(--font-m); display: flex; align-items: center; gap: 8px; }
+    .breadcrumb a { color: var(--dim2); text-decoration: none; }
+    .breadcrumb .sep { color: var(--dim); }
+    .breadcrumb .cur { color: var(--text); }
+
+    /* ── APP ── */
+    .app { display: flex; flex: 1; overflow: hidden; position: relative; z-index: 1; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--bg2); border-right: 1px solid var(--border);
+      width: 210px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto; padding-bottom: 16px;
+    }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+    .sec-label {
+      font-family: var(--font-h); font-size: var(--fz-11);
+      letter-spacing: 2px; color: #9090c0; text-transform: uppercase;
+      padding: 13px 14px 6px; flex-shrink: 0;
+    }
+    .sb-div { height: 1px; background: var(--border); margin: 8px 14px; }
+
+    /* mil tipi seçimi */
+    .type-btn {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 10px 14px;
+      background: transparent; border: none; border-left: 3px solid transparent;
+      color: var(--dim2); font-family: var(--font-b); font-size: calc(12.5px * var(--fz));
+      cursor: pointer; text-align: left; transition: all 0.15s;
+    }
+    .type-btn:hover { background: var(--surf1); color: var(--text); }
+    .type-btn.active { background: var(--surf1); color: var(--text); font-weight: 500; border-left-color: var(--mc); }
+    .type-ic { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+    .type-meta { font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim); display: block; margin-top: 1px; }
+
+    /* hesap modülü toggle'ları */
+    .mod-toggle {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 9px 14px;
+      background: transparent; border: none;
+      color: var(--dim2); font-family: var(--font-b); font-size: calc(12.5px * var(--fz));
+      cursor: pointer; text-align: left; transition: all 0.15s;
+    }
+    .mod-toggle:hover { background: var(--surf1); }
+    .mod-box {
+      width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0;
+      border: 1.5px solid var(--mb, var(--dim)); background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: #07070e; font-weight: 700; transition: all 0.15s;
+    }
+    .mod-toggle.on { color: var(--text); }
+    .mod-toggle.on .mod-box { background: var(--mb); border-color: var(--mb); }
+    .mod-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mb); flex-shrink: 0; opacity: 0.85; }
+
+    .sb-note {
+      margin: 8px 14px 0; padding: 10px 12px;
+      background: rgba(232,121,249,0.06); border: 1px solid rgba(232,121,249,0.16);
+      border-radius: 8px; color: #e0b0ec;
+      font-size: var(--fz-11); line-height: 1.65;
+    }
+    .sb-note b { color: var(--mc); }
+
+    /* ── CONTENT (girdiler) ── */
+    .content {
+      width: 470px; max-width: 470px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto; border-right: 1px solid var(--border);
+    }
+    .content::-webkit-scrollbar { width: 3px; }
+    .content::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .page-hdr {
+      padding: 13px 16px 11px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-shrink: 0;
+    }
+    .page-title { font-family: var(--font-h); font-size: var(--fz-20); font-weight: 700; letter-spacing: 1px; }
+    .page-sub { font-size: var(--fz-11); color: var(--dim2); font-family: var(--font-m); margin-top: 3px; }
+    .type-pill {
+      font-family: var(--font-m); font-size: var(--fz-10); font-weight: 600;
+      padding: 4px 9px; border-radius: 5px; letter-spacing: 0.5px;
+      background: var(--mc-bg); color: var(--mc); border: 1px solid var(--mc-bd); white-space: nowrap;
+    }
+
+    /* SVG önizleme */
+    .preview-wrap { padding: 10px 16px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .preview-box { background: var(--surf1); border: 1px solid var(--border); border-radius: 10px; height: 160px; overflow: hidden; }
+    .preview-box svg { width: 100%; height: 100%; display: block; }
+
+    .section { padding: 11px 16px 13px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .sec-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .sec-ttl { font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 2px; color: #9090c0; text-transform: uppercase; }
+    .sec-tag { font-family: var(--font-m); font-size: var(--fz-10); color: var(--dim2); }
+
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .input-row + .input-row { margin-top: 10px; }
+    .inp-g { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .inp-g.full { grid-column: 1 / -1; }
+    .inp-label {
+      font-family: var(--font-h); font-size: var(--fz-13);
+      letter-spacing: 1px; color: #c0c0e0; text-transform: uppercase;
+      display: flex; align-items: center;
+    }
+    .inp-label .sym { font-family: var(--font-m); text-transform: none; color: var(--dim2); margin-left: 5px; font-size: var(--fz-11); letter-spacing: 0; }
+    .inp-wrap {
+      display: flex; background: var(--surf2);
+      border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; transition: border-color 0.2s; min-width: 0;
+    }
+    .inp-wrap:focus-within { border-color: var(--mc); }
+    .inp-wrap input {
+      flex: 1; padding: 10px 12px; background: transparent; border: none;
+      color: var(--text); font-family: var(--font-m); font-size: var(--fz-15); font-weight: 600;
+      outline: none; min-width: 0; -moz-appearance: textfield; appearance: textfield;
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; }
+    .inp-sfx {
+      padding: 0 11px; display: flex; align-items: center;
+      font-family: var(--font-m); font-size: var(--fz-12); color: var(--dim);
+      background: var(--surf3); border-left: 1px solid var(--border); flex-shrink: 0; white-space: nowrap;
+    }
+    .inp-wrap select {
+      flex: 1; padding: 10px 12px; background: transparent; border: none;
+      color: var(--text); font-family: var(--font-b); font-size: var(--fz-13);
+      font-weight: 500; outline: none; appearance: none; cursor: pointer; min-width: 0;
+    }
+    .inp-wrap select option { color: #000; }
+
+    .info-box {
+      margin: 0 16px 14px; padding: 12px 14px;
+      background: rgba(232,121,249,0.05); border: 1px solid rgba(232,121,249,0.14);
+      border-radius: 8px; flex-shrink: 0;
+    }
+    .fml-ttl { font-family: var(--font-h); letter-spacing: 1px; font-size: var(--fz-11); color: #e0b0ec; display: block; margin-bottom: 7px; }
+    .fml { font-family: var(--font-m); font-size: var(--fz-10); color: var(--dim2); line-height: 1.95; }
+    .fml .k { color: var(--kin); } .fml .s { color: var(--stab); } .fml .l { color: var(--life); }
+
+    /* ── RESULTS COLUMN (3 canlı panel) ── */
+    .results-col {
+      flex: 1; min-width: 340px;
+      background: var(--bg2);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .rc-hdr {
+      padding: 13px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .rc-title { font-family: var(--font-h); font-size: var(--fz-15); font-weight: 700; letter-spacing: 1px; }
+    .live-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-m); font-size: var(--fz-10); color: var(--life);
+      padding: 3px 10px; border-radius: 100px;
+      background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.22);
+    }
+    .live-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--life); animation: lp 1.8s infinite; }
+    @keyframes lp { 0%{box-shadow:0 0 0 0 rgba(0,212,170,0.5)} 70%{box-shadow:0 0 0 7px rgba(0,212,170,0)} 100%{box-shadow:0 0 0 0 rgba(0,212,170,0)} }
+
+    .rc-body { flex: 1; overflow-y: auto; padding: 14px 16px 24px; }
+    .rc-body::-webkit-scrollbar { width: 4px; }
+    .rc-body::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .rpanel {
+      background: var(--surf1); border: 1px solid var(--border);
+      border-left: 3px solid var(--pa); border-radius: 10px;
+      padding: 13px 15px 6px; margin-bottom: 14px;
+      animation: fadeUp 0.2s ease;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:none} }
+    .rp-top { display: flex; align-items: center; gap: 9px; margin-bottom: 11px; }
+    .rp-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--pa); box-shadow: 0 0 8px var(--pa); }
+    .rp-name { font-family: var(--font-h); font-size: var(--fz-14); font-weight: 700; letter-spacing: 1px; color: var(--text); text-transform: uppercase; flex: 1; }
+    .rp-pill {
+      font-family: var(--font-m); font-size: var(--fz-9); font-weight: 600;
+      padding: 3px 9px; border-radius: 5px; letter-spacing: 0.5px; white-space: nowrap;
+    }
+    .p-ok   { background: rgba(74,222,128,0.12);  color: var(--green);  border: 1px solid rgba(74,222,128,0.25); }
+    .p-warn { background: rgba(251,191,36,0.12);  color: var(--yellow); border: 1px solid rgba(251,191,36,0.25); }
+    .p-bad  { background: rgba(248,113,113,0.12); color: var(--red);    border: 1px solid rgba(248,113,113,0.25); }
+    .p-info { background: rgba(255,255,255,0.04); color: var(--dim2);   border: 1px solid var(--border); }
+
+    .r-row {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 10px; padding: 7px 0; border-bottom: 1px dashed rgba(255,255,255,0.05);
+    }
+    .r-row:last-child { border-bottom: none; }
+    .r-k { font-family: var(--font-b); font-size: var(--fz-11); color: var(--dim2); flex-shrink: 0; }
+    .r-k small { font-family: var(--font-m); color: var(--dim); }
+    .r-v { display: flex; align-items: baseline; gap: 5px; text-align: right; min-width: 0; }
+    .r-v b { font-family: var(--font-m); font-size: var(--fz-15); font-weight: 600; color: var(--text); }
+    .r-v i { font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim); font-style: normal; }
+    .r-sym { font-size: var(--fz-12); font-weight: 700; }
+    .c-grn { color: var(--green) !important; } .c-ylw { color: var(--yellow) !important; } .c-red { color: var(--red) !important; }
+    .c-acc { color: var(--mc) !important; } .c-kin { color: var(--kin) !important; } .c-stab { color: var(--stab) !important; } .c-life { color: var(--life) !important; }
+
+    .panel-off { display: none; }
+    .all-off {
+      height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; text-align: center; padding: 32px; color: var(--dim2);
+    }
+    .all-off .ei { font-size: 30px; opacity: 0.25; }
+    .all-off p { font-family: var(--font-m); font-size: var(--fz-11); line-height: 1.7; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="index.html">MH<em>Platform</em></a>
+  <div class="breadcrumb">
+    <a href="index.html">Ana Sayfa</a>
+    <span class="sep">/</span>
+    <span class="cur">Vidalı Mil Hesabı</span>
+  </div>
+</nav>
+
+<div class="app">
+
+  <!-- ── SOL SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sec-label">Mil Tipi</div>
+    <button class="type-btn active" id="t-trapez" onclick="setType('trapez')">
+      <span class="type-ic">🔩</span>
+      <span>Trapez (Tr)<span class="type-meta">DIN 103 · kayar somun</span></span>
+    </button>
+    <button class="type-btn" id="t-ball" onclick="setType('ball')">
+      <span class="type-ic">⚙️</span>
+      <span>Bilyalı Mil<span class="type-meta">ISO 3408 · bilye somun</span></span>
+    </button>
+
+    <div class="sb-div"></div>
+
+    <div class="sec-label">Hesap Modülleri</div>
+    <button class="mod-toggle on" id="m-kin" style="--mb:var(--kin)" onclick="toggleMod('kin')">
+      <span class="mod-box">✓</span><span class="mod-dot"></span><span>Kinematik &amp; Kuvvet</span>
+    </button>
+    <button class="mod-toggle on" id="m-stab" style="--mb:var(--stab)" onclick="toggleMod('stab')">
+      <span class="mod-box">✓</span><span class="mod-dot"></span><span>Stabilite</span>
+    </button>
+    <button class="mod-toggle on" id="m-life" style="--mb:var(--life)" onclick="toggleMod('life')">
+      <span class="mod-box">✓</span><span class="mod-dot"></span><span>Ömür &amp; Hassasiyet</span>
+    </button>
+
+    <div class="sb-note">
+      Her girdi değiştiğinde <b>üç panel</b> eş zamanlı yeniden hesaplanır. İhtiyaç duymadığın
+      paneli kapatarak ekranı sadeleştirebilirsin.
+    </div>
+  </aside>
+
+  <!-- ── ORTA: ORTAK GİRDİLER ── -->
+  <main class="content">
+    <div class="page-hdr">
+      <div>
+        <div class="page-title">VİDALI MİL HESABI</div>
+        <div class="page-sub">ISO 3408 · DIN 103 · DIN 69051</div>
+      </div>
+      <span class="type-pill" id="type-pill">TRAPEZ</span>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="preview-box">
+        <svg id="diag" viewBox="0 0 460 160" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+    <!-- Ortak Girdiler -->
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-ttl">Ortak Girdiler</div>
+        <div class="sec-tag" id="derived-tag">d₃ ≈ — mm · λ ≈ —°</div>
+      </div>
+      <div class="input-row">
+        <div class="inp-g">
+          <span class="inp-label">Nominal Çap <span class="sym">d₀</span></span>
+          <div class="inp-wrap"><input type="number" id="d0" value="16" min="1" step="0.5"><span class="inp-sfx">mm</span></div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Hatve / Lead <span class="sym">Ph</span></span>
+          <div class="inp-wrap"><input type="number" id="ph" value="5" min="0.1" step="0.5"><span class="inp-sfx">mm</span></div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="inp-g">
+          <span class="inp-label">Serbest Boy <span class="sym">L</span></span>
+          <div class="inp-wrap"><input type="number" id="len" value="500" min="1" step="10"><span class="inp-sfx">mm</span></div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Eksenel Yük <span class="sym">Fa</span></span>
+          <div class="inp-wrap"><input type="number" id="fa" value="4000" min="0" step="50"><span class="inp-sfx">N</span></div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="inp-g">
+          <span class="inp-label">Devir <span class="sym">n</span></span>
+          <div class="inp-wrap"><input type="number" id="rpm" value="1500" min="0" step="10"><span class="inp-sfx">rpm</span></div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Sürtünme <span class="sym">μ</span></span>
+          <div class="inp-wrap"><input type="number" id="mu" value="0.15" min="0" step="0.005"><span class="inp-sfx">—</span></div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="inp-g full">
+          <span class="inp-label">Yatak / Destek Tipi</span>
+          <div class="inp-wrap">
+            <select id="sup">
+              <option value="ff">Sabit – Serbest (en zayıf)</option>
+              <option value="ss">Destekli – Destekli</option>
+              <option value="fs" selected>Sabit – Destekli (yaygın)</option>
+              <option value="cc">Sabit – Sabit (en güçlü)</option>
+            </select>
+            <span class="inp-sfx" id="sup-sfx">FS</span>
+          </div>
+        </div>
+      </div>
+      <div class="sb-note" style="margin:10px 0 0">
+        <b>Sabit:</b> ucu açısal olarak kenetler (çift açısal yatak) — eğilmeye direnir, ankastre kiriş ucu gibi.
+        <b>Destekli:</b> radyal tutar ama dönmeye izin verir (tek bilyalı yatak) — basit mesnet gibi.
+        <b>Serbest:</b> yataksız uç (konsol). Daha katı uç = daha yüksek kritik devir ve burkulma yükü.
+      </div>
+    </div>
+
+    <!-- Çalışma yönü & eksenel yük -->
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-ttl">Çalışma Yönü &amp; Yük</div>
+        <div class="sec-tag" id="load-tag">Fa elle girildi</div>
+      </div>
+      <div class="input-row">
+        <div class="inp-g full">
+          <span class="inp-label">Çalışma Yönü</span>
+          <div class="inp-wrap">
+            <select id="ori">
+              <option value="h" selected>Yatay — yere paralel</option>
+              <option value="vu">Dikey ↑ — yükü kaldırıyor</option>
+              <option value="vd">Dikey ↓ — yükü indiriyor</option>
+              <option value="inc">Eğimli (β açısı)</option>
+            </select>
+            <span class="inp-sfx" id="ori-sfx">0°</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-row" id="row-incline" style="display:none">
+        <div class="inp-g full">
+          <span class="inp-label">Eğim Açısı <span class="sym">β</span></span>
+          <div class="inp-wrap"><input type="number" id="beta" value="30" min="0" max="90" step="1"><span class="inp-sfx">° (yataydan)</span></div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="inp-g">
+          <span class="inp-label">Hareketli Kütle <span class="sym">m</span></span>
+          <div class="inp-wrap"><input type="number" id="mass" value="0" min="0" step="5"><span class="inp-sfx">kg</span></div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">İvme <span class="sym">a</span></span>
+          <div class="inp-wrap"><input type="number" id="acc" value="0" min="0" step="0.1"><span class="inp-sfx">m/s²</span></div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="inp-g full">
+          <span class="inp-label">Kılavuz Sürtünme <span class="sym">μ_g</span></span>
+          <div class="inp-wrap"><input type="number" id="mug" value="0.05" min="0" step="0.01"><span class="inp-sfx">— (yatay/eğimli)</span></div>
+        </div>
+      </div>
+      <div class="sb-note" style="margin:10px 0 0">
+        Kütle <b>m > 0</b> girersen Fa, yön + ivme + kılavuz sürtünmeden <b>otomatik</b> hesaplanır
+        ve yukarıdaki Fa alanını ezer. <b>m = 0</b> bırakırsan elle girdiğin Fa kullanılır.
+      </div>
+    </div>
+
+    <!-- Tipe özel girdiler -->
+    <div class="section" id="sec-trapez">
+      <div class="sec-hdr"><div class="sec-ttl">Trapez Somun &amp; Termal</div></div>
+      <div class="input-row">
+        <div class="inp-g">
+          <span class="inp-label">Somun Boyu <span class="sym">Hm</span></span>
+          <div class="inp-wrap"><input type="number" id="hm" value="32" min="1" step="1"><span class="inp-sfx">mm</span></div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">İzin Basıncı <span class="sym">p</span></span>
+          <div class="inp-wrap"><input type="number" id="pall" value="8" min="0.1" step="0.5"><span class="inp-sfx">MPa</span></div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="inp-g full">
+          <span class="inp-label">Somun Malzemesi</span>
+          <div class="inp-wrap">
+            <select id="nutmat" onchange="setNutMat()">
+              <option value="8">Bronz CuSn12 — p≤8 MPa</option>
+              <option value="10">Döküm Bronz — p≤10 MPa</option>
+              <option value="5">POM / PTFE — p≤5 MPa</option>
+              <option value="6">Çelik/Çelik (yağlı) — p≤6 MPa</option>
+              <option value="0">Özel (elle gir)</option>
+            </select>
+            <span class="inp-sfx">izin</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="inp-g full">
+          <span class="inp-label">Sıcaklık Artışı <span class="sym">ΔT</span></span>
+          <div class="inp-wrap"><input type="number" id="dt" value="15" min="0" step="1"><span class="inp-sfx">°C</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section panel-off" id="sec-ball">
+      <div class="sec-hdr"><div class="sec-ttl">Bilyalı Mil Kapasiteleri &amp; Termal</div></div>
+      <div class="input-row">
+        <div class="inp-g">
+          <span class="inp-label">Dinamik Yük <span class="sym">Ca</span></span>
+          <div class="inp-wrap"><input type="number" id="ca" value="12000" min="1" step="100"><span class="inp-sfx">N</span></div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Statik Yük <span class="sym">C0a</span></span>
+          <div class="inp-wrap"><input type="number" id="c0a" value="30000" min="1" step="100"><span class="inp-sfx">N</span></div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="inp-g full">
+          <span class="inp-label">Sıcaklık Artışı <span class="sym">ΔT</span></span>
+          <div class="inp-wrap"><input type="number" id="dt2" value="15" min="0" step="1"><span class="inp-sfx">°C</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="fml-ttl">TEMEL DENKLEMLER</span>
+      <div class="fml">
+        <span class="k">v = n·Ph/60</span> · <span class="k">tanλ = Ph/(π·d₃)</span> · <span class="k">T = Fa·d_m/2·(tanλ+μ′)/(1−μ′·tanλ)</span><br>
+        <span class="s">n_kr = (60/2π)·(C_s/L)²·√(EI/ρA)</span> · <span class="s">F_b = C_b·π²EI/L²</span> · <span class="s">DN = d₀·n</span><br>
+        <span class="l">L10 = (Ca/Fa)³·10⁶ dev</span> · <span class="l">p = 2·Fa/(π·d_m·Hm)</span> · <span class="l">ΔL = α·L·ΔT</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── SAĞ: 3 CANLI PANEL ── -->
+  <section class="results-col">
+    <div class="rc-hdr">
+      <div class="rc-title">SONUÇLAR</div>
+      <span class="live-badge">CANLI</span>
+    </div>
+    <div class="rc-body">
+      <div id="panel-kin"  class="rpanel" style="--pa:var(--kin)"></div>
+      <div id="panel-stab" class="rpanel" style="--pa:var(--stab)"></div>
+      <div id="panel-life" class="rpanel" style="--pa:var(--life)"></div>
+      <div id="all-off" class="all-off panel-off">
+        <div class="ei">📭</div>
+        <p>Tüm paneller kapalı.<br>Sol menüden bir hesap modülü aç.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ── Sabitler ── */
+const E = 2.06e11;       // Pa  (çelik)
+const RHO = 7850;        // kg/m³
+const ALPHA = 11.5e-6;   // 1/°C
+const SUP = {
+  ff: {nm:'Sabit – Serbest',   ab:'FF', cs:1.875,        cb:0.25 },
+  ss: {nm:'Destekli – Destekli',ab:'SS', cs:Math.PI,      cb:1.00 },
+  fs: {nm:'Sabit – Destekli',  ab:'FS', cs:3.927,        cb:2.046},
+  cc: {nm:'Sabit – Sabit',     ab:'CC', cs:4.730,        cb:4.00 },
+};
+
+let type = 'trapez';
+let mods = { kin:true, stab:true, life:true };
+
+/* ── Durum yardımcıları ── */
+const OK={c:'c-grn',s:'✓'}, WARN={c:'c-ylw',s:'⚠'}, BAD={c:'c-red',s:'✗'}, NA={c:'',s:''};
+const fmt=(x,d=1)=> (isFinite(x)&&!isNaN(x)) ? x.toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d}) : '—';
+const fmt0=x=> (isFinite(x)&&!isNaN(x)) ? Math.round(x).toLocaleString('tr-TR') : '—';
+
+function row(k, v, unit, st){
+  const sym = (st&&st.s) ? `<span class="r-sym ${st.c}">${st.s}</span>` : '';
+  const vc  = (st&&st.c) ? st.c : '';
+  return `<div class="r-row"><span class="r-k">${k}</span>
+    <span class="r-v"><b class="${vc}">${v}</b>${unit?`<i>${unit}</i>`:''}${sym}</span></div>`;
+}
+function pill(st, txt){ const m={ok:'p-ok',warn:'p-warn',bad:'p-bad',info:'p-info'}; return `<span class="rp-pill ${m[st]}">${txt}</span>`; }
+
+/* ── Tip / modül kontrolü ── */
+function setType(t){
+  type = t;
+  $('t-trapez').classList.toggle('active', t==='trapez');
+  $('t-ball').classList.toggle('active', t==='ball');
+  $('sec-trapez').classList.toggle('panel-off', t!=='trapez');
+  $('sec-ball').classList.toggle('panel-off', t!=='ball');
+  $('type-pill').textContent = t==='trapez' ? 'TRAPEZ' : 'BİLYALI';
+  // tipe uygun sürtünme öntanımı
+  $('mu').value = (t==='trapez') ? '0.15' : '0.01';
+  compute();
+}
+function toggleMod(m){
+  mods[m] = !mods[m];
+  $('m-'+m).classList.toggle('on', mods[m]);
+  $('m-'+m).querySelector('.mod-box').textContent = mods[m] ? '✓' : '';
+  compute();
+}
+function setNutMat(){
+  const v = parseFloat($('nutmat').value);
+  if(v>0){ $('pall').value = v; }
+  compute();
+}
+
+/* ════════ HESAP ════════ */
+function compute(){
+  const d0  = parseFloat($('d0').value)||0;
+  const ph  = parseFloat($('ph').value)||0;
+  const L   = parseFloat($('len').value)||0;
+  const n   = parseFloat($('rpm').value)||0;
+  const mu  = parseFloat($('mu').value)||0;
+  const sup = SUP[$('sup').value];
+  $('sup-sfx').textContent = sup.ab;
+
+  // ── ÇALIŞMA YÖNÜ & EKSENEL YÜK ──
+  const ori = $('ori').value;
+  $('row-incline').style.display = (ori==='inc') ? '' : 'none';
+  const beta = parseFloat($('beta').value)||0;
+  let axDeg = (ori==='h') ? 0 : (ori==='inc') ? Math.max(0,Math.min(90,beta)) : 90;
+  $('ori-sfx').textContent = axDeg + '°';
+  const isVert = axDeg >= 1;                              // dikey/eğimli mi?
+  const g = 9.81, aRad = axDeg*Math.PI/180;
+  const mass = parseFloat($('mass').value)||0;
+  const acc  = parseFloat($('acc').value)||0;
+  const mug  = parseFloat($('mug').value)||0;
+  const Fg_ax  = mass*g*Math.sin(aRad);                  // eksenel yerçekimi bileşeni
+  const Fguide = mug*mass*g*Math.cos(aRad);              // kılavuz sürtünmesi
+  const Finert = mass*acc;                               // atalet kuvveti
+
+  let Fa, Fhold, autoFa, tension=false;
+  if(mass>0){
+    autoFa = true;
+    const grav = (ori==='vd') ? -Math.abs(Fg_ax) : Math.abs(Fg_ax);
+    Fa = Math.max(0, grav + Fguide + Finert);            // sürüş (kaldırma/ileri) — en kötü hal
+    Fhold = Math.abs(Fg_ax);                             // statik tutma yükü (yerçekimi)
+    tension = (ori==='vd');                              // asılı yük → mil çekmede
+    $('fa').value = Math.round(Fa);
+    $('fa').readOnly = true;
+    $('load-tag').textContent = `Fa = ${Math.round(Fa)} N (oto)`;
+  } else {
+    autoFa = false;
+    Fa = parseFloat($('fa').value)||0;
+    Fhold = isVert ? Fa : 0;
+    $('fa').readOnly = false;
+    $('load-tag').textContent = 'Fa elle girildi';
+  }
+
+  // tipe bağlı geometri
+  let dm, d3, secB;
+  if(type==='trapez'){ dm = d0 - 0.5*ph; d3 = d0 - ph;       secB = 1/Math.cos(15*Math.PI/180); }
+  else               { dm = d0;          d3 = d0 - 0.6*ph;   secB = 1; }
+  const muP = mu*secB;
+  if(dm<=0 || d3<=0){ $('derived-tag').textContent = 'geometri geçersiz'; }
+
+  const tanL = ph/(Math.PI*dm);
+  const lam  = Math.atan(tanL)*180/Math.PI;
+  $('derived-tag').textContent = `d₃ ≈ ${fmt(d3,1)} mm · λ ≈ ${fmt(lam,1)}°`;
+
+  // ── KİNEMATİK ──
+  const v_mms  = n*ph/60;
+  const v_mmin = n*ph/1000;
+  let eF = tanL*(1 - muP*tanL)/(tanL + muP);
+  eF = Math.max(0, Math.min(eF, 0.99));
+  const selfLock = muP >= tanL;
+  let eB = selfLock ? 0 : (1 - muP/tanL)/(1 + muP*tanL);
+  eB = Math.max(0, eB);
+  const T_drive = (Fa*dm/2)*(tanL+muP)/(1-muP*tanL)/1000;        // N·m
+  const T_hold  = selfLock ? (Fa*dm/2)*(muP-tanL)/(1+muP*tanL)/1000 : 0;
+  const omega = 2*Math.PI*n/60;
+  const P_drive = T_drive*omega;                                 // W
+
+  // ── STABİLİTE ──
+  const Lm=L/1000, drm=d3/1000;
+  const I = Math.PI*Math.pow(drm,4)/64;
+  const A = Math.PI*Math.pow(drm,2)/4;
+  const wn = (sup.cs*sup.cs/(Lm*Lm))*Math.sqrt(E*I/(RHO*A));
+  const n_cr = wn*60/(2*Math.PI);
+  const n_safe = 0.8*n_cr;
+  const F_b = sup.cb*Math.PI*Math.PI*E*I/(Lm*Lm);                // N
+  const Sk  = Fa>0 ? F_b/Fa : Infinity;
+  const DN  = d0*n;
+  const rSpeed = n_cr>0 ? n/n_cr : 0;
+  const stSpeed = n<=0 ? NA : (rSpeed<=0.7?OK : rSpeed<=0.8?WARN:BAD);
+  const stBuck  = (Fa<=0||tension) ? NA : (Sk>=3?OK : Sk>=2?WARN:BAD);
+  const stDN    = (DN<=50000?OK : DN<=70000?WARN:BAD);
+
+  // tutma / fren torku (yöne duyarlı)
+  const Tl = Fhold>0 ? Fhold*dm/2*(muP - tanL)/(1+muP*tanL)/1000 : 0; // + kilitli · − fren gerek
+  const fallRisk = isVert && Fhold>0 && !selfLock;
+
+  // ── ÖMÜR ──
+  const dt = parseFloat((type==='trapez'?$('dt').value:$('dt2').value))||0;
+  const dL = ALPHA*L*dt;                                          // mm
+  const dL_um = dL*1000;
+
+  /* ===== PANEL: KİNEMATİK ===== */
+  if(mods.kin){
+    const slPill = selfLock ? pill('ok','OTOBLOKAJ: VAR')
+                 : fallRisk ? pill('bad','FREN GEREKLİ')
+                 : pill('warn','OTOBLOKAJ: YOK');
+    let rows = '';
+    if(autoFa){
+      rows += row('Eksenel yük Fa', `${fmt0(Fa)}`, 'N', {c:'c-kin'});
+      rows += row('↳ yerç./sürt./atalet', `${fmt0(Math.abs(Fg_ax))}/${fmt0(Fguide)}/${fmt0(Finert)}`, 'N', NA);
+    }
+    rows += row('Lineer hız', `${fmt(v_mms,0)}`, 'mm/s');
+    rows += row('Lineer hız', `${fmt(v_mmin,1)}`, 'm/dk');
+    rows += row('Helis açısı λ', `${fmt(lam,2)}`, '°');
+    rows += row('Sürüş torku', `${fmt(T_drive,2)}`, 'N·m', {c:'c-kin'});
+    rows += row('İleri verim η', `${fmt(eF*100,0)}`, '%', {c: eF>=0.85?'c-grn':eF>=0.5?'c-ylw':''});
+    rows += row('Geri verim η′', selfLock?'kilitli':`${fmt(eB*100,0)}`, selfLock?'':'%', NA);
+    if(isVert && Fhold>0){
+      if(selfLock) rows += row('Tutma torku', '0 (kilitli)', '', OK);
+      else         rows += row('Fren torku (tutma)', `${fmt(Math.abs(Tl),2)}`, 'N·m', BAD);
+    }
+    rows += row('Sürüş gücü', `${fmt(P_drive,0)}`, 'W');
+    rows += row('Otoblokaj', selfLock?'VAR (geri sürülmez)':(fallRisk?'YOK — düşme riski!':'YOK (geri sürülür)'),
+                '', selfLock?OK:(fallRisk?BAD:WARN));
+    $('panel-kin').innerHTML =
+      `<div class="rp-top"><span class="rp-dot"></span><span class="rp-name">Kinematik &amp; Kuvvet</span>${slPill}</div>`+rows;
+  }
+
+  /* ===== PANEL: STABİLİTE ===== */
+  if(mods.stab){
+    const worst = [stSpeed,stBuck,stDN].some(s=>s===BAD)?'bad'
+               : [stSpeed,stBuck,stDN].some(s=>s===WARN)?'warn':'ok';
+    const hp = pill(worst, worst==='ok'?'GÜVENLİ':worst==='warn'?'SINIRDA':'KRİTİK');
+    let rows = '';
+    rows += row('Destek tipi', `${sup.nm}`, '', NA);
+    rows += row('Kritik devir', `${fmt0(n_cr)}`, 'rpm', {c:'c-stab'});
+    rows += row('Güvenli devir', `≤ ${fmt0(n_safe)}`, 'rpm', stSpeed);
+    rows += row('Çalışma / kritik', `${fmt(rSpeed*100,0)}`, '%', stSpeed);
+    rows += row('Burkulma yükü', `${fmt0(F_b)}`, 'N', {c:'c-stab'});
+    rows += row('Burkulma emn. S', tension?'çekme — yok':`${isFinite(Sk)?fmt(Sk,1):'∞'}`, tension?'':'×', stBuck);
+    rows += row('DN değeri', `${fmt0(DN)}`, 'mm·rpm', stDN);
+    rows += row('DN limiti', 'std. somun ≈ 70.000', '', NA);
+    $('panel-stab').innerHTML =
+      `<div class="rp-top"><span class="rp-dot"></span><span class="rp-name">Stabilite</span>${hp}</div>`+rows;
+  }
+
+  /* ===== PANEL: ÖMÜR & HASSASİYET ===== */
+  if(mods.life){
+    let rows='', hp;
+    if(type==='ball'){
+      const Ca=parseFloat($('ca').value)||0, C0a=parseFloat($('c0a').value)||0;
+      const L10 = (Fa>0) ? Math.pow(Ca/Fa,3) : Infinity;          // milyon devir
+      const L10h = (n>0) ? L10*1e6/(60*n) : Infinity;             // saat
+      const travel = L10*1e6*ph/1e6;                              // m
+      const fs = Fa>0 ? C0a/Fa : Infinity;
+      const stLife = !isFinite(L10h)?NA : (L10h>=20000?OK : L10h>=5000?WARN:BAD);
+      const stFs   = !isFinite(fs)?NA : (fs>=2?OK : fs>=1?WARN:BAD);
+      hp = pill(stLife===BAD||stFs===BAD?'bad':(stLife===WARN||stFs===WARN?'warn':'ok'),
+                isFinite(L10h)?`${fmt0(L10h)} saat`:'—');
+      rows += row('L10 ömrü', `${fmt(L10,1)}`, '×10⁶ dev', {c:'c-life'});
+      rows += row('L10h ömrü', `${fmt0(L10h)}`, 'saat', stLife);
+      rows += row('Yol ömrü', `${fmt0(travel/1000)}`, 'km', NA);
+      rows += row('Statik emn. fs', `${isFinite(fs)?fmt(fs,1):'∞'}`, '×', stFs);
+    } else {
+      const Hm=parseFloat($('hm').value)||0, pall=parseFloat($('pall').value)||0;
+      const p  = (dm>0&&Hm>0) ? 2*Fa/(Math.PI*dm*Hm) : Infinity;  // MPa
+      const vS = Math.PI*dm*n/60000;                              // m/s (kayma hızı)
+      const PV = p*vS;                                            // MPa·m/s
+      const rP = pall>0 ? p/pall : Infinity;
+      const stP = (rP<=0.7?OK : rP<=1?WARN:BAD);
+      const heat = (1-eF)*P_drive;                                // W (sürtünme ısısı)
+      hp = pill(stP===BAD?'bad':stP===WARN?'warn':'ok', `p ${fmt(p,1)} MPa`);
+      rows += row('Yüzey basıncı p', `${fmt(p,2)}`, 'MPa', stP);
+      rows += row('İzin / kullanım', `${fmt(rP*100,0)}`, '%', stP);
+      rows += row('Kayma hızı', `${fmt(vS,3)}`, 'm/s', NA);
+      rows += row('PV değeri', `${fmt(PV,2)}`, 'MPa·m/s', {c: PV<=1?'c-grn':PV<=2?'c-ylw':'c-red'});
+      rows += row('Sürtünme ısısı', `${fmt0(heat)}`, 'W', NA);
+    }
+    // her iki tip — termal hassasiyet
+    rows += row('Termal uzama ΔL', `${fmt(dL,3)}`, 'mm', {c:'c-life'});
+    rows += row('Konum kayması', `${fmt0(dL_um)}`, 'µm', {c: dL_um<=50?'c-grn':dL_um<=200?'c-ylw':'c-red'});
+    $('panel-life').innerHTML =
+      `<div class="rp-top"><span class="rp-dot"></span><span class="rp-name">Ömür &amp; Hassasiyet</span>${hp}</div>`+rows;
+  }
+
+  // panel görünürlükleri
+  $('panel-kin').classList.toggle('panel-off', !mods.kin);
+  $('panel-stab').classList.toggle('panel-off', !mods.stab);
+  $('panel-life').classList.toggle('panel-off', !mods.life);
+  $('all-off').classList.toggle('panel-off', mods.kin||mods.stab||mods.life);
+
+  drawDiagram(sup, lam);
+}
+
+/* ════════ SVG TEKNİK ÇİZİM ════════ */
+function drawDiagram(sup, lam){
+  const c = { sc: type==='trapez'?'#f97316':'#e879f9', bl:'#60a5fa', tl:'#00d4aa',
+              dim:'#52527a', dim2:'#8080a8', line:'#1e1e34', txt:'#dde1f0', grn:'#4ade80' };
+  const fh='font-family:Barlow Condensed,sans-serif', fm='font-family:JetBrains Mono,monospace';
+  const cy=66, sh=22, x0=68, x1=392;          // mil ekseni
+
+  // mil gövdesi
+  let svg = `<rect x="${x0}" y="${cy-sh/2}" width="${x1-x0}" height="${sh}" rx="3"
+      fill="rgba(${type==='trapez'?'249,115,22':'232,121,249'},0.12)" stroke="${c.sc}" stroke-width="1.4"/>`;
+  // diş / helis çizgileri
+  for(let x=x0+8; x<x1-6; x+=11){
+    svg += `<line x1="${x}" y1="${cy-sh/2+2}" x2="${x+6}" y2="${cy+sh/2-2}" stroke="${c.sc}" stroke-width="1" opacity="0.45"/>`;
+  }
+  // somun bloğu (orta)
+  const nx=200, nw=58;
+  svg += `<rect x="${nx}" y="${cy-sh/2-9}" width="${nw}" height="${sh+18}" rx="4"
+      fill="rgba(96,165,250,0.10)" stroke="${c.bl}" stroke-width="1.4"/>
+    <text x="${nx+nw/2}" y="${cy-sh/2-13}" text-anchor="middle" style="${fh};font-size:11px;font-weight:700;fill:${c.bl}">SOMUN</text>`;
+  if(type==='ball'){ // bilye izleri
+    for(let i=0;i<4;i++) svg += `<circle cx="${nx+12+i*11}" cy="${cy}" r="3.1" fill="none" stroke="${c.bl}" stroke-width="1" opacity="0.7"/>`;
+  }
+
+  // uç destekleri
+  const supKey = $('sup').value;
+  const ends = {
+    ff:['fixed','free'], ss:['supported','supported'],
+    fs:['fixed','supported'], cc:['fixed','fixed']
+  }[supKey];
+  svg += endSym(x0, 'L', ends[0], c, fh);
+  svg += endSym(x1, 'R', ends[1], c, fh);
+
+  // eksenel yük oku Fa (üstte)
+  const ay=cy-sh/2-9;
+  svg += `<line x1="${nx+nw+6}" y1="${ay}" x2="${nx+nw+54}" y2="${ay}" stroke="${c.tl}" stroke-width="1.6"/>
+    <polygon points="${nx+nw+54},${ay-5} ${nx+nw+64},${ay} ${nx+nw+54},${ay+5}" fill="${c.tl}"/>
+    <text x="${nx+nw+34}" y="${ay-6}" text-anchor="middle" style="${fm};font-size:11px;fill:${c.tl}">Fa</text>`;
+
+  // dönüş + λ etiketi (solda)
+  svg += `<text x="${x0+18}" y="${cy-sh/2-13}" text-anchor="middle" style="${fm};font-size:11px;fill:${c.dim2}">n ↻</text>
+    <text x="${x0+90}" y="${cy+sh/2+16}" text-anchor="middle" style="${fm};font-size:10px;fill:${c.sc}">λ=${fmt(lam,1)}°</text>`;
+
+  // L ölçü çizgisi (altta)
+  const dy=cy+sh/2+30;
+  svg += `<line x1="${x0}" y1="${dy}" x2="${x1}" y2="${dy}" stroke="${c.dim}" stroke-width="1"/>
+    <line x1="${x0}" y1="${dy-4}" x2="${x0}" y2="${dy+4}" stroke="${c.dim}" stroke-width="1"/>
+    <line x1="${x1}" y1="${dy-4}" x2="${x1}" y2="${dy+4}" stroke="${c.dim}" stroke-width="1"/>
+    <text x="${(x0+x1)/2}" y="${dy+14}" text-anchor="middle" style="${fm};font-size:11px;fill:${c.dim2}">L = ${fmt0(parseFloat($('len').value)||0)} mm</text>`;
+
+  // yön + yerçekimi göstergesi (sağ üst)
+  const oriV = $('ori').value;
+  const oriTxt = {h:'YATAY 0°', vu:'DİKEY ↑', vd:'DİKEY ↓', inc:`EĞİMLİ ${parseFloat($('beta').value)||0}°`}[oriV];
+  const ax = 432, ay2 = 18;
+  svg += `<text x="${ax}" y="${ay2}" text-anchor="end" style="${fh};font-size:10px;letter-spacing:0.5px;fill:${c.dim2}">${oriTxt}</text>`;
+  if(oriV!=='h'){
+    svg += `<line x1="${ax-4}" y1="${ay2+7}" x2="${ax-4}" y2="${ay2+22}" stroke="${c.dim}" stroke-width="1.3"/>
+      <polygon points="${ax-8},${ay2+18} ${ax-4},${ay2+24} ${ax},${ay2+18}" fill="${c.dim}"/>
+      <text x="${ax-12}" y="${ay2+24}" text-anchor="end" style="${fm};font-size:9px;fill:${c.dim}">g</text>`;
+  }
+
+  $('diag').innerHTML = svg;
+}
+
+function endSym(x, side, kind, c, fh){
+  const cy=66, sh=22, dir = side==='L'?-1:1;
+  const wx = x + dir*2;
+  let s='';
+  if(kind==='free'){
+    s += `<rect x="${x-3}" y="${cy-sh/2-2}" width="6" height="${sh+4}" rx="2" fill="${c.line}" stroke="${c.dim}" stroke-width="1"/>`;
+    s += lbl(x,'SERBEST',c,fh);
+    return s;
+  }
+  // yatak gövdesi
+  const bw=14, bx = side==='L'? x-bw : x;
+  const fill = kind==='fixed'?'rgba(74,222,128,0.10)':'rgba(128,128,168,0.10)';
+  const stroke = kind==='fixed'? c.grn : c.dim2;
+  s += `<rect x="${bx}" y="${cy-sh/2-7}" width="${bw}" height="${sh+14}" rx="3" fill="${fill}" stroke="${stroke}" stroke-width="1.3"/>`;
+  if(kind==='fixed'){ // çift yatak çizgisi
+    s += `<line x1="${bx+bw/2}" y1="${cy-sh/2-4}" x2="${bx+bw/2}" y2="${cy+sh/2+4}" stroke="${stroke}" stroke-width="1" opacity="0.5"/>`;
+  }
+  // zemin tarama (ground hatch)
+  const gx = side==='L'? bx-2 : bx+bw+2, gy=cy+sh/2+9;
+  s += `<line x1="${bx-2}" y1="${gy}" x2="${bx+bw+2}" y2="${gy}" stroke="${stroke}" stroke-width="1" opacity="0.6"/>`;
+  for(let i=0;i<4;i++){ const hx=bx-1+i*((bw+2)/3.5); s += `<line x1="${hx}" y1="${gy}" x2="${hx-4}" y2="${gy+5}" stroke="${stroke}" stroke-width="0.8" opacity="0.5"/>`; }
+  s += lbl(side==='L'?bx+bw/2:bx+bw/2, kind==='fixed'?'SABİT':'DESTEKLİ', c, fh, gy+15);
+  return s;
+}
+function lbl(x, t, c, fh, y){
+  return `<text x="${x}" y="${y||(66+11+24)}" text-anchor="middle" style="${fh};font-size:9px;letter-spacing:0.5px;fill:${c.dim2}">${t}</text>`;
+}
+
+/* tüm girdileri canlı bağla */
+document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('input', compute);
+  el.addEventListener('change', compute);
+});
+compute();
+</script>
+</body>
+</html>

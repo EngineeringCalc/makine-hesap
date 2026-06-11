@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mil Mukavemet Hesabı — DIN 743 | MH Platform</title>
+<link rel="stylesheet" href="mh-tokens.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none}
+
+:root{ --rose:#fb7185; }
+
+/* ─── NAV ─────────────────────────────────────────── */
+nav{position:relative;z-index:10;flex-shrink:0;background:rgba(7,7,14,.92);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;height:52px;gap:20px}
+.brand{font-family:var(--font-logo);font-size:18px;letter-spacing:3px;color:var(--orange);text-decoration:none}
+.brand em{color:var(--text);font-style:normal}
+.breadcrumb{font-size:var(--fz-12);color:#8080a8;font-family:var(--font-m);display:flex;align-items:center;gap:8px}
+.breadcrumb span{color:#52527a}
+
+/* ─── APP ──────────────────────────────────────────── */
+.app{position:relative;z-index:1;display:flex;flex:1;overflow:hidden}
+
+/* ─── SIDEBAR ──────────────────────────────────────── */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);width:200px;flex-shrink:0;
+  display:flex;flex-direction:column;overflow-y:auto;padding-bottom:16px}
+.col-label{font-family:var(--font-h);font-size:var(--fz-13);letter-spacing:2px;color:#9090c0;
+  text-transform:uppercase;padding:14px 14px 8px}
+.sb-sep{height:1px;background:var(--border);margin:8px 14px}
+.type-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;
+  background:transparent;border:none;border-left:3px solid transparent;
+  color:#8080a8;font-family:var(--font-b);font-size:calc(12.5px * var(--fz));
+  cursor:pointer;text-align:left;transition:all .15s}
+.type-btn:hover{background:var(--surf1);color:var(--text)}
+.type-btn.active{background:var(--surf1);color:var(--text);font-weight:500}
+.type-btn[data-mode="kontrol"].active{border-left-color:var(--rose)}
+.type-btn[data-mode="capmin"].active{border-left-color:var(--teal)}
+.t-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-right:2px}
+.t-dot.rose{background:var(--rose)}
+.t-dot.teal{background:var(--teal)}
+.sb-info{padding:0 14px;display:flex;flex-direction:column;gap:4px}
+.sb-info div{font-family:var(--font-m);font-size:var(--fz-11);color:#52527a;line-height:1.5}
+.sb-info div b{color:#8080a8;font-weight:500}
+
+/* ─── CONTENT (middle 480px) ───────────────────────── */
+.content{width:480px;max-width:480px;flex-shrink:0;display:flex;flex-direction:column;
+  overflow-y:auto;padding:14px 16px;gap:12px}
+
+.head-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.page-lbl{font-family:var(--font-h);font-size:var(--fz-14);color:#c0c0e0;letter-spacing:1px;text-transform:uppercase}
+.mode-badge{font-family:var(--font-m);font-size:var(--fz-11);padding:3px 9px;border-radius:4px;font-weight:600;white-space:nowrap}
+.mode-badge.kontrol{background:rgba(251,113,133,.1);color:var(--rose);border:1px solid rgba(251,113,133,.25)}
+.mode-badge.capmin{background:rgba(0,212,170,.1);color:var(--teal);border:1px solid rgba(0,212,170,.25)}
+
+/* SVG card */
+.svg-card{background:#080814;border:1px solid rgba(251,113,133,.2);border-radius:10px;
+  padding:10px;flex-shrink:0;display:flex;flex-direction:column;gap:6px}
+.svg-top{display:flex;align-items:center;justify-content:space-between}
+.svg-title{font-family:var(--font-h);font-size:var(--fz-13);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--rose)}
+.svg-sub{font-family:var(--font-m);font-size:var(--fz-11);color:#52527a}
+.svg-bg{background:#05050e;border-radius:7px;overflow:hidden;width:100%}
+#milSvg{display:block;width:100%;height:auto}
+
+/* Inputs */
+.inp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.inp-grp{display:flex;flex-direction:column;gap:4px}
+.inp-grp.full{grid-column:span 2}
+.inp-lbl{font-family:var(--font-h);font-size:var(--fz-13);color:#c0c0e0;letter-spacing:1px;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:space-between;gap:6px}
+.inp-wrap{display:flex;background:var(--surf2);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .2s}
+.inp-wrap:focus-within{border-color:var(--rose)}
+.inp-wrap.teal:focus-within{border-color:var(--teal)}
+.inp-wrap input{flex:1;width:100%;padding:10px 12px;background:transparent;border:none;color:var(--text);
+  font-family:var(--font-m);font-size:var(--fz-15);font-weight:600;outline:none;
+  -moz-appearance:textfield;appearance:none}
+.inp-wrap input::-webkit-inner-spin-button,.inp-wrap input::-webkit-outer-spin-button{-webkit-appearance:none}
+.inp-unit{padding:0 12px;display:flex;align-items:center;font-family:var(--font-m);font-size:var(--fz-12);
+  color:#52527a;background:var(--surf3);border-left:1px solid var(--border);white-space:nowrap}
+select{width:100%;padding:10px 12px;background:var(--surf2);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:var(--font-b);font-size:var(--fz-13);cursor:pointer;appearance:none;outline:none;
+  transition:border-color .2s}
+select:focus{border-color:var(--rose)}
+select.mono{font-family:var(--font-m)}
+optgroup{background:var(--surf2);color:#9090c0;font-family:var(--font-b)}
+option{background:var(--surf2);color:var(--text)}
+.hint{font-family:var(--font-m);font-size:var(--fz-11);color:#8080a8;margin-top:2px}
+.hint.rose{color:var(--rose)}
+
+/* P/n → T helper */
+.pn-toggle{background:transparent;border:1px solid var(--border);border-radius:5px;color:#8080a8;
+  font-family:var(--font-m);font-size:var(--fz-10);padding:2px 8px;cursor:pointer;letter-spacing:.5px;transition:all .15s}
+.pn-toggle:hover{color:var(--yellow);border-color:rgba(251,191,36,.3)}
+.pn-toggle.on{color:var(--yellow);background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.3)}
+.pn-row{display:none;grid-column:span 2;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;
+  background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.15);border-radius:8px;padding:10px}
+.pn-row.show{display:grid}
+.pn-btn{padding:10px 14px;background:var(--surf3);border:1px solid rgba(251,191,36,.3);border-radius:7px;
+  color:var(--yellow);font-family:var(--font-h);font-size:var(--fz-13);letter-spacing:1px;cursor:pointer;transition:all .15s}
+.pn-btn:hover{background:rgba(251,191,36,.12)}
+
+/* Formula strip */
+.formula{background:var(--surf1);border:1px solid var(--border);border-radius:8px;padding:10px 14px;
+  font-family:var(--font-m);font-size:var(--fz-11);color:#52527a;line-height:1.8}
+.formula b{color:#8080a8;font-weight:500}
+
+/* Calc button */
+.calc-btn{width:100%;padding:14px;background:var(--rose);border:none;border-radius:10px;color:white;
+  font-family:var(--font-h);font-size:var(--fz-18);font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.calc-btn:hover{background:#f43f5e;transform:translateY(-1px);box-shadow:0 6px 24px rgba(251,113,133,.35)}
+.calc-btn:active{transform:none}
+.calc-btn.teal{background:var(--teal)}
+.calc-btn.teal:hover{background:#00b894;box-shadow:0 6px 24px rgba(0,212,170,.35)}
+
+/* Results */
+.res-sec{display:none;flex-direction:column;gap:6px}
+.res-sec.show{display:flex}
+.sec-head{font-family:var(--font-h);font-size:var(--fz-14);font-weight:700;letter-spacing:1px;color:var(--text);margin-top:4px}
+.calc-row{display:flex;justify-content:space-between;align-items:center;
+  background:var(--surf2);border-radius:6px;padding:8px 12px;border:1px solid var(--border)}
+.calc-row.hero{background:var(--surf1);border-color:rgba(251,113,133,.25);padding:12px}
+.calc-row-lbl{font-family:var(--font-h);font-size:var(--fz-12);color:#8080a8;letter-spacing:.5px}
+.calc-row-vals{display:flex;align-items:center;gap:10px}
+.crv{font-family:var(--font-m);font-size:var(--fz-14);font-weight:600;color:var(--text)}
+.crv.big{font-size:var(--fz-22)}
+.crv.ok{color:var(--green)}
+.crv.warn{color:var(--yellow)}
+.crv.bad{color:var(--red)}
+.crv.dim{color:#8080a8;font-size:var(--fz-12);font-weight:400}
+.crv.rose{color:var(--rose)}
+.crv.teal{color:var(--teal)}
+.crv.blue{color:var(--blue)}
+.chk{font-size:16px;line-height:1}
+.use-bar-bg{height:6px;background:var(--surf3);border-radius:3px;overflow:hidden;margin-top:6px}
+.use-bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
+
+/* Info boxes */
+.note-amber{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);color:#f0cc80;
+  border-radius:8px;padding:14px;font-size:var(--fz-12);line-height:1.7;font-family:var(--font-b)}
+.note-teal{background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.15);color:#80ddc5;
+  border-radius:8px;padding:14px;font-size:var(--fz-12);line-height:1.7;font-family:var(--font-b)}
+.note-amber b,.note-teal b{font-weight:600}
+
+/* ─── REF COL (right 320px) ────────────────────────── */
+.ref-col{background:var(--bg2);border-left:1px solid var(--border);width:320px;flex-shrink:0;
+  display:flex;flex-direction:column;overflow:hidden}
+.ref-hdr{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ref-title{font-family:var(--font-h);font-size:var(--fz-15);font-weight:700;letter-spacing:1px}
+.ref-std{font-family:var(--font-m);font-size:var(--fz-10);padding:2px 8px;border-radius:4px;
+  background:rgba(251,113,133,.1);color:var(--rose);border:1px solid rgba(251,113,133,.2);white-space:nowrap}
+.ref-wrap{flex:1;overflow-y:auto}
+.mat-grp{font-family:var(--font-h);font-size:var(--fz-11);letter-spacing:1.5px;color:#52527a;
+  text-transform:uppercase;padding:10px 12px 4px;background:var(--bg2);position:sticky;top:0;z-index:1}
+table.rtbl{width:100%;border-collapse:collapse;font-family:var(--font-m);font-size:calc(11px * var(--fz))}
+.rtbl tbody tr{border-bottom:1px solid rgba(255,255,255,.03);cursor:pointer;transition:background .1s}
+.rtbl tbody tr:hover{background:rgba(255,255,255,.04)}
+.rtbl tbody tr.sel{background:rgba(251,113,133,.09)}
+.rtbl td{padding:5px 6px;color:#9090b8;text-align:right;white-space:nowrap}
+.rtbl td:first-child{color:var(--text);font-weight:500;text-align:left;padding-left:12px;white-space:normal;
+  font-family:var(--font-b);font-size:calc(11.5px * var(--fz))}
+.rtbl td.hl{color:var(--rose)}
+.ref-foot{padding:8px 12px;border-top:1px solid var(--border);font-family:var(--font-m);
+  font-size:var(--fz-10);color:#52527a;line-height:1.6;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══════════════════════════════════════════════ -->
+<nav>
+  <a href="index.html" class="brand">MH<em>Platform</em></a>
+  <div class="breadcrumb">
+    <a href="index.html" style="color:#8080a8;text-decoration:none">Ana Sayfa</a>
+    <span>/</span>
+    Mil Mukavemet Hesabı
+  </div>
+</nav>
+
+<!-- ═══ APP ═══════════════════════════════════════════════ -->
+<div class="app">
+
+  <!-- ── SIDEBAR ─────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="col-label">Hesap Modu</div>
+
+    <button class="type-btn active" data-mode="kontrol">
+      <span class="t-dot rose"></span>
+      Gerilme Kontrolü
+    </button>
+    <button class="type-btn" data-mode="capmin">
+      <span class="t-dot teal"></span>
+      Minimum Mil Çapı
+    </button>
+
+    <div class="sb-sep"></div>
+    <div class="col-label">Yöntem</div>
+    <div class="sb-info">
+      <div><b>DIN 743</b> (basitleştirilmiş)</div>
+      <div>Bach eşdeğer gerilme</div>
+      <div style="margin-top:8px"><b>Düzeltme faktörleri:</b></div>
+      <div>b₁ — boyut etkisi</div>
+      <div>b₂ — yüzey kalitesi</div>
+      <div>βk — çentik etkisi</div>
+      <div style="margin-top:8px"><b>Emniyet hedefi:</b></div>
+      <div>S_D ≥ 1.5 (yorulma)</div>
+      <div>S_F ≥ 1.5 (akma)</div>
+    </div>
+
+    <div class="sb-sep"></div>
+    <div class="col-label">Kromlu Mil Boyları</div>
+    <div class="sb-info">
+      <div>∅12 · 16 · 20 · 25</div>
+      <div>∅30 · 35 · 40 · 50</div>
+      <div>∅60 · 80 mm</div>
+      <div style="margin-top:6px">Ck45/Cf53 ind. sert.</div>
+      <div>HRC 56–62 · Ra ≤ 0.3</div>
+    </div>
+  </aside>
+
+  <!-- ── CONTENT ─────────────────────────────────── -->
+  <main class="content">
+
+    <div class="head-row">
+      <span class="page-lbl" id="pageLbl">Mil Mukavemet — Gerilme Kontrolü</span>
+      <span class="mode-badge kontrol" id="modeBadge">DIN 743 — Kontrol</span>
+    </div>
+
+    <!-- SVG -->
+    <div class="svg-card">
+      <div class="svg-top">
+        <span class="svg-title">Yükleme Şeması</span>
+        <span class="svg-sub" id="svgSub">Eğilme + Burulma</span>
+      </div>
+      <div class="svg-bg">
+        <svg id="milSvg" viewBox="0 0 448 178" xmlns="http://www.w3.org/2000/svg">
+          <!-- centerline -->
+          <line x1="40" y1="92" x2="424" y2="92" stroke="#444468" stroke-width="1" stroke-dasharray="10 4 2 4"/>
+          <!-- shaft -->
+          <rect x="78" y="74" width="296" height="36" fill="rgba(251,113,133,.22)" stroke="#fb7185" stroke-width="1.4"/>
+          <!-- bearings -->
+          <g stroke="#8080a8" stroke-width="1.2" fill="none">
+            <polygon points="112,110 100,130 124,130"/>
+            <line x1="96" y1="130" x2="128" y2="130"/>
+            <line x1="100" y1="136" x2="106" y2="130"/><line x1="108" y1="136" x2="114" y2="130"/><line x1="116" y1="136" x2="122" y2="130"/>
+            <polygon points="340,110 328,130 352,130"/>
+            <line x1="324" y1="130" x2="356" y2="130"/>
+            <line x1="328" y1="136" x2="334" y2="130"/><line x1="336" y1="136" x2="342" y2="130"/><line x1="344" y1="136" x2="350" y2="130"/>
+          </g>
+          <!-- bending arrow -->
+          <g>
+            <line x1="226" y1="26" x2="226" y2="68" stroke="#fb7185" stroke-width="1.6"/>
+            <polygon points="226,74 221,63 231,63" fill="#fb7185"/>
+            <text id="svgMb" x="234" y="36" font-family="JetBrains Mono, monospace" font-size="11" fill="#fb7185">Mb = 250 N·m</text>
+          </g>
+          <!-- torque arc -->
+          <g>
+            <path d="M 388 70 A 24 24 0 1 1 388 114" fill="none" stroke="#fbbf24" stroke-width="1.6"/>
+            <polygon points="388,118 396,109 384,107" fill="#fbbf24"/>
+            <text id="svgT" x="380" y="160" font-family="JetBrains Mono, monospace" font-size="11" fill="#fbbf24" text-anchor="middle">T = 180 N·m</text>
+          </g>
+          <!-- axial arrow (hidden unless F>0) -->
+          <g id="svgFgrp" style="display:none">
+            <line x1="48" y1="92" x2="74" y2="92" stroke="#a78bfa" stroke-width="1.6"/>
+            <polygon points="78,92 67,87 67,97" fill="#a78bfa"/>
+            <text id="svgF" x="46" y="80" font-family="JetBrains Mono, monospace" font-size="10" fill="#a78bfa">F</text>
+          </g>
+          <!-- diameter dim -->
+          <g stroke="#60a5fa" stroke-width="1.1" fill="#60a5fa">
+            <line x1="62" y1="74" x2="62" y2="110" stroke-dasharray="none"/>
+            <polygon points="62,74 58,84 66,84"/>
+            <polygon points="62,110 58,100 66,100"/>
+            <line x1="56" y1="74" x2="76" y2="74"/>
+            <line x1="56" y1="110" x2="76" y2="110"/>
+          </g>
+          <text id="svgD" x="34" y="58" font-family="JetBrains Mono, monospace" font-size="12" fill="#60a5fa">∅40</text>
+          <!-- notch symbol at keyway -->
+          <g id="svgNotch" style="display:none">
+            <rect x="262" y="74" width="44" height="8" fill="rgba(96,165,250,.25)" stroke="#60a5fa" stroke-width="1" stroke-dasharray="3 2"/>
+            <text id="svgNotchTxt" x="284" y="68" font-family="JetBrains Mono, monospace" font-size="9" fill="#60a5fa" text-anchor="middle">kama yuvası</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- INPUTS -->
+    <div class="inp-grid">
+
+      <div class="inp-grp">
+        <div class="inp-lbl">Eğilme Momenti (Mb)</div>
+        <div class="inp-wrap">
+          <input type="number" id="mbInput" min="0" step="1" value="250">
+          <div class="inp-unit">N·m</div>
+        </div>
+      </div>
+
+      <div class="inp-grp">
+        <div class="inp-lbl">
+          Burulma Momenti (T)
+          <button class="pn-toggle" id="pnToggle" title="Güç ve devirden tork hesapla">P / n →</button>
+        </div>
+        <div class="inp-wrap">
+          <input type="number" id="tInput" min="0" step="1" value="180">
+          <div class="inp-unit">N·m</div>
+        </div>
+      </div>
+
+      <div class="pn-row" id="pnRow">
+        <div class="inp-grp">
+          <div class="inp-lbl" style="font-size:var(--fz-12)">Güç (P)</div>
+          <div class="inp-wrap"><input type="number" id="pInput" min="0" step="0.1" value="5.5"><div class="inp-unit">kW</div></div>
+        </div>
+        <div class="inp-grp">
+          <div class="inp-lbl" style="font-size:var(--fz-12)">Devir (n)</div>
+          <div class="inp-wrap"><input type="number" id="nInput" min="1" step="10" value="1450"><div class="inp-unit">d/dk</div></div>
+        </div>
+        <button class="pn-btn" id="pnCalc">T = 9550·P/n</button>
+      </div>
+
+      <div class="inp-grp" id="grpD">
+        <div class="inp-lbl">Mil Çapı (d)</div>
+        <div class="inp-wrap">
+          <input type="number" id="dInput" min="3" max="400" step="0.5" value="40">
+          <div class="inp-unit">mm</div>
+        </div>
+      </div>
+
+      <div class="inp-grp" id="grpS" style="display:none">
+        <div class="inp-lbl">Hedef Emniyet (S)</div>
+        <div class="inp-wrap teal">
+          <input type="number" id="sInput" min="1" max="10" step="0.1" value="1.8">
+          <div class="inp-unit">—</div>
+        </div>
+      </div>
+
+      <div class="inp-grp">
+        <div class="inp-lbl">Eksenel Kuvvet (F)</div>
+        <div class="inp-wrap">
+          <input type="number" id="fInput" min="0" step="100" value="0">
+          <div class="inp-unit">N</div>
+        </div>
+      </div>
+
+      <div class="inp-grp full">
+        <div class="inp-lbl">Mil Malzemesi</div>
+        <select id="matSelect" class="mono"></select>
+        <div class="hint" id="matHint">Rm = 700 MPa · Re = 490 MPa · σbW ≈ 350 MPa</div>
+      </div>
+
+      <div class="inp-grp">
+        <div class="inp-lbl">Burulma Karakteri</div>
+        <select id="loadSelect">
+          <option value="statik">Statik / Titreşimli (α₀ = 0.7)</option>
+          <option value="degisken">Tam Değişken (α₀ = 1.0)</option>
+        </select>
+      </div>
+
+      <div class="inp-grp">
+        <div class="inp-lbl">Çentik Durumu (βk)</div>
+        <select id="notchSelect">
+          <option value="duz">Çentiksiz düz mil — βk 1.0</option>
+          <option value="fat_genis">Faturalı geçiş, r/d ≥ 0.1 — βk 1.5</option>
+          <option value="fat_norm" selected>Faturalı geçiş, r/d ≈ 0.05 — βk 2.0</option>
+          <option value="fat_keskin">Faturalı geçiş, keskin — βk 2.5</option>
+          <option value="kama">Kama yuvası (DIN 6885) — βk 1.8</option>
+          <option value="segman">Segman kanalı (DIN 471) — βk 2.5</option>
+          <option value="delik">Enine delik — βk 1.9</option>
+          <option value="pres">Pres geçme göbek — βk 1.8</option>
+        </select>
+      </div>
+
+      <div class="inp-grp full">
+        <div class="inp-lbl">Yüzey Kalitesi (b₂)</div>
+        <select id="surfSelect">
+          <option value="polish">Parlatılmış (Ra ≤ 0.1)</option>
+          <option value="grind" selected>Taşlanmış (Ra 0.2–0.8)</option>
+          <option value="fine">İnce tornalanmış (Ra 1.6–3.2)</option>
+          <option value="rough">Kaba tornalanmış (Ra 6.3–12.5)</option>
+          <option value="rolled">Haddelenmiş kabuklu</option>
+        </select>
+        <div class="hint" id="surfHint" style="display:none"></div>
+      </div>
+
+    </div>
+
+    <!-- FORMULA -->
+    <div class="formula">
+      <b>σ_v</b> = √( (σ_b + σ_z)² + 3·(α₀·τ_t)² ) &nbsp;·&nbsp; <b>σ_b</b> = 32·Mb/(π·d³) &nbsp;·&nbsp; <b>τ_t</b> = 16·T/(π·d³)<br>
+      <b>S_D</b> = σbW · b₁ · b₂ / ( βk · σ_v ) &nbsp;·&nbsp; <b>S_F</b> = Re / √( σ² + 3τ² )
+    </div>
+
+    <button class="calc-btn" id="calcBtn">HESAPLA</button>
+
+    <!-- RESULTS -->
+    <div class="res-sec" id="resSec"></div>
+
+    <!-- NOTES -->
+    <div class="note-teal"><b>Kromlu mil notu:</b> İndüksiyonla sertleştirilmiş + taşlanmış + sert krom kaplı miller (Ck45/Cf53, yüzey 56–62 HRC) öncelikle lineer hareket ve hidrolik/pnömatik uygulamalar içindir. İndüksiyon sertleştirme yüzeyde basınç kalıntı gerilmesi oluşturarak yorulma dayanımını artırır; ancak sert krom tabakasının kendisi mikro çatlaklı olduğundan kaplama yorulma dayanımını ~%10–20 düşürebilir. Yüksek burulma iletiminde kama kanalı açmak sert yüzey nedeniyle zordur — göbek bağlantısı için sıkma bilezikli (locking assembly) çözümler tercih edilir.</div>
+
+    <div class="note-amber"><b>Yöntem sınırı:</b> Bu hesap, Bach eşdeğer gerilme hipotezi ve b₁·b₂/βk düzeltme faktörleriyle basitleştirilmiş DIN 743 yaklaşımıdır. Ortalama gerilme etkisi (Smith diyagramı), sıcaklık faktörü ve birden fazla çentiğin etkileşimi dahil edilmemiştir. Emniyet katsayısı 1.5'in altına düşen kritik uygulamalarda (kaldırma, basınçlı ekipman, can güvenliği) tam DIN 743 analizi veya FEM doğrulaması yapılmalıdır. Dönen mil kabulüyle eğilme tam değişken (wechselnd) alınmıştır.</div>
+
+  </main>
+
+  <!-- ── REF COL ───────────────────────────────────── -->
+  <div class="ref-col">
+    <div class="ref-hdr">
+      <span class="ref-title">Mil Malzemeleri</span>
+      <span class="ref-std">Rm / Re / σbW (MPa)</span>
+    </div>
+    <div class="ref-wrap" id="refWrap"></div>
+    <div class="ref-foot">σbW ≈ 0.5·Rm (eğilme değişken dayanımı)<br>τtW ≈ 0.3·Rm · Değerler tipik/min. katalog değerleridir, ısıl işlem &amp; çapa göre değişir.</div>
+  </div>
+
+</div><!-- /.app -->
+
+<script>
+/* ═════════════════════════════════════════════════════════
+   MALZEME VERİTABANI  — Rm/Re: tipik katalog değerleri (MPa)
+   kromlu:true → yüzey önerisi "taşlanmış", krom notu
+═════════════════════════════════════════════════════════ */
+const MATS = [
+  {grp:'Yapı Çelikleri'},
+  {id:'s235',  name:'S235JR (St37-2)',        wnr:'1.0038', Rm:370,  Re:235},
+  {id:'e295',  name:'E295 (St50-2)',          wnr:'1.0050', Rm:490,  Re:295},
+  {id:'e335',  name:'E335 (St60-2)',          wnr:'1.0060', Rm:590,  Re:335},
+  {grp:'Islah Çelikleri'},
+  {id:'c45n',  name:'C45 Normalize',          wnr:'1.0503', Rm:620,  Re:340},
+  {id:'c45v',  name:'C45E Islah (Ck45)',      wnr:'1.1191', Rm:700,  Re:490, def:true},
+  {id:'c60v',  name:'C60E Islah',             wnr:'1.1221', Rm:800,  Re:520},
+  {id:'42cr',  name:'42CrMo4 Islah',          wnr:'1.7225', Rm:1000, Re:800},
+  {id:'34cr',  name:'34CrNiMo6 Islah',        wnr:'1.6582', Rm:1100, Re:900},
+  {grp:'Sertleştirilmiş / Kromlu Mil'},
+  {id:'krom45',name:'Kromlu Mil Ck45 (İnd.Sert.+Taşlı+Cr)', wnr:'1.1191', Rm:700,  Re:520, kromlu:true},
+  {id:'krom53',name:'Kromlu Mil Cf53 (İnd.Sert.+Taşlı+Cr)', wnr:'1.1213', Rm:750,  Re:550, kromlu:true},
+  {id:'42ind', name:'42CrMo4 + İnd. Sertleştirme',           wnr:'1.7225', Rm:1100, Re:900},
+  {grp:'Sementasyon Çelikleri'},
+  {id:'16mn',  name:'16MnCr5 Sementasyon',    wnr:'1.7131', Rm:900,  Re:630},
+  {id:'20mn',  name:'20MnCr5 Sementasyon',    wnr:'1.7147', Rm:1000, Re:700},
+  {grp:'Paslanmaz / Diğer'},
+  {id:'x20',   name:'X20Cr13 Islah',          wnr:'1.4021', Rm:750,  Re:550},
+  {id:'304',   name:'X5CrNi18-10 (AISI 304)', wnr:'1.4301', Rm:520,  Re:210},
+  {id:'etg',   name:'ETG 100 Otomat Çeliği',  wnr:'—',      Rm:1000, Re:865},
+];
+
+const NOTCH = {
+  duz:       {b:1.0, lbl:'çentiksiz'},
+  fat_genis: {b:1.5, lbl:'fatura r/d≥0.1'},
+  fat_norm:  {b:2.0, lbl:'fatura r/d≈0.05'},
+  fat_keskin:{b:2.5, lbl:'keskin fatura'},
+  kama:      {b:1.8, lbl:'kama yuvası'},
+  segman:    {b:2.5, lbl:'segman kanalı'},
+  delik:     {b:1.9, lbl:'enine delik'},
+  pres:      {b:1.8, lbl:'pres geçme'},
+};
+
+/* Yüzey faktörü b2 — Rm'e bağlı interpolasyon tabloları */
+const SURF = {
+  polish:[[400,1.00],[700,1.00],[1000,1.00],[1300,1.00]],
+  grind: [[400,0.95],[700,0.92],[1000,0.89],[1300,0.86]],
+  fine:  [[400,0.90],[700,0.84],[1000,0.78],[1300,0.72]],
+  rough: [[400,0.82],[700,0.74],[1000,0.66],[1300,0.58]],
+  rolled:[[400,0.70],[700,0.58],[1000,0.48],[1300,0.40]],
+};
+
+/* Boyut faktörü b1 (d mm) */
+const SIZE = [[10,1.00],[20,0.90],[30,0.86],[40,0.83],[50,0.81],[70,0.77],[100,0.73],[150,0.68],[200,0.64],[300,0.60]];
+
+const STD_D = [6,8,10,12,14,15,16,17,18,20,22,25,28,30,32,35,38,40,42,45,48,50,55,60,63,65,70,75,80,85,90,95,100,110,120,130,140,150,160,180,200,220,250,280,300];
+
+function lerp(table, x){
+  if(x<=table[0][0]) return table[0][1];
+  if(x>=table[table.length-1][0]) return table[table.length-1][1];
+  for(let i=0;i<table.length-1;i++){
+    const [x0,y0]=table[i],[x1,y1]=table[i+1];
+    if(x>=x0&&x<=x1) return y0+(y1-y0)*(x-x0)/(x1-x0);
+  }
+  return table[table.length-1][1];
+}
+const sizeFactor = d => lerp(SIZE, d);
+const surfFactor = (k,Rm) => lerp(SURF[k], Rm);
+
+/* ═════════════════════════════════════════════════════════
+   DOM & STATE
+═════════════════════════════════════════════════════════ */
+let mode = 'kontrol';
+const $ = id => document.getElementById(id);
+const matById = id => MATS.find(m=>m.id===id);
+
+/* Malzeme select & referans tablo doldur */
+(function buildMats(){
+  const sel = $('matSelect');
+  let html='', og=false;
+  MATS.forEach(m=>{
+    if(m.grp){ if(og) html+='</optgroup>'; html+=`<optgroup label="${m.grp}">`; og=true; }
+    else html+=`<option value="${m.id}" ${m.def?'selected':''}>${m.name} — ${m.wnr}</option>`;
+  });
+  if(og) html+='</optgroup>';
+  sel.innerHTML = html;
+
+  const wrap = $('refWrap');
+  let rh='';
+  MATS.forEach(m=>{
+    if(m.grp){
+      if(rh) rh+='</tbody></table>';
+      rh+=`<div class="mat-grp">${m.grp}</div><table class="rtbl"><tbody>`;
+    } else {
+      rh+=`<tr data-id="${m.id}" onclick="pickMat('${m.id}')">
+        <td>${m.name}</td><td>${m.Rm}</td><td>${m.Re}</td><td class="hl">${Math.round(m.Rm*0.5)}</td></tr>`;
+    }
+  });
+  rh+='</tbody></table>';
+  wrap.innerHTML = rh;
+})();
+
+function pickMat(id){
+  $('matSelect').value = id;
+  onMatChange();
+}
+
+function onMatChange(){
+  const m = matById($('matSelect').value);
+  $('matHint').textContent = `Rm = ${m.Rm} MPa · Re = ${m.Re} MPa · σbW ≈ ${Math.round(m.Rm*0.5)} MPa`;
+  const sh = $('surfHint');
+  if(m.kromlu){
+    $('surfSelect').value = 'grind';
+    sh.style.display='block';
+    sh.className='hint rose';
+    sh.textContent='Kromlu mil: yüzey fabrikadan taşlanmış (Ra ≤ 0.3) — b₂ taşlanmış seçildi. Krom kaplama etkisi için S hedefini ~%15 artırın.';
+  } else { sh.style.display='none'; }
+  // tablo seçim vurgusu
+  document.querySelectorAll('.rtbl tr').forEach(tr=>tr.classList.toggle('sel', tr.dataset.id===m.id));
+}
+$('matSelect').addEventListener('change', onMatChange);
+onMatChange();
+
+/* Mode geçişi */
+document.querySelectorAll('.type-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+    const kontrol = mode==='kontrol';
+    $('grpD').style.display = kontrol?'flex':'none';
+    $('grpS').style.display = kontrol?'none':'flex';
+    $('pageLbl').textContent = kontrol?'Mil Mukavemet — Gerilme Kontrolü':'Mil Mukavemet — Minimum Çap';
+    const mb=$('modeBadge');
+    mb.textContent = kontrol?'DIN 743 — Kontrol':'DIN 743 — Boyutlandırma';
+    mb.className = `mode-badge ${kontrol?'kontrol':'capmin'}`;
+    $('calcBtn').classList.toggle('teal', !kontrol);
+    $('calcBtn').textContent = kontrol?'HESAPLA':'MİN. ÇAPI BUL';
+    $('resSec').classList.remove('show');
+  });
+});
+
+/* P/n → T yardımcısı */
+$('pnToggle').addEventListener('click', ()=>{
+  $('pnRow').classList.toggle('show');
+  $('pnToggle').classList.toggle('on');
+});
+$('pnCalc').addEventListener('click', ()=>{
+  const P=parseFloat($('pInput').value)||0, n=parseFloat($('nInput').value)||1;
+  $('tInput').value = (9550*P/n).toFixed(1);
+  updateSvg();
+});
+
+/* ═════════════════════════════════════════════════════════
+   HESAP ÇEKİRDEĞİ
+═════════════════════════════════════════════════════════ */
+function compute(d, Mb, T, F, mat, notchKey, surfKey, a0){
+  const Wb = Math.PI*Math.pow(d,3)/32;          // mm³
+  const Wt = Math.PI*Math.pow(d,3)/16;
+  const A  = Math.PI*d*d/4;
+  const sb = Mb*1000/Wb;                         // MPa
+  const tt = T*1000/Wt;
+  const sz = F/A;
+  const sTot = sb+sz;
+  const sv = Math.sqrt(sTot*sTot + 3*Math.pow(a0*tt,2));
+  const b1 = sizeFactor(d);
+  const b2 = surfFactor(surfKey, mat.Rm);
+  const bk = NOTCH[notchKey].b;
+  const sbW = 0.5*mat.Rm;
+  const sbWk = sbW*b1*b2/bk;                     // düzeltilmiş yorulma dayanımı
+  const SD = sv>0 ? sbWk/sv : Infinity;
+  const svStat = Math.sqrt(sTot*sTot + 3*tt*tt);
+  const SF = svStat>0 ? mat.Re/svStat : Infinity;
+  return {sb,tt,sz,sv,b1,b2,bk,sbW,sbWk,SD,SF};
+}
+
+function readCommon(){
+  return {
+    Mb: parseFloat($('mbInput').value)||0,
+    T:  parseFloat($('tInput').value)||0,
+    F:  parseFloat($('fInput').value)||0,
+    mat: matById($('matSelect').value),
+    notchKey: $('notchSelect').value,
+    surfKey: $('surfSelect').value,
+    a0: $('loadSelect').value==='degisken'?1.0:0.7,
+  };
+}
+
+const cls  = (S,lim)=> S>=lim?'ok':(S>=lim*0.8?'warn':'bad');
+const icon = (S,lim)=> S>=lim?'✓':(S>=lim*0.8?'⚠':'✗');
+const fmt  = v => isFinite(v)? v.toFixed(2) : '∞';
+
+function rowHTML(lbl, val, extra=''){ return `
+  <div class="calc-row">
+    <span class="calc-row-lbl">${lbl}</span>
+    <span class="calc-row-vals">${val}${extra}</span>
+  </div>`;
+}
+
+$('calcBtn').addEventListener('click', ()=>{
+  const c = readCommon();
+  if(c.Mb<=0 && c.T<=0){ alert('Mb veya T değerlerinden en az biri sıfırdan büyük olmalı.'); return; }
+  if(mode==='kontrol') runKontrol(c); else runCapmin(c);
+  updateSvg();
+});
+
+function runKontrol(c){
+  const d = parseFloat($('dInput').value)||0;
+  if(d<=0){ alert('Geçerli bir mil çapı girin.'); return; }
+  const r = compute(d, c.Mb, c.T, c.F, c.mat, c.notchKey, c.surfKey, c.a0);
+  const usage = Math.min(100, 1.5/r.SD*100);
+  const barCol = r.SD>=1.5?'var(--green)':(r.SD>=1.2?'var(--yellow)':'var(--red)');
+
+  $('resSec').innerHTML = `
+    <div class="sec-head">Sonuçlar — ∅${d} mm · ${c.mat.name}</div>
+    ${rowHTML('Eğilme Gerilmesi (σ_b)', `<span class="crv rose">${r.sb.toFixed(1)} MPa</span>`)}
+    ${rowHTML('Burulma Gerilmesi (τ_t)', `<span class="crv">${r.tt.toFixed(1)} MPa</span>`)}
+    ${c.F>0 ? rowHTML('Eksenel Gerilme (σ_z)', `<span class="crv blue">${r.sz.toFixed(1)} MPa</span>`) : ''}
+    ${rowHTML('Eşdeğer Gerilme (σ_v)', `<span class="crv rose">${r.sv.toFixed(1)} MPa</span>`)}
+    ${rowHTML(`Düzeltilmiş Dayanım (σbW·b₁·b₂/βk)`,
+      `<span class="crv teal">${r.sbWk.toFixed(0)} MPa</span>
+       <span class="crv dim">b₁ ${r.b1.toFixed(2)} · b₂ ${r.b2.toFixed(2)} · βk ${r.bk.toFixed(1)}</span>`)}
+    <div class="calc-row hero">
+      <span class="calc-row-lbl">YORULMA EMNİYETİ (S_D)</span>
+      <span class="calc-row-vals">
+        <span class="crv big ${cls(r.SD,1.5)}">${fmt(r.SD)}</span>
+        <span class="crv dim">/ ≥1.5</span>
+        <span class="chk">${icon(r.SD,1.5)}</span>
+      </span>
+    </div>
+    ${rowHTML('Akma Emniyeti (S_F)',
+      `<span class="crv ${cls(r.SF,1.5)}">${fmt(r.SF)}</span>
+       <span class="crv dim">/ ≥1.5</span>
+       <span class="chk">${icon(r.SF,1.5)}</span>`)}
+    <div class="use-bar-bg"><div class="use-bar-fill" style="width:${usage}%;background:${barCol}"></div></div>
+    <div class="hint">Kapasite kullanımı: %${usage.toFixed(0)} (S_D = 1.5 hedefine göre)</div>
+  `;
+  $('resSec').classList.add('show');
+}
+
+function runCapmin(c){
+  const Shedef = parseFloat($('sInput').value)||1.8;
+  let dMin = null;
+  for(let d=4; d<=400; d+=0.5){
+    const r = compute(d, c.Mb, c.T, c.F, c.mat, c.notchKey, c.surfKey, c.a0);
+    if(r.SD>=Shedef && r.SF>=1.5){ dMin=d; break; }
+  }
+  if(dMin===null){
+    $('resSec').innerHTML = `<div class="calc-row hero"><span class="calc-row-lbl">SONUÇ</span>
+      <span class="crv bad">∅400 mm'de bile hedef sağlanamadı — yükleri / malzemeyi gözden geçirin</span></div>`;
+    $('resSec').classList.add('show');
+    return;
+  }
+  // 0.5'lik adımı 0.05'e incelt
+  for(let d=dMin-0.5; d<=dMin; d+=0.05){
+    const r = compute(d, c.Mb, c.T, c.F, c.mat, c.notchKey, c.surfKey, c.a0);
+    if(r.SD>=Shedef && r.SF>=1.5){ dMin=d; break; }
+  }
+  const dStd = STD_D.find(s=>s>=dMin) || Math.ceil(dMin);
+  const rStd = compute(dStd, c.Mb, c.T, c.F, c.mat, c.notchKey, c.surfKey, c.a0);
+
+  $('dInput').value = dStd; // kontrol moduna geçilirse hazır olsun
+
+  $('resSec').innerHTML = `
+    <div class="sec-head">Sonuçlar — Hedef S = ${Shedef} · ${c.mat.name}</div>
+    <div class="calc-row hero">
+      <span class="calc-row-lbl">MİNİMUM MİL ÇAPI (d_min)</span>
+      <span class="calc-row-vals"><span class="crv big teal">∅${dMin.toFixed(1)} mm</span></span>
+    </div>
+    <div class="calc-row hero" style="border-color:rgba(0,212,170,.25)">
+      <span class="calc-row-lbl">ÖNERİLEN STANDART ÇAP</span>
+      <span class="calc-row-vals">
+        <span class="crv big teal">∅${dStd} mm</span>
+        <span class="crv dim">S_D = ${fmt(rStd.SD)}</span>
+        <span class="chk">${icon(rStd.SD,Shedef)}</span>
+      </span>
+    </div>
+    ${rowHTML(`∅${dStd} mm'de Eğilme (σ_b)`, `<span class="crv">${rStd.sb.toFixed(1)} MPa</span>`)}
+    ${rowHTML(`∅${dStd} mm'de Burulma (τ_t)`, `<span class="crv">${rStd.tt.toFixed(1)} MPa</span>`)}
+    ${rowHTML(`∅${dStd} mm'de Eşdeğer (σ_v)`, `<span class="crv rose">${rStd.sv.toFixed(1)} MPa</span>`)}
+    ${rowHTML('Düzeltilmiş Dayanım',
+      `<span class="crv teal">${rStd.sbWk.toFixed(0)} MPa</span>
+       <span class="crv dim">b₁ ${rStd.b1.toFixed(2)} · b₂ ${rStd.b2.toFixed(2)} · βk ${rStd.bk.toFixed(1)}</span>`)}
+    ${rowHTML('Akma Emniyeti (S_F)',
+      `<span class="crv ${cls(rStd.SF,1.5)}">${fmt(rStd.SF)}</span>
+       <span class="crv dim">/ ≥1.5</span>
+       <span class="chk">${icon(rStd.SF,1.5)}</span>`)}
+    <div class="hint">Çap, S_D ≥ ${Shedef} ve S_F ≥ 1.5 koşullarını birlikte sağlayacak şekilde iteratif bulundu (b₁ ve b₂ çapla değiştiği için kapalı formül yerine iterasyon kullanılır).</div>
+  `;
+  $('resSec').classList.add('show');
+}
+
+/* ═════════════════════════════════════════════════════════
+   SVG GÜNCELLEME
+═════════════════════════════════════════════════════════ */
+function updateSvg(){
+  const Mb=parseFloat($('mbInput').value)||0;
+  const T =parseFloat($('tInput').value)||0;
+  const F =parseFloat($('fInput').value)||0;
+  const d =parseFloat($('dInput').value)||0;
+  $('svgMb').textContent = `Mb = ${Mb} N·m`;
+  $('svgT').textContent  = `T = ${T} N·m`;
+  $('svgD').textContent  = mode==='kontrol' && d>0 ? `∅${d}` : '∅d';
+  $('svgFgrp').style.display = F>0?'':'none';
+  $('svgF').textContent = `F=${F}N`;
+  const nk = $('notchSelect').value;
+  const showNotch = nk!=='duz';
+  $('svgNotch').style.display = showNotch?'':'none';
+  $('svgNotchTxt').textContent = NOTCH[nk].lbl;
+  $('svgSub').textContent = F>0?'Eğilme + Burulma + Eksenel':'Eğilme + Burulma';
+}
+['mbInput','tInput','fInput','dInput'].forEach(id=>$(id).addEventListener('input', updateSvg));
+$('notchSelect').addEventListener('change', updateSvg);
+updateSvg();
+</script>
+</body>
+</html>

@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mil Tasarımı — Kama & Segman | MH Platform</title>
+<link rel="stylesheet" href="mh-tokens.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none}
+
+/* ─── NAV ─────────────────────────────────────────── */
+nav{position:relative;z-index:10;flex-shrink:0;background:rgba(7,7,14,.92);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;height:52px;gap:20px}
+.brand{font-family:var(--font-logo);font-size:18px;letter-spacing:3px;color:var(--orange);text-decoration:none}
+.brand em{color:var(--text);font-style:normal}
+.breadcrumb{font-size:var(--fz-12);color:#8080a8;font-family:var(--font-m);display:flex;align-items:center;gap:8px}
+.breadcrumb span{color:#52527a}
+
+/* ─── APP ──────────────────────────────────────────── */
+.app{position:relative;z-index:1;display:flex;flex:1;overflow:hidden}
+
+/* ─── SIDEBAR ──────────────────────────────────────── */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);width:200px;flex-shrink:0;
+  display:flex;flex-direction:column;overflow-y:auto;padding-bottom:16px}
+.col-label{font-family:var(--font-h);font-size:var(--fz-13);letter-spacing:2px;color:#9090c0;
+  text-transform:uppercase;padding:14px 14px 8px}
+.sb-sep{height:1px;background:var(--border);margin:8px 14px}
+.type-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;
+  background:transparent;border:none;border-left:3px solid transparent;
+  color:#8080a8;font-family:var(--font-b);font-size:calc(12.5px * var(--fz));
+  cursor:pointer;text-align:left;transition:all .15s}
+.type-btn:hover{background:var(--surf1);color:var(--text)}
+.type-btn.active{background:var(--surf1);color:var(--text);font-weight:500}
+.type-btn[data-mode="dis"].active{border-left-color:var(--orange)}
+.type-btn[data-mode="ic"].active{border-left-color:var(--teal)}
+.type-btn[data-mode="kama"].active{border-left-color:var(--purple)}
+.t-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-right:2px}
+.t-dot.orange{background:var(--orange)}
+.t-dot.teal{background:var(--teal)}
+.t-dot.purple{background:var(--purple)}
+
+/* ─── CONTENT (middle 480px) ───────────────────────── */
+.content{width:480px;max-width:480px;flex-shrink:0;display:flex;flex-direction:column;
+  overflow-y:auto;padding:14px 16px;gap:12px}
+
+/* Mil input block */
+.mil-block{display:flex;flex-direction:column;gap:6px}
+.mil-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mil-lbl{font-family:var(--font-h);font-size:var(--fz-14);color:#c0c0e0;
+  letter-spacing:1px;text-transform:uppercase}
+.mode-badge{font-family:var(--font-m);font-size:var(--fz-11);padding:3px 9px;border-radius:4px;font-weight:600}
+.mode-badge.dis{background:rgba(249,115,22,.1);color:var(--orange);border:1px solid rgba(249,115,22,.25)}
+.mode-badge.ic{background:rgba(0,212,170,.1);color:var(--teal);border:1px solid rgba(0,212,170,.25)}
+.mode-badge.kama{background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.25)}
+
+.inp-wrap{display:flex;background:var(--surf2);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .2s}
+.inp-wrap:focus-within{border-color:var(--orange)}
+.inp-wrap.teal:focus-within{border-color:var(--teal)}
+.inp-wrap.purple:focus-within{border-color:var(--purple)}
+.inp-wrap input{flex:1;padding:10px 12px;background:transparent;border:none;color:var(--text);
+  font-family:var(--font-m);font-size:var(--fz-15);font-weight:600;outline:none;
+  -moz-appearance:textfield; appearance:none;}
+.inp-wrap input::-webkit-inner-spin-button,.inp-wrap input::-webkit-outer-spin-button{-webkit-appearance:none}
+.inp-unit{padding:0 12px;display:flex;align-items:center;font-family:var(--font-m);font-size:var(--fz-12);
+  color:#52527a;background:var(--surf3);border-left:1px solid var(--border);white-space:nowrap}
+
+.nearest-bar{display:flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:var(--fz-11);color:#8080a8}
+.nearest-bar .ns{color:var(--orange);font-weight:600}
+.nearest-bar .ns.teal{color:var(--teal)}
+.nearest-bar .ns.purple{color:var(--purple)}
+
+/* SVG card */
+.svg-card{background:#080814;border:1px solid rgba(249,115,22,.2);border-radius:10px;
+  padding:10px;flex-shrink:0;display:flex;flex-direction:column;gap:6px}
+.svg-card.teal{border-color:rgba(0,212,170,.2)}
+.svg-card.purple{border-color:rgba(167,139,250,.2)}
+.svg-top{display:flex;align-items:center;justify-content:space-between}
+.svg-title{font-family:var(--font-h);font-size:var(--fz-13);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange)}
+.svg-title.teal{color:var(--teal)}
+.svg-title.purple{color:var(--purple)}
+.svg-sub{font-family:var(--font-m);font-size:var(--fz-11);color:#52527a}
+.svg-bg{background:#05050e;border-radius:7px;overflow:hidden;width:100%}
+#mainSvg{display:block;width:100%;height:auto}
+
+/* Dims section */
+.dims-sec{display:flex;flex-direction:column;gap:8px}
+.sec-head{font-family:var(--font-h);font-size:var(--fz-14);font-weight:700;letter-spacing:1px;color:var(--text)}
+.dims-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.dim-box{background:var(--surf1);border:1px solid var(--border);border-radius:8px;padding:8px 10px;
+  display:flex;flex-direction:column;gap:2px;transition:border-color .2s}
+.dim-box:hover{border-color:rgba(255,255,255,.12)}
+.dim-box.wide{grid-column:span 2}
+.dim-val{font-family:var(--font-m);font-size:var(--fz-15);font-weight:600;color:var(--teal)}
+.dim-val.orange{color:var(--orange)}
+.dim-val.blue{color:var(--blue)}
+.dim-val.purple{color:var(--purple)}
+.dim-val.yellow{color:var(--yellow)}
+.dim-lbl{font-family:var(--font-h);font-size:var(--fz-11);color:#52527a;text-transform:uppercase;letter-spacing:.5px;line-height:1.3}
+
+/* Load capacity bar */
+.load-row{display:flex;align-items:center;gap:10px;background:var(--surf1);border:1px solid var(--border);
+  border-radius:8px;padding:10px 14px}
+.load-info{flex:1}
+.load-lbl{font-family:var(--font-h);font-size:var(--fz-11);color:#52527a;letter-spacing:1px;text-transform:uppercase}
+.load-val{font-family:var(--font-m);font-size:var(--fz-15);font-weight:600}
+.load-bar-wrap{flex:2}
+.load-bar-bg{height:6px;background:var(--surf3);border-radius:3px;overflow:hidden}
+.load-bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
+
+/* Kama calculation */
+.kama-sec{background:var(--surf1);border:1px solid rgba(167,139,250,.15);border-radius:10px;padding:14px;
+  display:flex;flex-direction:column;gap:10px}
+.kama-sec-title{font-family:var(--font-h);font-size:var(--fz-15);font-weight:700;letter-spacing:1px;color:var(--purple)}
+.calc-inp-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.inp-grp{display:flex;flex-direction:column;gap:4px}
+.inp-lbl2{font-family:var(--font-h);font-size:var(--fz-13);color:#c0c0e0;letter-spacing:1px;text-transform:uppercase}
+.calc-btn{width:100%;padding:12px;background:var(--purple);border:none;border-radius:8px;color:white;
+  font-family:var(--font-h);font-size:var(--fz-15);font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.calc-btn:hover{background:#9333ea;transform:translateY(-1px);box-shadow:0 4px 18px rgba(167,139,250,.35)}
+.calc-btn:active{transform:none}
+.calc-results{display:flex;flex-direction:column;gap:6px}
+.calc-row{display:flex;justify-content:space-between;align-items:center;
+  background:var(--surf2);border-radius:6px;padding:8px 12px;border:1px solid var(--border)}
+.calc-row-lbl{font-family:var(--font-h);font-size:var(--fz-12);color:#8080a8;letter-spacing:.5px}
+.calc-row-vals{display:flex;align-items:center;gap:10px}
+.crv{font-family:var(--font-m);font-size:var(--fz-14);font-weight:600}
+.crv.ok{color:var(--green)}
+.crv.warn{color:var(--yellow)}
+.crv.bad{color:var(--red)}
+.crv.dim{color:#8080a8}
+.chk{font-size:16px;line-height:1}
+.calc-note{font-family:var(--font-b);font-size:var(--fz-11);color:#52527a;line-height:1.6}
+
+/* ─── REF COL (right 320px) ────────────────────────── */
+.ref-col{background:var(--bg2);border-left:1px solid var(--border);width:320px;flex-shrink:0;
+  display:flex;flex-direction:column;overflow:hidden}
+.ref-hdr{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ref-title{font-family:var(--font-h);font-size:var(--fz-15);font-weight:700;letter-spacing:1px}
+.ref-std{font-family:var(--font-m);font-size:var(--fz-10);padding:2px 8px;border-radius:4px;
+  background:rgba(249,115,22,.1);color:var(--orange);border:1px solid rgba(249,115,22,.2);white-space:nowrap}
+.ref-std.teal{background:rgba(0,212,170,.1);color:var(--teal);border-color:rgba(0,212,170,.2)}
+.ref-std.purple{background:rgba(167,139,250,.1);color:var(--purple);border-color:rgba(167,139,250,.2)}
+.ref-wrap{flex:1;overflow-y:auto}
+table.rtbl{width:100%;border-collapse:collapse;font-family:var(--font-m);font-size:calc(11px * var(--fz))}
+.rtbl thead th{position:sticky;top:0;background:#0e0e1e;padding:5px 6px;
+  font-family:var(--font-h);font-size:calc(10px * var(--fz));color:#52527a;
+  letter-spacing:.3px;text-align:right;border-bottom:1px solid var(--border);z-index:1}
+.rtbl thead th:first-child{text-align:left;padding-left:10px}
+.rtbl tbody tr{border-bottom:1px solid rgba(255,255,255,.03);cursor:pointer;transition:background .1s}
+.rtbl tbody tr:hover{background:rgba(255,255,255,.04)}
+.rtbl tbody tr.sel{background:rgba(249,115,22,.09)}
+.rtbl tbody tr.sel.teal{background:rgba(0,212,170,.09)}
+.rtbl tbody tr.sel.purple{background:rgba(167,139,250,.09)}
+.rtbl td{padding:5px 6px;color:#9090b8;text-align:right}
+.rtbl td:first-child{color:var(--text);font-weight:600;text-align:left;padding-left:10px}
+.rtbl td.hl{color:var(--orange)}
+.rtbl td.hl.teal{color:var(--teal)}
+.rtbl td.hl.purple{color:var(--purple)}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══════════════════════════════════════════════ -->
+<nav>
+  <a href="index.html" class="brand">MH<em>Platform</em></a>
+  <div class="breadcrumb">
+    <a href="index.html" style="color:#8080a8;text-decoration:none">Ana Sayfa</a>
+    <span>/</span>
+    Mil Tasarımı
+  </div>
+</nav>
+
+<!-- ═══ APP ═══════════════════════════════════════════════ -->
+<div class="app">
+
+  <!-- ── SIDEBAR ─────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="col-label">Segman</div>
+
+    <button class="type-btn active" data-mode="dis">
+      <span class="t-dot orange"></span>
+      Dış Segman
+    </button>
+    <button class="type-btn" data-mode="ic">
+      <span class="t-dot teal"></span>
+      İç Segman
+    </button>
+
+    <div class="sb-sep"></div>
+    <div class="col-label">Kama</div>
+
+    <button class="type-btn" data-mode="kama">
+      <span class="t-dot purple"></span>
+      Paralel Kama
+    </button>
+
+    <div class="sb-sep"></div>
+    <div class="col-label" style="font-size:var(--fz-11);padding:10px 14px 6px;color:#52527a">Standart</div>
+    <div style="padding:0 14px;display:flex;flex-direction:column;gap:4px">
+      <div style="font-family:var(--font-m);font-size:var(--fz-11);color:#52527a">Dış: DIN 471</div>
+      <div style="font-family:var(--font-m);font-size:var(--fz-11);color:#52527a">İç: DIN 472</div>
+      <div style="font-family:var(--font-m);font-size:var(--fz-11);color:#52527a">Kama: DIN 6885</div>
+      <div style="margin-top:8px;font-family:var(--font-m);font-size:var(--fz-11);color:#52527a">Aralık</div>
+      <div style="font-family:var(--font-m);font-size:var(--fz-11);color:#8080a8">Dış: ∅4–162 mm</div>
+      <div style="font-family:var(--font-m);font-size:var(--fz-11);color:#8080a8">İç: ∅8–160 mm</div>
+      <div style="font-family:var(--font-m);font-size:var(--fz-11);color:#8080a8">Kama: ∅6–230 mm</div>
+    </div>
+  </aside>
+
+  <!-- ── CONTENT ─────────────────────────────────── -->
+  <main class="content" id="mainContent">
+
+    <!-- Mil çapı input -->
+    <div class="mil-block">
+      <div class="mil-label-row">
+        <span class="mil-lbl" id="milLbl">Mil Çapı (d₁)</span>
+        <span class="mode-badge dis" id="modeBadge">DIN 471 — Dış Segman</span>
+      </div>
+      <div class="inp-wrap" id="milInpWrap">
+        <input type="number" id="milInput" min="4" max="230" step="1" value="30" placeholder="Mil çapı...">
+        <div class="inp-unit">mm</div>
+      </div>
+      <div class="nearest-bar" id="nearestBar">
+        <span style="color:#52527a">En yakın standart boyut:</span>
+        <span class="ns" id="nearestVal">—</span>
+        <span id="exactMatch" style="color:#4ade80;display:none">✓ tam eşleşme</span>
+      </div>
+    </div>
+
+    <!-- SVG Drawing card -->
+    <div class="svg-card" id="svgCard">
+      <div class="svg-top">
+        <span class="svg-title" id="svgTitle">Dış Segman — Kanal Kesiti (DIN 471)</span>
+        <span class="svg-sub" id="svgSub">∅30 mm</span>
+      </div>
+      <div class="svg-bg">
+        <svg id="mainSvg" viewBox="0 0 448 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+              <path d="M0,0 L7,3.5 L0,7 Z" fill="#60a5fa"/>
+            </marker>
+            <marker id="arrs" markerWidth="7" markerHeight="7" refX="1" refY="3.5" orient="auto-start-reverse">
+              <path d="M0,0 L7,3.5 L0,7 Z" fill="#60a5fa"/>
+            </marker>
+            <marker id="arrO" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+              <path d="M0,0 L7,3.5 L0,7 Z" fill="#f97316"/>
+            </marker>
+            <marker id="arrsO" markerWidth="7" markerHeight="7" refX="1" refY="3.5" orient="auto-start-reverse">
+              <path d="M0,0 L7,3.5 L0,7 Z" fill="#f97316"/>
+            </marker>
+            <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(0,212,170,0.5)" stroke-width="2"/>
+            </pattern>
+            <pattern id="hatchP" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(167,139,250,0.5)" stroke-width="2"/>
+            </pattern>
+          </defs>
+          <g id="svgContent"></g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Dimension boxes -->
+    <div class="dims-sec" id="dimsSection">
+      <div class="sec-head" id="dimsTitle">Segman & Kanal Ölçüleri</div>
+      <div class="dims-grid" id="dimsGrid">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- Load capacity row (segman modes) -->
+    <div id="loadRow" style="display:flex;gap:8px">
+      <div class="load-row" style="flex:1">
+        <div class="load-info">
+          <div class="load-lbl">Kanal Kap. (Fn)</div>
+          <div class="load-val" id="fnVal" style="color:var(--blue)">—</div>
+        </div>
+        <div class="load-bar-wrap">
+          <div class="load-bar-bg"><div class="load-bar-fill" id="fnBar" style="width:0%;background:var(--blue)"></div></div>
+        </div>
+      </div>
+      <div class="load-row" style="flex:1">
+        <div class="load-info">
+          <div class="load-lbl">Segman Kap. (Fr)</div>
+          <div class="load-val" id="frVal" style="color:var(--teal)">—</div>
+        </div>
+        <div class="load-bar-wrap">
+          <div class="load-bar-bg"><div class="load-bar-fill" id="frBar" style="width:0%;background:var(--teal)"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kama calculation section (hidden by default) -->
+    <div class="kama-sec" id="kamaSec" style="display:none">
+      <div class="kama-sec-title">⚙ Tork Kapasitesi Hesabı</div>
+      <div class="calc-inp-grid">
+        <div class="inp-grp">
+          <div class="inp-lbl2">Tork (T)</div>
+          <div class="inp-wrap purple">
+            <input type="number" id="torkInput" min="0" step="1" value="100" placeholder="0">
+            <div class="inp-unit">N·m</div>
+          </div>
+        </div>
+        <div class="inp-grp">
+          <div class="inp-lbl2">Göbek Uzunluğu (L)</div>
+          <div class="inp-wrap purple">
+            <input type="number" id="lInput" min="1" step="1" value="50" placeholder="0">
+            <div class="inp-unit">mm</div>
+          </div>
+        </div>
+        <div class="inp-grp">
+          <div class="inp-lbl2">İzin Verilen σ</div>
+          <div class="inp-wrap purple">
+            <input type="number" id="sigmaInput" min="10" max="300" step="5" value="100" placeholder="100">
+            <div class="inp-unit">MPa</div>
+          </div>
+        </div>
+        <div class="inp-grp">
+          <div class="inp-lbl2">Kama Sayısı</div>
+          <div class="inp-wrap purple">
+            <input type="number" id="kamaAdet" min="1" max="2" step="1" value="1" placeholder="1">
+            <div class="inp-unit">adet</div>
+          </div>
+        </div>
+      </div>
+      <button class="calc-btn" id="calcBtn">HESAPLA</button>
+      <div class="calc-results" id="calcResults" style="display:none">
+        <!-- populated by JS -->
+      </div>
+      <div class="calc-note" id="calcNote"></div>
+    </div>
+
+  </main><!-- /.content -->
+
+  <!-- ── REF COL ───────────────────────────────────── -->
+  <div class="ref-col">
+    <div class="ref-hdr">
+      <span class="ref-title" id="refTitle">Referans Tablosu</span>
+      <span class="ref-std" id="refStd">DIN 471</span>
+    </div>
+    <div class="ref-wrap">
+      <table class="rtbl" id="refTable">
+        <thead id="refThead"></thead>
+        <tbody id="refTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /.app -->
+
+<!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─────────────────────────────────────────────────────────
+   DATA TABLES
+   DIN 471 / 472: [s, d3, d2, m, t, n, a, b, d5, Fn, Fr]
+   Kama DIN 6885: {b, h, t1, t2} indexed by [dMin, dMax]
+───────────────────────────────────────────────────────── */
+
+// DIN 471 – Dış Segman (External Circlip) – d1: 4…162 mm
+// Key: d1 → [s, d3, d2, m, t, n, a, b, d5, Fn(kN), Fr(kN)]
+const DIS471 = {
+  4:[0.40,3.7,3.8,0.50,0.10,0.3,2.2,0.9,1.0,0.2,0.50],
+  5:[0.60,4.7,4.8,0.70,0.10,0.3,2.5,1.1,1.0,0.2,1.0],
+  6:[0.70,5.6,5.7,0.80,0.15,0.5,2.7,1.3,1.2,0.4,1.45],
+  7:[0.80,6.5,6.7,0.90,0.15,0.5,3.1,1.4,1.2,0.5,2.6],
+  8:[0.80,7.4,7.6,0.90,0.20,0.6,3.2,1.5,1.2,0.8,3.0],
+  9:[1.00,8.4,8.6,1.10,0.20,0.6,3.3,1.7,1.2,0.9,3.5],
+  10:[1.00,9.3,9.6,1.10,0.20,0.6,3.3,1.8,1.5,1.0,4.0],
+  11:[1.00,10.2,10.5,1.10,0.25,0.8,3.3,1.8,1.5,1.4,4.5],
+  12:[1.00,11.0,11.5,1.10,0.25,0.8,3.3,1.8,1.7,1.5,5.0],
+  13:[1.00,11.9,12.4,1.10,0.30,0.9,3.4,2.0,1.7,2.0,5.8],
+  14:[1.00,12.9,13.4,1.10,0.30,0.9,3.5,2.1,1.7,2.1,6.4],
+  15:[1.00,13.8,14.3,1.10,0.35,1.1,3.6,2.2,1.7,2.6,6.9],
+  16:[1.00,14.7,15.2,1.10,0.40,1.2,3.7,2.2,1.7,3.2,7.4],
+  17:[1.00,15.7,16.2,1.10,0.40,1.2,3.8,2.3,1.7,3.4,8.0],
+  18:[1.20,16.5,17.0,1.30,0.50,1.5,3.9,2.4,2.0,4.5,17.0],
+  19:[1.20,17.5,18.0,1.30,0.50,1.5,3.9,2.5,2.0,4.8,17.0],
+  20:[1.20,18.5,19.0,1.30,0.50,1.5,4.0,2.6,2.0,5.0,17.1],
+  21:[1.20,19.5,20.0,1.30,0.50,1.5,4.1,2.7,2.0,5.3,16.8],
+  22:[1.20,20.5,21.0,1.30,0.50,1.5,4.2,2.8,2.0,5.6,16.9],
+  23:[1.20,21.5,22.0,1.30,0.50,1.5,4.3,2.9,2.0,5.9,16.6],
+  24:[1.20,22.2,22.9,1.30,0.55,1.7,4.4,3.0,2.0,6.7,16.1],
+  25:[1.20,23.2,23.9,1.30,0.55,1.7,4.4,3.0,2.0,7.0,16.2],
+  26:[1.20,24.2,24.9,1.30,0.55,1.7,4.5,3.1,2.0,7.3,16.1],
+  27:[1.20,24.9,25.6,1.30,0.70,2.1,4.6,3.1,2.0,9.6,16.4],
+  28:[1.50,25.9,26.6,1.60,0.70,2.1,4.7,3.2,2.0,10.0,32.1],
+  29:[1.50,26.9,27.6,1.60,0.70,2.1,4.8,3.4,2.0,10.3,31.8],
+  30:[1.50,27.9,28.6,1.60,0.70,2.1,5.0,3.5,2.0,10.7,32.1],
+  31:[1.50,28.6,29.3,1.60,0.85,2.6,5.1,3.5,2.5,13.4,31.5],
+  32:[1.50,29.6,30.3,1.60,0.85,2.6,5.2,3.6,2.5,13.8,31.2],
+  33:[1.50,30.5,31.3,1.60,0.85,2.6,5.2,3.7,2.5,14.3,31.6],
+  34:[1.50,31.5,32.3,1.60,0.85,2.6,5.4,3.8,2.5,14.7,31.3],
+  35:[1.50,32.2,33.0,1.60,1.00,3.0,5.6,3.9,2.5,17.8,30.8],
+  36:[1.75,33.2,34.0,1.85,1.00,3.0,5.6,4.0,2.5,18.3,49.4],
+  37:[1.75,34.2,35.0,1.85,1.00,3.0,5.7,4.1,2.5,18.8,50.0],
+  38:[1.75,35.2,36.0,1.85,1.00,3.0,5.8,4.2,2.5,19.3,49.5],
+  39:[1.75,36.0,37.0,1.85,1.00,3.0,5.9,4.3,2.5,19.9,49.8],
+  40:[1.75,36.5,37.5,1.85,1.25,3.8,6.0,4.4,2.5,25.3,51.0],
+  41:[1.75,37.5,38.5,1.85,1.25,3.8,6.2,4.5,2.5,26.0,50.1],
+  42:[1.75,38.5,39.5,1.85,1.25,3.8,6.5,4.5,2.5,26.7,50.0],
+  44:[1.75,40.5,41.5,1.85,1.25,3.8,6.6,4.6,2.5,28.0,48.5],
+  45:[1.75,41.5,42.5,1.85,1.25,3.8,6.7,4.7,2.5,28.6,49.0],
+  46:[1.75,42.5,43.5,1.85,1.25,3.8,6.7,4.8,2.5,29.4,48.9],
+  47:[1.75,43.5,44.5,1.85,1.25,3.8,6.8,4.9,2.5,30.0,49.5],
+  48:[1.75,44.5,45.5,1.85,1.25,3.8,6.9,5.0,2.5,30.7,49.4],
+  50:[2.00,45.8,47.0,2.15,1.50,4.5,6.9,5.1,2.5,38.0,73.3],
+  52:[2.00,47.8,49.0,2.15,1.50,4.5,7.0,5.2,2.5,39.7,73.1],
+  54:[2.00,49.8,51.0,2.15,1.50,4.5,7.1,5.3,2.5,41.2,71.2],
+  55:[2.00,50.8,52.0,2.15,1.50,4.5,7.2,5.4,2.5,42.0,71.4],
+  56:[2.00,51.8,53.0,2.15,1.50,4.5,7.3,5.5,2.5,42.8,70.8],
+  57:[2.00,52.8,54.0,2.15,1.50,4.5,7.3,5.5,2.5,43.7,70.9],
+  58:[2.00,53.8,55.0,2.15,1.50,4.5,7.3,5.6,2.5,44.3,71.1],
+  60:[2.00,55.8,57.0,2.15,1.50,4.5,7.4,5.8,2.5,46.0,69.2],
+  62:[2.00,57.8,59.0,2.15,1.50,4.5,7.5,6.0,2.5,47.5,69.3],
+  63:[2.00,58.8,60.0,2.15,1.50,4.5,7.6,6.2,2.5,48.3,70.2],
+  65:[2.50,60.8,62.0,2.65,1.50,4.5,7.8,6.3,3.0,49.8,135.0],
+  67:[2.50,62.5,64.0,2.65,1.50,4.5,7.9,6.4,3.0,51.3,136.0],
+  68:[2.50,63.5,65.0,2.65,1.50,4.5,8.0,6.5,3.0,52.2,135.0],
+  70:[2.50,65.5,67.0,2.65,1.50,4.5,8.1,6.6,3.0,53.8,134.0],
+  72:[2.50,67.5,69.0,2.65,1.50,4.5,8.2,6.8,3.0,55.3,131.0],
+  75:[2.50,70.5,72.0,2.65,1.50,4.5,8.4,7.0,3.0,57.6,130.0],
+  77:[2.50,72.5,74.0,2.65,1.50,4.5,8.5,7.2,3.0,59.3,131.0],
+  78:[2.50,73.5,75.0,2.65,1.50,4.5,8.6,7.3,3.0,60.0,131.0],
+  80:[2.50,74.5,76.5,2.65,1.75,5.3,8.6,7.4,3.0,71.6,128.0],
+  82:[2.50,76.5,78.5,2.65,1.75,5.3,8.7,7.6,3.0,73.5,128.0],
+  85:[3.00,79.5,81.5,3.15,1.75,5.3,8.7,7.8,3.5,76.2,215.0],
+  87:[3.00,81.5,83.5,3.15,1.75,5.3,8.8,7.9,3.5,78.2,222.0],
+  88:[3.00,82.5,84.5,3.15,1.75,5.3,8.8,8.0,3.5,79.0,221.0],
+  90:[3.00,84.5,86.5,3.15,1.75,5.3,8.8,8.2,3.5,80.0,217.0],
+  92:[3.00,86.5,88.5,3.15,1.75,5.3,9.0,8.4,3.5,82.0,217.0],
+  95:[3.00,89.5,91.5,3.15,1.75,5.3,9.4,8.6,3.5,85.0,212.0],
+  97:[3.00,91.5,93.5,3.15,1.75,5.3,9.4,8.8,3.5,87.0,211.0],
+  98:[3.00,91.5,94.5,3.15,1.75,5.3,9.4,8.8,3.5,88.0,208.0],
+  100:[3.00,94.5,96.5,3.15,1.75,5.3,9.6,9.0,3.5,90.0,206.0],
+  102:[4.00,95.0,98.0,4.15,2.00,6.0,9.7,9.2,3.5,104.0,482.0],
+  105:[4.00,98.0,101.0,4.15,2.00,6.0,9.9,9.3,3.5,107.0,471.0],
+  107:[4.00,100.0,103.0,4.15,2.00,6.0,10.0,9.5,3.5,110.0,465.0],
+  108:[4.00,100.0,104.0,4.15,2.00,6.0,10.0,9.5,3.5,111.0,459.0],
+  110:[4.00,103.0,106.0,4.15,2.00,6.0,10.1,9.6,3.5,113.0,457.0],
+  112:[4.00,105.0,108.0,4.15,2.00,6.0,10.3,9.7,3.5,115.0,451.0],
+  115:[4.00,108.0,111.0,4.15,2.00,6.0,10.6,9.8,3.5,118.0,438.0],
+  117:[4.00,110.0,113.0,4.15,2.00,6.0,10.8,10.0,3.5,120.0,437.0],
+  118:[4.00,110.0,114.0,4.15,2.00,6.0,10.8,10.0,3.5,121.0,430.0],
+  120:[4.00,113.0,116.0,4.15,2.00,6.0,11.0,10.2,3.5,123.0,424.0],
+  122:[4.00,115.0,118.0,4.15,2.00,6.0,11.2,10.3,4.0,125.0,418.0],
+  125:[4.00,118.0,121.0,4.15,2.00,6.0,11.4,10.4,4.0,128.0,411.0],
+  127:[4.00,120.0,123.0,4.15,2.00,6.0,11.4,10.5,4.0,130.0,407.0],
+  128:[4.00,120.0,124.0,4.15,2.00,6.0,11.4,10.5,4.0,131.0,401.0],
+  130:[4.00,123.0,126.0,4.15,2.00,6.0,11.6,10.7,4.0,134.0,395.0],
+  132:[4.00,125.0,128.0,4.15,2.00,6.0,11.7,10.8,4.0,136.0,396.0],
+  135:[4.00,128.0,131.0,4.15,2.00,6.0,11.8,11.0,4.0,139.0,389.0],
+  137:[4.00,130.0,133.0,4.15,2.00,6.0,11.9,11.0,4.0,141.0,380.0],
+  138:[4.00,130.0,134.0,4.15,2.00,6.0,11.9,11.0,4.0,142.0,381.0],
+  140:[4.00,133.0,136.0,4.15,2.00,6.0,12.0,11.2,4.0,144.0,376.0],
+  142:[4.00,135.0,138.0,4.15,2.00,6.0,12.1,11.3,4.0,146.0,370.0],
+  145:[4.00,138.0,141.0,4.15,2.00,6.0,12.2,11.5,4.0,149.0,367.0],
+  147:[4.00,140.0,143.0,4.15,2.00,6.0,12.3,11.6,4.0,151.0,361.0],
+  148:[4.00,140.0,144.0,4.15,2.00,6.0,12.3,11.6,4.0,152.0,357.0],
+  150:[4.00,142.0,145.0,4.15,2.50,7.5,13.0,11.8,4.0,193.0,357.0],
+  152:[4.00,143.0,147.0,4.15,2.50,7.5,13.0,11.9,4.0,195.0,356.0],
+  155:[4.00,146.0,150.0,4.15,2.50,7.5,13.0,12.0,4.0,199.0,352.0],
+  157:[4.00,148.0,152.0,4.15,2.50,7.5,13.1,12.0,4.0,202.0,352.0],
+  158:[4.00,148.0,153.0,4.15,2.50,7.5,13.1,12.0,4.0,203.0,353.0],
+  160:[4.00,151.0,155.0,4.15,2.50,7.5,13.3,12.2,4.0,206.0,349.0],
+  162:[4.00,152.5,157.0,4.15,2.50,7.5,13.3,12.3,4.0,208.0,348.0]
+};
+
+// DIN 472 – İç Segman (Internal Circlip) – d1: 8…160 mm
+const IC472 = {
+  8:[0.80,8.7,8.4,0.90,0.20,0.6,2.4,1.1,1.0,0.86,2.0],
+  9:[0.80,9.8,9.4,0.90,0.20,0.6,2.5,1.3,1.0,0.96,2.0],
+  10:[1.00,10.8,10.4,1.10,0.20,0.6,3.2,1.4,1.2,1.08,4.0],
+  11:[1.00,11.8,11.4,1.10,0.20,0.6,3.3,1.5,1.2,1.17,4.0],
+  12:[1.00,13.0,12.5,1.10,0.25,0.8,3.4,1.7,1.5,1.60,4.0],
+  13:[1.00,14.1,13.6,1.10,0.30,0.9,3.6,1.8,1.5,2.10,4.2],
+  14:[1.00,15.1,14.6,1.10,0.30,0.9,3.7,1.8,1.7,2.10,4.5],
+  15:[1.00,16.2,15.7,1.10,0.35,1.1,3.7,2.0,1.7,2.80,5.0],
+  16:[1.00,17.3,16.8,1.10,0.40,1.2,3.8,2.0,1.7,3.40,5.5],
+  17:[1.00,18.3,17.8,1.10,0.40,1.2,3.9,2.1,1.7,3.60,6.0],
+  18:[1.00,19.5,19.0,1.10,0.50,1.5,4.1,2.2,2.0,4.80,6.5],
+  19:[1.00,20.5,20.0,1.10,0.50,1.5,4.1,2.2,2.0,5.10,6.8],
+  20:[1.00,21.5,21.0,1.10,0.50,1.5,4.1,2.3,2.0,5.40,7.2],
+  21:[1.00,22.5,22.0,1.10,0.50,1.5,4.2,2.4,2.0,5.70,7.6],
+  22:[1.00,23.5,23.0,1.10,0.50,1.5,4.2,2.5,2.0,5.90,8.0],
+  23:[1.20,24.6,24.1,1.30,0.55,1.7,4.2,2.5,2.0,6.80,8.0],
+  24:[1.20,25.9,25.2,1.30,0.60,1.8,4.3,2.6,2.0,7.70,13.9],
+  25:[1.20,26.9,26.2,1.30,0.60,1.8,4.5,2.7,2.0,8.00,14.6],
+  26:[1.20,27.9,27.2,1.30,0.60,1.8,4.7,2.8,2.0,8.40,13.8],
+  27:[1.20,29.1,28.4,1.30,0.70,2.1,4.7,2.9,2.0,10.10,13.3],
+  28:[1.20,30.1,29.4,1.30,0.70,2.1,4.8,2.9,2.0,10.50,13.3],
+  29:[1.20,31.1,30.4,1.30,0.70,2.1,4.8,3.0,2.0,10.90,13.6],
+  30:[1.20,32.1,31.4,1.30,0.70,2.1,4.8,3.0,2.0,11.30,13.7],
+  31:[1.20,33.4,32.7,1.30,0.85,2.6,5.2,3.1,2.5,14.10,13.8],
+  32:[1.20,34.4,33.7,1.30,0.85,2.6,5.4,3.2,2.5,14.60,13.8],
+  33:[1.20,35.5,34.7,1.30,0.85,2.6,5.4,3.3,2.5,15.00,14.3],
+  34:[1.50,36.5,35.7,1.60,0.85,2.6,5.4,3.3,2.5,15.40,26.2],
+  35:[1.50,37.8,37.0,1.60,1.00,3.0,5.4,3.4,2.5,18.80,26.9],
+  36:[1.50,38.8,38.0,1.60,1.00,3.0,5.4,3.5,2.5,19.40,26.4],
+  37:[1.50,39.8,39.0,1.60,1.00,3.0,5.5,3.6,2.5,19.80,27.1],
+  38:[1.50,40.8,40.0,1.60,1.00,3.0,5.5,3.7,2.5,22.50,28.2],
+  39:[1.50,42.0,41.0,1.60,1.00,3.0,5.6,3.8,2.5,26.00,28.8],
+  40:[1.75,43.5,42.5,1.85,1.25,3.8,5.8,3.9,2.5,27.00,44.6],
+  41:[1.75,44.5,43.5,1.85,1.25,3.8,5.9,4.0,2.5,27.60,45.0],
+  42:[1.75,45.5,44.5,1.85,1.25,3.8,5.9,4.1,2.5,28.40,44.7],
+  43:[1.75,46.5,45.5,1.85,1.25,3.8,5.9,4.2,2.5,28.80,44.5],
+  44:[1.75,47.5,46.5,1.85,1.25,3.8,6.0,4.2,2.5,29.50,43.3],
+  45:[1.75,48.5,47.5,1.85,1.25,3.8,6.2,4.3,2.5,30.20,43.1],
+  46:[1.75,49.5,48.5,1.85,1.25,3.8,6.3,4.4,2.5,30.80,42.9],
+  47:[1.75,50.5,49.5,1.85,1.25,3.8,6.4,4.4,2.5,31.40,43.5],
+  48:[2.00,51.5,50.5,1.85,1.25,3.8,6.4,4.5,2.5,32.00,43.2],
+  50:[2.00,54.2,53.0,2.15,1.50,4.5,6.5,4.6,2.5,40.50,60.8],
+  52:[2.00,56.2,55.0,2.15,1.50,4.5,6.7,4.7,2.5,42.00,60.2],
+  53:[2.00,57.2,56.0,2.15,1.50,4.5,6.7,4.9,2.5,42.90,60.7],
+  54:[2.00,58.2,57.0,2.15,1.50,4.5,6.7,5.0,2.5,43.60,60.4],
+  55:[2.00,59.2,58.0,2.15,1.50,4.5,6.8,5.0,2.5,44.40,60.3],
+  56:[2.00,60.2,59.0,2.15,1.50,4.5,6.8,5.1,2.5,45.20,60.3],
+  57:[2.00,61.2,60.0,2.15,1.50,4.5,6.8,5.1,2.5,46.00,60.8],
+  58:[2.00,62.2,61.0,2.15,1.50,4.5,6.9,5.2,2.5,46.70,60.8],
+  60:[2.00,64.2,63.0,2.15,1.50,4.5,7.3,5.4,2.5,48.30,61.0],
+  62:[2.00,66.2,65.0,2.15,1.50,4.5,7.3,5.5,2.5,49.80,60.9],
+  64:[2.00,68.2,67.0,2.15,1.50,4.5,7.4,5.7,2.5,51.40,60.6],
+  65:[2.50,69.2,68.0,2.65,1.50,4.5,7.6,5.8,3.0,51.80,121.0],
+  67:[2.50,71.5,70.0,2.65,1.50,4.5,7.7,6.0,3.0,53.80,121.0],
+  68:[2.50,72.5,71.0,2.65,1.50,4.5,7.8,6.1,3.0,56.20,119.0],
+  70:[2.50,74.5,73.0,2.65,1.50,4.5,7.8,6.2,3.0,56.20,119.0],
+  72:[2.50,76.5,75.0,2.65,1.50,4.5,7.8,6.4,3.0,58.00,119.0],
+  75:[2.50,79.5,78.0,2.65,1.50,4.5,7.8,6.6,3.0,60.00,118.0],
+  77:[2.50,82.5,80.0,2.65,1.50,4.5,8.5,6.8,3.0,61.60,121.0],
+  78:[2.50,82.5,81.0,2.65,1.50,4.5,8.5,6.8,3.0,62.30,122.0],
+  80:[2.50,85.5,83.5,2.65,1.75,5.3,8.5,7.0,3.0,74.60,120.0],
+  82:[2.50,87.5,85.5,2.65,1.75,5.3,8.5,7.0,3.0,76.60,119.0],
+  85:[3.00,90.5,88.5,3.15,1.75,5.3,8.6,7.2,3.5,79.50,201.0],
+  87:[3.00,93.5,90.5,3.15,1.75,5.3,8.6,7.4,3.5,81.30,204.0],
+  88:[3.00,93.5,91.5,3.15,1.75,5.3,8.6,7.4,3.5,82.00,209.0],
+  90:[3.00,95.5,93.5,3.15,1.75,5.3,8.6,7.6,3.5,84.00,199.0],
+  92:[3.00,97.5,95.5,3.15,1.75,5.3,8.7,7.8,3.5,85.00,201.0],
+  95:[3.00,100.5,98.5,3.15,1.75,5.3,8.8,8.1,3.5,88.00,195.0],
+  97:[3.00,103.5,100.5,3.15,1.75,5.3,9.0,8.3,3.5,90.00,193.0],
+  98:[3.00,103.5,101.5,3.15,1.75,5.3,9.0,8.3,3.5,91.00,191.0],
+  100:[3.00,105.5,103.5,3.15,1.75,5.3,9.2,8.4,3.5,93.00,118.0],
+  102:[4.00,108.0,106.0,4.15,2.00,6.0,9.5,8.5,3.5,108.00,439.0],
+  105:[4.00,112.0,109.0,4.15,2.00,6.0,9.5,8.7,3.5,112.00,436.0],
+  108:[4.00,115.0,112.0,4.15,2.00,6.0,9.5,8.9,3.5,115.00,419.0],
+  110:[4.00,117.0,114.0,4.15,2.00,6.0,10.4,9.0,3.5,117.00,415.0],
+  112:[4.00,119.0,116.0,4.15,2.00,6.0,10.5,9.1,3.5,119.00,418.0],
+  115:[4.00,122.0,119.0,4.15,2.00,6.0,10.5,9.3,3.5,122.00,409.0],
+  118:[4.00,125.0,122.0,4.15,2.00,6.0,10.7,9.6,3.5,125.00,394.0],
+  120:[4.00,127.0,124.0,4.15,2.00,6.0,11.0,9.7,3.5,127.00,396.0],
+  122:[4.00,129.0,126.0,4.15,2.00,6.0,11.0,9.8,4.0,129.00,399.0],
+  125:[4.00,132.0,129.0,4.15,2.00,6.0,11.0,10.0,4.0,132.00,385.0],
+  128:[4.00,135.0,132.0,4.15,2.00,6.0,11.0,10.2,4.0,136.00,378.0],
+  130:[4.00,137.0,134.0,4.15,2.00,6.0,11.0,10.2,4.0,138.00,374.0],
+  135:[4.00,142.0,139.0,4.15,2.00,6.0,11.2,10.5,4.0,143.00,358.0],
+  140:[4.00,147.0,144.0,4.15,2.00,6.0,11.2,10.7,4.0,148.00,350.0],
+  145:[4.00,152.0,149.0,4.15,2.00,6.0,11.4,10.9,4.0,153.00,336.0],
+  150:[4.00,158.0,155.0,4.15,2.50,7.5,12.0,11.2,4.0,191.00,326.0],
+  155:[4.00,164.0,160.0,4.15,2.50,7.5,12.0,11.4,4.0,206.00,324.0],
+  160:[4.00,169.0,165.0,4.15,2.50,7.5,13.0,11.6,4.0,212.00,321.0]
+};
+
+// DIN 6885-1 – Paralel Kama & Kamalık
+// [dMin_exclusive, dMax_inclusive, b, h, t1, t2, rMin, rMax]
+const KAMA6885 = [
+  [0,  8,  2,  2,  1.2, 1.0, 0.08, 0.16],
+  [8,  10, 3,  3,  1.8, 1.4, 0.08, 0.16],
+  [10, 12, 4,  4,  2.5, 1.8, 0.08, 0.16],
+  [12, 17, 5,  5,  3.0, 2.3, 0.16, 0.25],
+  [17, 22, 6,  6,  3.5, 2.8, 0.16, 0.25],
+  [22, 30, 8,  7,  4.0, 3.3, 0.16, 0.25],
+  [30, 38, 10, 8,  5.0, 3.3, 0.25, 0.40],
+  [38, 44, 12, 8,  5.0, 3.3, 0.25, 0.40],
+  [44, 50, 14, 9,  5.5, 3.8, 0.25, 0.40],
+  [50, 58, 16, 10, 6.0, 4.3, 0.40, 0.60],
+  [58, 65, 18, 11, 7.0, 4.4, 0.40, 0.60],
+  [65, 75, 20, 12, 7.5, 4.9, 0.40, 0.60],
+  [75, 85, 22, 14, 9.0, 5.4, 0.60, 0.80],
+  [85, 95, 25, 14, 9.0, 5.4, 0.60, 0.80],
+  [95,110, 28, 16,10.0, 6.4, 0.60, 0.80],
+  [110,130,32, 18,11.0, 7.4, 0.60, 0.80],
+  [130,150,36, 20,12.0, 8.4, 0.60, 0.80],
+  [150,170,40, 22,13.0, 9.4, 1.00, 1.20],
+  [170,200,45, 25,15.0,10.4, 1.00, 1.20],
+  [200,230,50, 28,17.0,11.4, 1.00, 1.20]
+];
+
+/* ─────────────────────────────────────────────────────────
+   STATE
+───────────────────────────────────────────────────────── */
+let mode = 'dis'; // 'dis' | 'ic' | 'kama'
+let currentD1 = 30;
+let currentData = null;
+let currentStd = null;
+
+/* ─────────────────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────────────────── */
+function fmt(v, dec=2){ return (typeof v==='number') ? v.toFixed(dec) : '—'; }
+
+function findNearestSegman(table, d) {
+  const keys = Object.keys(table).map(Number).sort((a,b)=>a-b);
+  let best = keys[0], diff = Infinity;
+  for (const k of keys) {
+    const d2 = Math.abs(k - d);
+    if (d2 < diff) { diff = d2; best = k; }
+  }
+  return best;
+}
+
+function findKama(d) {
+  for (const row of KAMA6885) {
+    if (d > row[0] && d <= row[1]) return row;
+  }
+  return KAMA6885[KAMA6885.length-1];
+}
+
+function modeColor(m) {
+  return m==='dis'?'orange': m==='ic'?'teal':'purple';
+}
+
+/* ─────────────────────────────────────────────────────────
+   SVG DRAWING
+───────────────────────────────────────────────────────── */
+function makeLine(x1,y1,x2,y2,stroke='#60a5fa',sw=1,dash=''){
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${sw}" ${dash?`stroke-dasharray="${dash}"`:''} vector-effect="non-scaling-stroke"/>`;
+}
+function makeText(x,y,txt,fill,fs=11,anch='middle',fw='400',ff="'JetBrains Mono',monospace"){
+  return `<text x="${x}" y="${y}" fill="${fill}" font-size="${fs}" text-anchor="${anch}" font-weight="${fw}" font-family="${ff}">${txt}</text>`;
+}
+function dimLine(x1,y1,x2,y2,label,lx,ly,color='#60a5fa',fs=10){
+  const mS=`url(#arrs)`, mE=`url(#arr)`;
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1" marker-start="${mS}" marker-end="${mE}" vector-effect="non-scaling-stroke"/>
+${makeText(lx,ly,label,color,fs)}`;
+}
+
+function drawDisSvg(d1, data) {
+  // data = [s,d3,d2,m,t,n,a,b,d5,Fn,Fr]
+  const [s,d3,d2,m,t,n,a,b,d5] = data;
+  // Schematic side cross-section along shaft axis (exaggerated groove, not to scale)
+  const CY=100, R=68, GD=16; // R=shaft half-height px, GD=groove depth px (exaggerated)
+  const GX=88, GW=44;        // groove x-start, width (exaggerated)
+  const shaftFill='rgba(249,115,22,0.15)', shaftStroke='#f97316';
+  const segFill='rgba(0,212,170,0.45)', segStroke='#00d4aa';
+  const spx=Math.max(5,Math.min(11,s*3.5)); // circlip thickness in px
+
+  let svg='';
+  // ── Shaft full rectangle ─────────────────────────────────────────
+  svg+=`<rect x="50" y="${CY-R}" width="348" height="${R*2}" fill="${shaftFill}" stroke="${shaftStroke}" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`;
+  // Groove cut top (from top shaft surface, depth=GD)
+  svg+=`<rect x="${GX}" y="${CY-R}" width="${GW}" height="${GD}" fill="#06060f" stroke="${shaftStroke}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+  // Groove cut bottom
+  svg+=`<rect x="${GX}" y="${CY+R-GD}" width="${GW}" height="${GD}" fill="#06060f" stroke="${shaftStroke}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+  // Groove floor lines (d2 level)
+  svg+=makeLine(GX,CY-R+GD, GX+GW,CY-R+GD,'#f97316',1.5);
+  svg+=makeLine(GX,CY+R-GD, GX+GW,CY+R-GD,'#f97316',1.5);
+  // ── Circlip cross-section (sits at groove, teal) ─────────────────
+  svg+=`<rect x="${GX}" y="${CY-R}" width="${spx}" height="${GD}" fill="${segFill}" stroke="${segStroke}" stroke-width="1.5" rx="1" vector-effect="non-scaling-stroke"/>`;
+  svg+=`<rect x="${GX}" y="${CY+R-GD}" width="${spx}" height="${GD}" fill="${segFill}" stroke="${segStroke}" stroke-width="1.5" rx="1" vector-effect="non-scaling-stroke"/>`;
+  // Centerline
+  svg+=makeLine(30,CY,420,CY,'#52527a',0.8,'8,4');
+
+  // ── Boyut çizgileri — sadece sembol, değer yok ──────────────────
+  // d₁ — sol kenar (tam mil çapı)
+  svg+=`<line x1="22" y1="${CY-R}" x2="22" y2="${CY+R}" stroke="#f97316" stroke-width="1" marker-start="url(#arrsO)" marker-end="url(#arrO)" vector-effect="non-scaling-stroke"/>`;
+  svg+=makeLine(22,CY-R, 56,CY-R,'#f97316',0.5);
+  svg+=makeLine(22,CY+R, 56,CY+R,'#f97316',0.5);
+  svg+=makeText(10,CY,'d₁','#f97316',14,'middle','600');
+
+  // d₂ — sağ kenar (kanal çapı)
+  svg+=`<line x1="408" y1="${CY-R+GD}" x2="408" y2="${CY+R-GD}" stroke="#60a5fa" stroke-width="1" marker-start="url(#arrs)" marker-end="url(#arr)" vector-effect="non-scaling-stroke"/>`;
+  svg+=makeLine(408,CY-R+GD, GX+GW+2,CY-R+GD,'#60a5fa',0.5);
+  svg+=makeLine(408,CY+R-GD, GX+GW+2,CY+R-GD,'#60a5fa',0.5);
+  svg+=makeText(426,CY,'d₂','#60a5fa',14,'middle','600');
+
+  // m — kanal genişliği (üst)
+  svg+=`<line x1="${GX}" y1="14" x2="${GX+GW}" y2="14" stroke="#60a5fa" stroke-width="1" marker-start="url(#arrs)" marker-end="url(#arr)" vector-effect="non-scaling-stroke"/>`;
+  svg+=makeLine(GX,14, GX,CY-R-2,'#60a5fa',0.5);
+  svg+=makeLine(GX+GW,14, GX+GW,CY-R-2,'#60a5fa',0.5);
+  svg+=makeText(GX+GW/2,8,'m','#60a5fa',14,'middle','600');
+
+  // n — mil yüzeyinden kanala mesafe (üst)
+  svg+=`<line x1="50" y1="26" x2="${GX}" y2="26" stroke="#60a5fa" stroke-width="1" marker-start="url(#arrs)" marker-end="url(#arr)" vector-effect="non-scaling-stroke"/>`;
+  svg+=makeLine(50,26, 50,CY-R-2,'#60a5fa',0.5);
+  svg+=makeText((50+GX)/2,20,'n','#60a5fa',14,'middle','600');
+
+  // s — segman kalınlığı (segmanın üstüne) dış segman
+  svg+=makeText(GX+spx/2, CY-R+50, 's', '#00d4aa', 14, 'middle', '600');
+  svg+=makeLine(GX+spx/2, CY-R+50, GX+spx/2, CY-R, '#00d4aa', 0.8);
+
+  return svg;
+}
+
+function drawIcSvg(d1, data) {
+  // Internal circlip: bore with groove, segman expands into groove
+  const [s,d3,d2,m,t,n,a,b,d5] = data;
+  const CY=100, BI=58, WT=20, GD=14; // bore inner half-height, wall thickness, groove depth
+  const GX=88, GW=44;
+  const boreFill='rgba(251,191,36,0.20)', boreStroke='#fbbf24';  // delik duvarı → amber
+  const segFill='rgba(0,212,170,0.45)',   segStroke='#00d4aa';    // segman → teal
+  const spx=Math.max(5,Math.min(11,s*3.5)); // segman kalınlığı px
+
+  let svg='';
+  // ── Bore walls (amber) ───────────────────────────────────────────
+  svg+=`<rect x="50" y="${CY-BI-WT}" width="348" height="${WT}" fill="${boreFill}" stroke="${boreStroke}" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`;
+  svg+=`<rect x="50" y="${CY+BI}" width="348" height="${WT}" fill="${boreFill}" stroke="${boreStroke}" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`;
+
+  // Groove expansion (amber, lighter)
+  svg+=`<rect x="${GX}" y="${CY-BI-GD}" width="${GW}" height="${GD}" fill="rgba(251,191,36,0.07)" stroke="${boreStroke}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+  svg+=`<rect x="${GX}" y="${CY+BI}" width="${GW}" height="${GD}" fill="rgba(251,191,36,0.07)" stroke="${boreStroke}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+
+  // Bore inner surface (d1) — amber
+  svg+=makeLine(50,CY-BI, 420,CY-BI,boreStroke,1.5);
+  svg+=makeLine(50,CY+BI, 420,CY+BI,boreStroke,1.5);
+  // Groove outer edges (d2) — amber
+  svg+=makeLine(GX,CY-BI-GD, GX+GW,CY-BI-GD,boreStroke,1.5);
+  svg+=makeLine(GX,CY+BI+GD, GX+GW,CY+BI+GD,boreStroke,1.5);
+
+  // Circlip cross-section (teal — kontrast sağlanıyor)
+  svg+=`<rect x="${GX}" y="${CY-BI-GD}" width="${spx}" height="${GD}" fill="${segFill}" stroke="${segStroke}" stroke-width="1.5" rx="1" vector-effect="non-scaling-stroke"/>`;
+  svg+=`<rect x="${GX}" y="${CY+BI}" width="${spx}" height="${GD}" fill="${segFill}" stroke="${segStroke}" stroke-width="1.5" rx="1" vector-effect="non-scaling-stroke"/>`;
+
+  // Centerline
+  svg+=makeLine(30,CY,420,CY,'#52527a',0.8,'8,4');
+
+  // ── Boyut çizgileri — sadece sembol, değer yok ──────────────────
+  // d₁ — sol kenar (delik iç çapı)
+  svg+=`<line x1="22" y1="${CY-BI}" x2="22" y2="${CY+BI}" stroke="#fbbf24" stroke-width="1" marker-start="url(#arrs)" marker-end="url(#arr)" vector-effect="non-scaling-stroke"/>`;
+  svg+=makeLine(22,CY-BI, 56,CY-BI,'#fbbf24',0.5);
+  svg+=makeLine(22,CY+BI, 56,CY+BI,'#fbbf24',0.5);
+  svg+=makeText(10,CY,'d₁','#fbbf24',14,'middle','600');
+
+  // d₂ — sağ kenar (kanal çapı)
+  svg+=`<line x1="408" y1="${CY-BI-GD}" x2="408" y2="${CY+BI+GD}" stroke="#60a5fa" stroke-width="1" marker-start="url(#arrs)" marker-end="url(#arr)" vector-effect="non-scaling-stroke"/>`;
+  svg+=makeLine(408,CY-BI-GD, GX+GW+2,CY-BI-GD,'#60a5fa',0.5);
+  svg+=makeLine(408,CY+BI+GD, GX+GW+2,CY+BI+GD,'#60a5fa',0.5);
+  svg+=makeText(426,CY,'d₂','#60a5fa',14,'middle','600');
+
+  // m — kanal genişliği (üst)
+  svg+=`<line x1="${GX}" y1="12" x2="${GX+GW}" y2="12" stroke="#60a5fa" stroke-width="1" marker-start="url(#arrs)" marker-end="url(#arr)" vector-effect="non-scaling-stroke"/>`;
+  svg+=makeLine(GX,12, GX,CY-BI-WT-3,'#60a5fa',0.5);
+  svg+=makeLine(GX+GW,12, GX+GW,CY-BI-WT-3,'#60a5fa',0.5);
+  svg+=makeText(GX+GW/2,6,'m','#60a5fa',14,'middle','600');
+
+  // n — delik yüzeyinden kanala mesafe (üst)
+  svg+=`<line x1="50" y1="24" x2="${GX}" y2="24" stroke="#60a5fa" stroke-width="1" marker-start="url(#arrs)" marker-end="url(#arr)" vector-effect="non-scaling-stroke"/>`;
+  svg+=makeLine(50,24, 50,CY-BI-WT-3,'#60a5fa',0.5);
+  svg+=makeText((50+GX)/2,18,'n','#60a5fa',14,'middle','600');
+
+  // s — segman kalınlığı (segmanın üstüne ok)
+// Metni (s) aşağıya indiriyoruz (daha az çıkararak)
+  svg+=makeText(GX+spx/2, CY-BI-GD+42, 's', '#00d4aa', 14, 'middle', '600');
+
+// Çizgiyi metnin üstüne alıyoruz (daha çok çıkararak yukarı taşıyoruz)
+  svg+=makeLine(GX+spx/2, CY-BI-GD+35, GX+spx/2, CY-BI-GD, '#00d4aa', 0.8);
+
+  return svg;
+}
+
+function drawKamaSvg(d1, row) {
+  const [,, b, h, t1, t2] = row;
+  const CX=110, CY=100;
+  // Scale: radius in px
+  const R = Math.min(75, Math.max(30, d1 * 1.1));
+  const bpx = b/d1 * R*2 * 0.9; // key width in px (proportional)
+  const t1px = t1/d1 * R*2 * 0.9; // shaft depth in px
+  const hpx = (h/d1) * R*2 * 0.9; // key height in px
+
+  const shaftFill='rgba(167,139,250,0.15)', shaftStroke='#a78bfa';
+  const keyFill='rgba(167,139,250,0.45)', keyStroke='#a78bfa';
+
+  let svg='';
+
+  // Left panel: Cross-section
+  // Shaft circle
+  svg+=`<circle cx="${CX}" cy="${CY}" r="${R}" fill="${shaftFill}" stroke="${shaftStroke}" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`;
+
+  // Keyway cutout (rectangle at top of shaft)
+  const kx = CX - bpx/2;
+  const ky_top = CY - R - t1px;
+  svg+=`<rect x="${kx}" y="${ky_top}" width="${bpx}" height="${R+t1px}" fill="#06060f" stroke="${shaftStroke}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+
+  // Key (sits in keyway, protrudes above shaft)
+  const keyH = Math.min(hpx, t1px + 14); // portion above shaft surface
+  svg+=`<rect x="${kx}" y="${ky_top}" width="${bpx}" height="${keyH}" fill="${keyFill}" stroke="${keyStroke}" stroke-width="1.5" rx="1" vector-effect="non-scaling-stroke"/>`;
+
+  // Center dot
+  svg+=`<circle cx="${CX}" cy="${CY}" r="2.5" fill="${shaftStroke}"/>`;
+  // Centerlines
+  svg+=makeLine(CX-R-16, CY, CX+R+16, CY, '#52527a', 0.7, '6,3');
+  svg+=makeLine(CX, CY-R-12, CX, CY+R+12, '#52527a', 0.7, '6,3');
+
+  // Dimension: d1 (shaft diameter)
+  svg+=dimLine(CX-R-14, CY, CX+R+14, CY, `∅${d1}`, CX, CY+R+22, '#a78bfa', 20);
+
+  // Dimension: b (keyway width)
+  svg+=dimLine(kx, ky_top-8, kx+bpx, ky_top-8, `b=${b}`, CX, ky_top-13, '#60a5fa', 20);
+
+  // Dimension: t1 (shaft keyway depth)
+  const t1_top = CY-R;
+  const t1_bot = t1_top+t1px;
+  svg+=dimLine(CX+bpx/2+12, t1_top, CX+bpx/2+12, t1_bot, `t₁=${t1}`, CX+bpx/2+26, (t1_top+t1_bot)/2, '#60a5fa', 20);
+
+  // Right panel: Side view (key dimensions)
+  const KX=280, KY=65, KW=80, KH=Math.min(70, hpx+15);
+  svg+=`<rect x="${KX}" y="${KY}" width="${KW}" height="${KH}" fill="${keyFill}" stroke="${keyStroke}" stroke-width="1.5" rx="2" vector-effect="non-scaling-stroke"/>`;
+
+  // Hub outline (dashed)
+  svg+=`<rect x="${KX-12}" y="${KY+KH-Math.min(18,t2*3+4)}" width="${KW+24}" height="26" fill="rgba(167,139,250,0.06)" stroke="#52527a" stroke-width="1" stroke-dasharray="5,3" vector-effect="non-scaling-stroke"/>`;
+
+  // b dimension
+  svg+=dimLine(KX, KY-10, KX+KW, KY-10, `b=${b}`, KX+KW/2, KY-15, '#60a5fa', 20);
+  // h dimension
+  svg+=dimLine(KX+KW+10, KY, KX+KW+10, KY+KH, `h=${h}`, KX+KW+28, KY+KH/2, '#60a5fa', 20);
+  // t2
+  svg+=makeText(KX+KW/2, KY+KH+28, `t₂=${t2}`, '#a78bfa', 20, 'middle');
+  svg+=makeText(KX+KW/2, KY+KH+50, 'göbek kanalı', '#52527a', 18, 'middle');
+
+  // Labels
+  svg+=makeText(KX+KW/2, KY+KH/2+4, 'KAMA', '#a78bfa', 22, 'middle', '600', "'Barlow Condensed',sans-serif");
+  svg+=makeText(CX, CY-R-28, 'Enine Kesit', '#52527a', 20, 'middle');
+  svg+=makeText(KX+KW/2, KY-28, 'Kama Görünüşü', '#52527a', 20, 'middle');
+
+  return svg;
+}
+
+/* ─────────────────────────────────────────────────────────
+   UI UPDATE
+───────────────────────────────────────────────────────── */
+function update() {
+  const d1 = parseFloat(document.getElementById('milInput').value) || 30;
+  currentD1 = d1;
+
+  const accentColor = modeColor(mode);
+
+  // Mode badge
+  const mb = document.getElementById('modeBadge');
+  mb.className = `mode-badge ${accentColor}`;
+  mb.textContent = mode==='dis'?'DIN 471 — Dış Segman': mode==='ic'?'DIN 472 — İç Segman':'DIN 6885 — Paralel Kama';
+
+  // Kama section visibility
+  document.getElementById('kamaSec').style.display = mode==='kama'?'flex':'none';
+  document.getElementById('loadRow').style.display = mode==='kama'?'none':'flex';
+  document.getElementById('calcResults').style.display = 'none';
+
+  // Mil label
+  document.getElementById('milLbl').textContent = mode==='ic' ? 'Delik Çapı (d₁)' : 'Mil Çapı (d₁)';
+
+  // inp-wrap focus color
+  const fc = mode==='ic'?'teal': mode==='kama'?'purple':'';
+  document.getElementById('milInpWrap').className = `inp-wrap ${fc}`;
+
+  // SVG card color
+  const svgCard = document.getElementById('svgCard');
+  svgCard.className = `svg-card ${mode==='dis'?'':'(mode==="ic"?"teal":"purple")'}`;
+  svgCard.className = 'svg-card ' + (mode==='ic'?'teal': mode==='kama'?'purple':'');
+
+  const svgTitle = document.getElementById('svgTitle');
+  svgTitle.className = 'svg-title ' + (mode==='ic'?'teal': mode==='kama'?'purple':'');
+
+  let svgHTML='', d1Std=d1;
+
+  if (mode==='dis') {
+    d1Std = findNearestSegman(DIS471, d1);
+    currentData = DIS471[d1Std];
+    currentStd = d1Std;
+    svgTitle.textContent = 'Dış Segman — Kanal Kesiti (DIN 471)';
+    svgHTML = drawDisSvg(d1Std, currentData);
+    updateSegDims(currentData, d1, d1Std, accentColor);
+    updateLoadBars(currentData);
+    updateRefTable('dis', d1Std);
+  } else if (mode==='ic') {
+    d1Std = findNearestSegman(IC472, d1);
+    currentData = IC472[d1Std];
+    currentStd = d1Std;
+    svgTitle.textContent = 'İç Segman — Kanal Kesiti (DIN 472)';
+    svgHTML = drawIcSvg(d1Std, currentData);
+    updateSegDims(currentData, d1, d1Std, accentColor);
+    updateLoadBars(currentData);
+    updateRefTable('ic', d1Std);
+  } else {
+    const row = findKama(d1);
+    currentData = row;
+    currentStd = d1;
+    svgTitle.textContent = 'Paralel Kama — Kesit (DIN 6885)';
+    svgHTML = drawKamaSvg(d1, row);
+    updateKamaDims(row, d1, accentColor);
+    updateRefTable('kama', d1);
+  }
+
+  document.getElementById('svgSub').textContent = `∅${d1} mm`;
+  document.getElementById('svgContent').innerHTML = svgHTML;
+
+  // Nearest notice
+  const nb = document.getElementById('nearestBar');
+  const nv = document.getElementById('nearestVal');
+  const em = document.getElementById('exactMatch');
+  if (mode==='kama') {
+    const [dMin, dMax] = findKama(d1);
+    nv.className = `ns ${accentColor}`;
+    nv.textContent = `d = ${dMin+1}…${dMax} mm aralığı`;
+    em.style.display='none';
+    nb.style.display='flex';
+  } else {
+    nv.className = `ns ${accentColor}`;
+    nv.textContent = `∅${d1Std} mm`;
+    const exact = d1Std === d1;
+    em.style.display = exact ? 'inline':'none';
+    if (!exact) nv.textContent += ` (Δ${Math.abs(d1-d1Std).toFixed(0)}mm)`;
+    nb.style.display='flex';
+  }
+}
+
+function updateSegDims(data, d1, d1Std, ac) {
+  const [s,d3,d2,m,t,n,a,b,d5,Fn,Fr] = data;
+  const grid = document.getElementById('dimsGrid');
+  document.getElementById('dimsTitle').textContent = `${ac==='teal'?'İç':'Dış'} Segman Ölçüleri — ∅${d1Std} mm`;
+
+  const boxes = [
+    {v:`${d1Std}`, l:`d₁ — Mil / Delik Çapı`, cls:'orange'},
+    {v:`${d2}`, l:`d₂ — Kanal Çapı (mm)`, cls:'blue'},
+    {v:`${d3}`, l:`d₃ — Serbest Çap (mm)`, cls:''},
+    {v:`${s}`, l:`s — Kalınlık (mm)`, cls:''},
+    {v:`${m}`, l:`m — Kanal Genişliği (mm)`, cls:''},
+    {v:`${t}`, l:`t — Kanal Derinliği (mm)`, cls:''},
+    {v:`${n}`, l:`n — Kenar Mesafesi (mm)`, cls:''},
+    {v:`${a}`, l:`a — Lug Yüksekliği (mm)`, cls:''},
+    {v:`${b}`, l:`b — Halka Genişliği (mm)`, cls:''},
+    {v:`${d5}`, l:`d₅ — Pens Deliği (mm)`, cls:''},
+    {v:`${Fn} kN`, l:`Fn — Kanal Kapasitesi`, cls:'yellow'},
+    {v:`${Fr} kN`, l:`Fr — Segman Kapasitesi`, cls:ac},
+  ];
+
+  grid.innerHTML = boxes.map(bx =>
+    `<div class="dim-box">
+      <div class="dim-val ${bx.cls}">${bx.v}</div>
+      <div class="dim-lbl">${bx.l}</div>
+    </div>`
+  ).join('');
+}
+
+function updateKamaDims(row, d1, ac) {
+  const [dMin, dMax, b, h, t1, t2, rMin, rMax] = row;
+  const grid = document.getElementById('dimsGrid');
+  document.getElementById('dimsTitle').textContent = `Kama Ölçüleri — DIN 6885 (d=${dMin+1}…${dMax}mm)`;
+
+  const boxes = [
+    {v:`${d1}`, l:`d₁ — Mil Çapı (mm)`, cls:'orange'},
+    {v:`${b}`, l:`b — Kama Genişliği (mm)`, cls:'purple'},
+    {v:`${h}`, l:`h — Kama Yüksekliği (mm)`, cls:'purple'},
+    {v:`${t1}`, l:`t₁ — Mil Kamalık Derinliği (mm)`, cls:'blue'},
+    {v:`${t2}`, l:`t₂ — Göbek Kamalık Derinliği (mm)`, cls:'blue'},
+    {v:`${b}×${h}`, l:`b × h — Kesit`, cls:'purple'},
+    {v:`${rMin}–${rMax}`, l:`r — Köşe Yarıçapı (mm)`, cls:''},
+    {v:`P9`, l:`Mil Toleransı`, cls:''},
+    {v:`Js9`, l:`Göbek Toleransı (Normal)`, cls:''},
+    {v:`N9`, l:`Göbek Toleransı (Sıkı)`, cls:''},
+    {v:`${(t1+t2).toFixed(1)}`, l:`t₁+t₂ (kontrol: ≈h)`, cls:''},
+    {v:`≥${(2*d1).toFixed(0)}`, l:`L_min Önerisi (mm)`, cls:'yellow'},
+  ];
+
+  grid.innerHTML = boxes.map(bx =>
+    `<div class="dim-box">
+      <div class="dim-val ${bx.cls}">${bx.v}</div>
+      <div class="dim-lbl">${bx.l}</div>
+    </div>`
+  ).join('');
+}
+
+function updateLoadBars(data) {
+  const [,,,,,,,,,Fn,Fr] = data;
+  const maxF = Math.max(Fn, Fr, 1);
+  document.getElementById('fnVal').textContent = `${Fn} kN`;
+  document.getElementById('frVal').textContent = `${Fr} kN`;
+  document.getElementById('fnBar').style.width = Math.min(100, Fn/maxF*100) + '%';
+  document.getElementById('frBar').style.width = Math.min(100, Fr/maxF*100) + '%';
+}
+
+/* ─────────────────────────────────────────────────────────
+   REFERENCE TABLE
+───────────────────────────────────────────────────────── */
+function updateRefTable(m, selectedD1) {
+  const thead = document.getElementById('refThead');
+  const tbody = document.getElementById('refTbody');
+  const refTitle = document.getElementById('refTitle');
+  const refStd = document.getElementById('refStd');
+
+  const ac = modeColor(m);
+  refStd.className = `ref-std ${ac==='orange'?'':ac}`;
+
+  if (m==='dis') {
+    refTitle.textContent = 'Referans Tablosu';
+    refStd.textContent = 'DIN 471';
+    thead.innerHTML = `<tr>
+      <th>d₁</th><th>s</th><th>d₂</th><th>m</th><th>t</th><th>n</th><th>Fr</th>
+    </tr>`;
+    tbody.innerHTML = Object.entries(DIS471).map(([d1,v]) => {
+      const sel = parseInt(d1)===selectedD1;
+      return `<tr class="${sel?'sel':''}" onclick="clickRow(${d1})">
+        <td class="${sel?'hl':''}">${d1}</td>
+        <td>${v[0]}</td><td>${v[2]}</td><td>${v[3]}</td><td>${v[4]}</td><td>${v[5]}</td>
+        <td>${v[10]}kN</td>
+      </tr>`;
+    }).join('');
+  } else if (m==='ic') {
+    refTitle.textContent = 'Referans Tablosu';
+    refStd.textContent = 'DIN 472';
+    thead.innerHTML = `<tr>
+      <th>d₁</th><th>s</th><th>d₂</th><th>m</th><th>t</th><th>n</th><th>Fr</th>
+    </tr>`;
+    tbody.innerHTML = Object.entries(IC472).map(([d1,v]) => {
+      const sel = parseInt(d1)===selectedD1;
+      return `<tr class="${sel?'sel teal':''}" onclick="clickRow(${d1})">
+        <td class="${sel?'hl teal':''}">${d1}</td>
+        <td>${v[0]}</td><td>${v[2]}</td><td>${v[3]}</td><td>${v[4]}</td><td>${v[5]}</td>
+        <td>${v[10]}kN</td>
+      </tr>`;
+    }).join('');
+  } else {
+    refTitle.textContent = 'Referans Tablosu';
+    refStd.textContent = 'DIN 6885';
+    thead.innerHTML = `<tr>
+      <th>d (mm)</th><th>b</th><th>h</th><th>t₁</th><th>t₂</th><th>r</th>
+    </tr>`;
+    tbody.innerHTML = KAMA6885.map(row => {
+      const [dMin,dMax,b,h,t1,t2,rMin,rMax] = row;
+      const sel = selectedD1 > dMin && selectedD1 <= dMax;
+      return `<tr class="${sel?'sel purple':''}" onclick="clickKamaRow(${dMin+1})">
+        <td class="${sel?'hl purple':''}">${dMin+1}…${dMax}</td>
+        <td>${b}</td><td>${h}</td><td>${t1}</td><td>${t2}</td><td>${rMin}-${rMax}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Scroll active row into view
+  const selRow = tbody.querySelector('.sel');
+  if (selRow) setTimeout(()=>selRow.scrollIntoView({block:'nearest'}),50);
+}
+
+function clickRow(d1) {
+  document.getElementById('milInput').value = d1;
+  update();
+}
+
+function clickKamaRow(d1) {
+  document.getElementById('milInput').value = d1;
+  update();
+}
+
+/* ─────────────────────────────────────────────────────────
+   KAMA CALCULATION
+───────────────────────────────────────────────────────── */
+document.getElementById('calcBtn').addEventListener('click', function(){
+  const d1 = parseFloat(document.getElementById('milInput').value)||30;
+  const T  = parseFloat(document.getElementById('torkInput').value)||0;
+  const L  = parseFloat(document.getElementById('lInput').value)||50;
+  const si = parseFloat(document.getElementById('sigmaInput').value)||100;
+  const nk = parseInt(document.getElementById('kamaAdet').value)||1;
+
+  const row = findKama(d1);
+  const [,,b,h,t1,t2] = row;
+
+  // Torque in N·mm
+  const T_nmm = T * 1000;
+  // Bearing stress on shaft keyway flank
+  const sigma_b = T_nmm * 4 / (d1 * h * L * nk);  // simplified: effective area = h/2 * L
+  // Shear stress in key
+  const tau = T_nmm * 2 / (d1 * b * L * nk);
+  const tau_allow = 0.6 * si;
+  // Required length
+  const L_req_b = T_nmm * 4 / (d1 * h * si);
+  const L_req_t = T_nmm * 2 / (d1 * b * tau_allow);
+  const L_min = Math.max(L_req_b, L_req_t);
+
+  function statusClass(v, lim) {
+    if (v <= lim*0.75) return 'ok';
+    if (v <= lim) return 'warn';
+    return 'bad';
+  }
+  function statusIcon(v, lim) {
+    if (v <= lim*0.75) return '✓';
+    if (v <= lim) return '⚠';
+    return '✗';
+  }
+
+  const scB = statusClass(sigma_b, si);
+  const scT = statusClass(tau, tau_allow);
+
+  const resultsDiv = document.getElementById('calcResults');
+  resultsDiv.innerHTML = `
+    <div class="calc-row">
+      <span class="calc-row-lbl">Basma Gerilmesi (σ_b)</span>
+      <span class="calc-row-vals">
+        <span class="crv ${scB}">${sigma_b.toFixed(1)} MPa</span>
+        <span class="crv dim">/ ${si} MPa</span>
+        <span class="chk">${statusIcon(sigma_b,si)}</span>
+      </span>
+    </div>
+    <div class="calc-row">
+      <span class="calc-row-lbl">Kesme Gerilmesi (τ)</span>
+      <span class="calc-row-vals">
+        <span class="crv ${scT}">${tau.toFixed(1)} MPa</span>
+        <span class="crv dim">/ ${tau_allow.toFixed(0)} MPa</span>
+        <span class="chk">${statusIcon(tau,tau_allow)}</span>
+      </span>
+    </div>
+    <div class="calc-row">
+      <span class="calc-row-lbl">Güvenlik Faktörü (σ)</span>
+      <span class="calc-row-vals">
+        <span class="crv ${sigma_b>0?statusClass(sigma_b,si):'ok'}">${sigma_b>0?(si/sigma_b).toFixed(2):'∞'}</span>
+        <span class="crv dim">≥ 1.0 istenen</span>
+        <span class="chk">${sigma_b>0?statusIcon(sigma_b,si):'✓'}</span>
+      </span>
+    </div>
+    <div class="calc-row">
+      <span class="calc-row-lbl">Min. Göbek Uzunluğu</span>
+      <span class="calc-row-vals">
+        <span class="crv ${L>=L_min?'ok':'bad'}">${L_min.toFixed(1)} mm</span>
+        <span class="crv dim">Girilen: ${L} mm</span>
+        <span class="chk">${L>=L_min?'✓':'✗'}</span>
+      </span>
+    </div>
+  `;
+
+  document.getElementById('calcNote').innerHTML =
+    `<span style="color:#52527a">Formüller: σ_b = 4T/(d·h·L·n), τ = 2T/(d·b·L·n) — Basitleştirilmiş (DIN 6885-1). Stres yoğunlaşma faktörleri dahil değil. Kritik uygulamalar için imalatçı verisi kullanınız.</span>`;
+
+  resultsDiv.style.display='flex';
+});
+
+/* ─────────────────────────────────────────────────────────
+   EVENT LISTENERS
+───────────────────────────────────────────────────────── */
+document.querySelectorAll('.type-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+    update();
+  });
+});
+
+document.getElementById('milInput').addEventListener('input', ()=>{
+  clearTimeout(window._ut);
+  window._ut = setTimeout(update, 250);
+});
+
+// Enter key on calc inputs
+['torkInput','lInput','sigmaInput','kamaAdet'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown', e=>{
+    if(e.key==='Enter') document.getElementById('calcBtn').click();
+  });
+});
+
+// ─── INIT ─────────────────────────────────────────
+update();
+
+</script>
+</body>
+</html>
