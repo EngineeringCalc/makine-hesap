@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rulman Ömür & Emniyet — MH Platform</title>
+  <link rel="stylesheet" href="mh-tokens.css">
+  <style>
+    :root {
+      --dim:   #52527a;
+      --dim2:  #8080a8;
+      --mc:    #818cf8;
+      --mc-bg: rgba(129,140,248,0.12);
+      --mc-bd: rgba(129,140,248,0.28);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--font-b);
+      display: flex; flex-direction: column;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(7,7,14,0.92); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 20px; height: 52px; gap: 20px; flex-shrink: 0;
+    }
+    .brand { font-family: var(--font-logo); font-size: var(--fz-18); letter-spacing: 3px; color: var(--accent); text-decoration: none; }
+    .brand em { color: var(--text); font-style: normal; }
+    .breadcrumb { font-size: var(--fz-12); color: var(--dim2); font-family: var(--font-m); display: flex; align-items: center; gap: 8px; }
+    .breadcrumb a { color: var(--dim2); text-decoration: none; }
+    .breadcrumb .sep { color: var(--dim); }
+
+    /* ── APP ── */
+    .app { display: flex; flex: 1; overflow: hidden; position: relative; z-index: 1; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--bg2); border-right: 1px solid var(--border);
+      width: 200px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto; padding-bottom: 16px;
+    }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .sec-label {
+      font-family: var(--font-h); font-size: var(--fz-11);
+      letter-spacing: 2px; color: #9090c0; text-transform: uppercase;
+      padding: 12px 14px 5px; flex-shrink: 0;
+    }
+    .type-btn {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 8px 14px;
+      background: transparent; border: none; border-left: 3px solid transparent;
+      color: var(--dim2); font-family: var(--font-b); font-size: var(--fz-12);
+      cursor: pointer; text-align: left; transition: all 0.15s;
+    }
+    .type-btn:hover { background: var(--surf1); color: var(--text); }
+    .type-btn.active { background: var(--surf1); color: var(--text); border-left-color: var(--tb-c); }
+    .type-btn .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--tb-c); flex-shrink: 0; }
+    .type-btn .tb-txt b  { font-family: var(--font-m); font-size: var(--fz-13); font-weight: 600; }
+    .type-btn .tb-txt small { font-size: var(--fz-9); color: var(--dim); font-family: var(--font-b); }
+    .type-btn.active .tb-txt small { color: var(--dim2); }
+    .type-btn .tb-txt { display: flex; flex-direction: column; gap: 1px; }
+    .sb-sep { height: 1px; background: var(--border); margin: 10px 14px 0; }
+
+    /* Boyut grid (sidebar'ın altında) */
+    .sb-sizes { padding: 6px 8px 4px; border-top: 1px solid var(--border); }
+    .bsz-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+    .bsz-btn {
+      background: var(--surf2); border: 1px solid var(--border); border-radius: 6px;
+      padding: 5px 3px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 1px;
+      transition: all 0.15s;
+    }
+    .bsz-btn b     { font-family: var(--font-m); font-size: var(--fz-11); font-weight: 600; color: var(--text); }
+    .bsz-btn small { font-family: var(--font-m); font-size: 9px; color: var(--dim); }
+    .bsz-btn:hover { background: var(--surf3); }
+    .bsz-btn.active { border-color: var(--mc); background: var(--mc-bg); }
+    .bsz-btn.active b { color: var(--mc); }
+    .bsz-btn.active small { color: var(--dim2); }
+
+    /* ── CONTENT ── */
+    .content {
+      width: 480px; max-width: 480px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto; border-right: 1px solid var(--border);
+    }
+    .content::-webkit-scrollbar { width: 3px; }
+    .content::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .page-hdr {
+      padding: 13px 16px 11px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 8px; flex-shrink: 0;
+    }
+    .page-title { font-family: var(--font-h); font-size: var(--fz-20); font-weight: 700; letter-spacing: 1px; }
+    .page-sub   { font-size: var(--fz-11); color: var(--dim2); font-family: var(--font-m); margin-top: 3px; }
+    .brg-badge  { font-family: var(--font-m); font-size: var(--fz-18); font-weight: 600;
+                  color: var(--mc); line-height: 1; flex-shrink: 0; }
+
+    /* Seçili rulman şeridi */
+    .brg-strip {
+      display: flex; align-items: stretch; gap: 0;
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .bs-cell {
+      flex: 1; padding: 8px 10px; border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .bs-cell:last-child { border-right: none; }
+    .bs-lbl { font-family: var(--font-h); font-size: var(--fz-9); letter-spacing: 1.5px; color: var(--dim2); text-transform: uppercase; }
+    .bs-val { font-family: var(--font-m); font-size: var(--fz-13); font-weight: 600; color: var(--text); }
+    .bs-val.mc  { color: var(--mc); }
+    .bs-val.tl  { color: var(--teal); }
+    .bs-val.yl  { color: var(--yellow); }
+    .bs-val.bl  { color: var(--blue); }
+
+    /* SVG yük diyagramı */
+    .preview-wrap { padding: 10px 16px 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .preview-box  { background: var(--surf1); border: 1px solid var(--border); border-radius: 10px; height: 155px; overflow: hidden; }
+    .preview-box svg { width: 100%; height: 100%; }
+
+    /* Mode sekmeler */
+    .mode-bar { display: flex; padding: 0; background: var(--surf1); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .mode-tab {
+      padding: 11px 20px; background: transparent; border: none;
+      border-bottom: 2px solid transparent; color: var(--dim2);
+      font-family: var(--font-h); font-size: var(--fz-13); font-weight: 700; letter-spacing: 1px;
+      cursor: pointer; transition: all 0.18s; position: relative; top: 1px;
+      text-transform: uppercase;
+    }
+    .mode-tab:hover { color: var(--text); }
+    .mode-tab.active { color: var(--mc); border-bottom-color: var(--mc); }
+
+    /* Sections */
+    .section { padding: 11px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .sec-hdr  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+    .sec-ttl  { font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 2px; color: #9090c0; text-transform: uppercase; }
+    .sec-tag  { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); }
+
+    /* Inputs */
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .input-row.three { grid-template-columns: 1fr 1fr 1fr; }
+    .input-row.full  { grid-template-columns: 1fr; }
+    .inp-g    { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .inp-label {
+      font-family: var(--font-h); font-size: var(--fz-13);
+      letter-spacing: 1px; color: #c0c0e0; text-transform: uppercase;
+    }
+    .inp-wrap {
+      display: flex; background: var(--surf2);
+      border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; transition: border-color 0.2s; min-width: 0;
+    }
+    .inp-wrap:focus-within { border-color: var(--mc); }
+    .inp-wrap input {
+      flex: 1; padding: 10px 12px; background: transparent; border: none;
+      color: var(--text); font-family: var(--font-m);
+      font-size: var(--fz-15); font-weight: 600;
+      outline: none; min-width: 0;
+      -moz-appearance: textfield; appearance: textfield;
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; }
+    .inp-sfx {
+      padding: 0 11px; display: flex; align-items: center;
+      font-family: var(--font-m); font-size: var(--fz-12);
+      color: var(--dim); background: var(--surf3);
+      border-left: 1px solid var(--border); flex-shrink: 0;
+    }
+    .inp-wrap select {
+      flex: 1; padding: 10px 12px; background: transparent; border: none;
+      color: var(--text); font-family: var(--font-m); font-size: var(--fz-13);
+      font-weight: 600; outline: none; appearance: none; cursor: pointer;
+    }
+    .inp-wrap select option { background: #17172a; }
+    .inp-hint { font-family: var(--font-m); font-size: var(--fz-10); color: var(--dim2); min-height: 15px; }
+    .inp-hint .hv { color: var(--teal); }
+    .inp-hint .hw { color: var(--yellow); }
+
+    /* Yük tipi toggle (statik sekme) */
+    .seg { display: flex; gap: 6px; }
+    .seg-btn {
+      flex: 1; padding: 8px 6px;
+      background: var(--surf2); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--dim2); font-family: var(--font-h);
+      font-size: var(--fz-12); font-weight: 700; letter-spacing: 0.3px;
+      cursor: pointer; text-align: center; transition: all 0.15s; line-height: 1.2;
+    }
+    .seg-btn small { display: block; font-family: var(--font-m); font-size: var(--fz-9); font-weight: 400; color: var(--dim); margin-top: 2px; }
+    .seg-btn:hover { background: var(--surf3); color: var(--text); }
+    .seg-btn.active { background: var(--mc-bg); border-color: var(--mc); color: var(--mc); }
+    .seg-btn.active small { color: var(--mc); }
+
+    /* Hesapla butonu */
+    .calc-btn {
+      display: block; width: calc(100% - 32px);
+      margin: 12px 16px; padding: 14px;
+      background: var(--mc); border: none; border-radius: 10px;
+      color: white; font-family: var(--font-h);
+      font-size: var(--fz-18); font-weight: 700; letter-spacing: 2px;
+      cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    }
+    .calc-btn:hover { background: #6d75e8; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(129,140,248,0.35); }
+    .calc-btn:active { transform: translateY(0); }
+
+    /* Sonuç alanı */
+    .result-area { padding: 0 16px 4px; display: none; flex-shrink: 0; animation: fadeUp 0.2s ease; }
+    .result-area.visible { display: block; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+
+    .res-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .res-grid.two { grid-template-columns: 1fr 1fr; }
+    .res-card {
+      background: var(--surf1); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 12px;
+    }
+    .res-card.hi { border-color: var(--mc-bd); }
+    .res-lbl { font-family: var(--font-h); font-size: var(--fz-10); letter-spacing: 1.5px; color: var(--dim2); text-transform: uppercase; }
+    .res-val { font-family: var(--font-m); font-size: var(--fz-20); font-weight: 600; margin: 3px 0 1px; }
+    .res-unt { font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim2); line-height: 1.4; }
+    .c-mc { color: var(--mc); } .c-tl { color: var(--teal); } .c-bl { color: var(--blue); }
+    .c-yl { color: var(--yellow); } .c-rd { color: var(--red); } .c-grn { color: var(--green); }
+    .c-ac { color: var(--accent); }
+
+    /* Karar şeridi */
+    .verdict-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surf1); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 14px; margin-bottom: 8px;
+    }
+    .verdict-txt { flex: 1; }
+    .verdict-lbl { font-family: var(--font-h); font-size: var(--fz-10); letter-spacing: 1.5px; color: var(--dim2); text-transform: uppercase; }
+    .verdict-sub { font-family: var(--font-m); font-size: var(--fz-10); color: var(--dim2); margin-top: 2px; }
+    .serv-badge {
+      display: inline-flex; align-items: center; gap: 5px; margin-top: 4px;
+      font-family: var(--font-m); font-size: var(--fz-11); font-weight: 600;
+      padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px;
+    }
+    .v-safe   { background: rgba(74,222,128,0.12);  color: var(--green);  border: 1px solid rgba(74,222,128,0.25); }
+    .v-good   { background: rgba(0,212,170,0.12);   color: var(--teal);   border: 1px solid rgba(0,212,170,0.25); }
+    .v-warn   { background: rgba(251,191,36,0.12);  color: var(--yellow); border: 1px solid rgba(251,191,36,0.25); }
+    .v-danger { background: rgba(248,113,113,0.12); color: var(--red);    border: 1px solid rgba(248,113,113,0.25); }
+
+    .add-btn {
+      padding: 8px 14px; background: var(--surf2); border: 1px solid var(--teal);
+      border-radius: 7px; color: var(--teal); font-family: var(--font-h);
+      font-size: var(--fz-13); letter-spacing: 1px; cursor: pointer;
+      transition: all 0.15s; flex-shrink: 0; white-space: nowrap;
+    }
+    .add-btn:hover { background: rgba(0,212,170,0.1); }
+
+    /* Açıklayıcı bilgi kutusu */
+    .info-box {
+      margin: 0 16px 14px; padding: 11px 13px;
+      border-radius: 8px; flex-shrink: 0; font-size: var(--fz-11); line-height: 1.75;
+    }
+    .info-box.purple { background: rgba(129,140,248,0.06); border: 1px solid rgba(129,140,248,0.18); color: #b0b8f8; }
+    .info-box.amber  { background: rgba(251,191,36,0.07);  border: 1px solid rgba(251,191,36,0.20); color: #f0cc80; }
+    .ib-ttl { font-family: var(--font-h); letter-spacing: 1px; font-size: var(--fz-11); display: block; margin-bottom: 6px; text-transform: uppercase; }
+    .fml { font-family: var(--font-m); font-size: var(--fz-10); color: var(--dim2); line-height: 2.1; }
+    .fml .hi { color: var(--mc); } .fml .tl { color: var(--teal); } .fml .yl { color: var(--yellow); }
+
+    /* ── SAĞ PANEL ── */
+    .right-panel {
+      background: var(--bg2); border-left: 1px solid var(--border);
+      width: 290px; flex-shrink: 0;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .rp-hdr {
+      padding: 12px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .rp-title { font-family: var(--font-h); font-size: var(--fz-15); font-weight: 700; letter-spacing: 1px; }
+    .clr-btn {
+      background: transparent; border: none; color: var(--dim2);
+      font-size: var(--fz-11); font-family: var(--font-b);
+      padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: all 0.15s;
+    }
+    .clr-btn:hover { background: rgba(248,113,113,0.1); color: var(--red); }
+    .rp-body { flex: 1; overflow-y: auto; padding: 8px 10px 10px; }
+    .rp-body::-webkit-scrollbar { width: 3px; }
+    .rp-body::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .hist-item {
+      background: var(--surf1); border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 11px; margin-bottom: 8px;
+      animation: slideIn 0.2s ease;
+    }
+    @keyframes slideIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:none; } }
+    .hi-top { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+    .hi-code { font-family: var(--font-m); font-size: var(--fz-13); font-weight: 600; }
+    .hi-type {
+      font-family: var(--font-m); font-size: var(--fz-9); font-weight: 600;
+      padding: 2px 7px; border-radius: 4px; letter-spacing: 0.5px;
+    }
+    .hi-type.omur   { background: var(--mc-bg); color: var(--mc); border: 1px solid var(--mc-bd); }
+    .hi-type.statik { background: rgba(251,191,36,0.12); color: var(--yellow); border: 1px solid rgba(251,191,36,0.25); }
+    .hi-del {
+      margin-left: auto; background: transparent; border: none; color: var(--dim);
+      font-size: 15px; cursor: pointer; padding: 0 2px; line-height: 1;
+      transition: color 0.15s; border-radius: 3px;
+    }
+    .hi-del:hover { color: var(--red); }
+    .hi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 10px; }
+    .hi-row  { display: flex; justify-content: space-between; align-items: baseline; }
+    .hi-k { font-family: var(--font-b); font-size: var(--fz-10); color: var(--dim2); }
+    .hi-v { font-family: var(--font-m); font-size: var(--fz-11); font-weight: 600; color: var(--text); }
+    .hi-v.mc { color: var(--mc); } .hi-v.tl { color: var(--teal); }
+    .hi-v.yl { color: var(--yellow); } .hi-v.grn { color: var(--green); }
+    .hi-v.rd { color: var(--red); } .hi-v.wn { color: var(--yellow); }
+    .hi-verdict { margin-top: 6px; }
+
+    .empty-st { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 32px; text-align: center; }
+    .empty-st .ei { font-size: 28px; opacity: 0.22; }
+    .empty-st p { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); line-height: 1.75; }
+
+    /* ── MOBİL ── */
+    @media (max-width: 768px) {
+      .right-panel { width:100% !important; border-left:none !important; border-top:1px solid var(--border) !important; }
+      .content { border-right:none !important; }
+      .input-row.three { grid-template-columns: 1fr 1fr !important; }
+      .res-grid { grid-template-columns: 1fr 1fr !important; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="index.html">MH<em>Platform</em></a>
+  <div class="breadcrumb">
+    <a href="index.html">Ana Sayfa</a>
+    <span class="sep">/</span>
+    <a href="rulman.html">Rulman Referansı</a>
+    <span class="sep">/</span>
+    <span style="color:var(--text)">Ömür & Emniyet</span>
+  </div>
+</nav>
+
+<div class="app">
+
+<!-- ── SOL SIDEBAR ── -->
+<aside class="sidebar">
+  <p class="sec-label">Sabit Bilyalı</p>
+  <button class="type-btn" data-s="6000" style="--tb-c:#60a5fa" onclick="selSeries('6000')">
+    <span class="dot"></span><span class="tb-txt"><b>6000</b><small>Hafif</small></span></button>
+  <button class="type-btn" data-s="6200" style="--tb-c:#f97316" onclick="selSeries('6200')">
+    <span class="dot"></span><span class="tb-txt"><b>6200</b><small>Orta</small></span></button>
+  <button class="type-btn" data-s="6300" style="--tb-c:#fbbf24" onclick="selSeries('6300')">
+    <span class="dot"></span><span class="tb-txt"><b>6300</b><small>Ağır</small></span></button>
+  <button class="type-btn" data-s="6400" style="--tb-c:#f87171" onclick="selSeries('6400')">
+    <span class="dot"></span><span class="tb-txt"><b>6400</b><small>Çok Ağır</small></span></button>
+  <div class="sb-sep"></div>
+  <p class="sec-label">İnce Kesit</p>
+  <button class="type-btn" data-s="6800" style="--tb-c:#00d4aa" onclick="selSeries('6800')">
+    <span class="dot"></span><span class="tb-txt"><b>6800</b><small>Ultra İnce</small></span></button>
+  <button class="type-btn" data-s="6900" style="--tb-c:#34d399" onclick="selSeries('6900')">
+    <span class="dot"></span><span class="tb-txt"><b>6900</b><small>İnce</small></span></button>
+  <div class="sb-sep"></div>
+  <p class="sec-label">Eğik · α=40°</p>
+  <button class="type-btn" data-s="7000" style="--tb-c:#a78bfa" onclick="selSeries('7000')">
+    <span class="dot"></span><span class="tb-txt"><b>7000</b><small>Hafif AC</small></span></button>
+  <button class="type-btn" data-s="7200" style="--tb-c:#f472b6" onclick="selSeries('7200')">
+    <span class="dot"></span><span class="tb-txt"><b>7200</b><small>Orta AC</small></span></button>
+  <button class="type-btn" data-s="7300" style="--tb-c:#22d3ee" onclick="selSeries('7300')">
+    <span class="dot"></span><span class="tb-txt"><b>7300</b><small>Ağır AC</small></span></button>
+  <div class="sb-sep" style="margin-top:8px"></div>
+  <div class="sb-sizes">
+    <p class="sec-label" style="padding:6px 4px 5px">Boyut</p>
+    <div class="bsz-grid" id="bsz-grid"></div>
+  </div>
+</aside>
+
+<!-- ── ORTA İÇERİK ── -->
+<main class="content">
+
+  <div class="page-hdr">
+    <div>
+      <div class="page-title">ÖMÜR &amp; EMNİYET</div>
+      <div class="page-sub" id="page-sub">ISO 281:2007 · ISO 76 · Dinamik ömür · Statik emniyet</div>
+    </div>
+    <div class="brg-badge" id="brg-badge"></div>
+  </div>
+
+  <!-- Seçili rulman özet şeridi -->
+  <div class="brg-strip" id="brg-strip">
+    <div class="bs-cell"><span class="bs-lbl">Rulman</span><span class="bs-val mc" id="bs-kod">—</span></div>
+    <div class="bs-cell"><span class="bs-lbl">d × D × B</span><span class="bs-val bl" id="bs-dim">—</span></div>
+    <div class="bs-cell"><span class="bs-lbl">C (kN)</span><span class="bs-val ac" id="bs-C">—</span></div>
+    <div class="bs-cell"><span class="bs-lbl">C₀ (kN)</span><span class="bs-val yl" id="bs-C0">—</span></div>
+  </div>
+
+  <!-- SVG yük diyagramı -->
+  <div class="preview-wrap">
+    <div class="preview-box">
+      <svg id="load-svg" viewBox="0 0 448 155" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <!-- ORTAK: Yük girişleri -->
+  <div class="section">
+    <div class="sec-hdr">
+      <div class="sec-ttl">Yük Girişi</div>
+      <div class="sec-tag" id="pq-tag"></div>
+    </div>
+    <div class="input-row" style="margin-bottom:10px">
+      <div class="inp-g">
+        <span class="inp-label">Radyal Yük F<sub>r</sub></span>
+        <div class="inp-wrap">
+          <input type="number" id="inp_fr" value="2.5" min="0" step="0.1" oninput="onInput()">
+          <span class="inp-sfx">kN</span>
+        </div>
+      </div>
+      <div class="inp-g">
+        <span class="inp-label">Eksenel Yük F<sub>a</sub></span>
+        <div class="inp-wrap">
+          <input type="number" id="inp_fa" value="0.5" min="0" step="0.1" oninput="onInput()">
+          <span class="inp-sfx">kN</span>
+        </div>
+        <div class="inp-hint" id="hint-pq"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOD SEKMELERİ -->
+  <div class="mode-bar">
+    <button class="mode-tab active" data-m="omur"   onclick="setMode('omur')">Dinamik Ömür</button>
+    <button class="mode-tab"        data-m="statik" onclick="setMode('statik')">Statik Emniyet</button>
+  </div>
+
+  <!-- ════ SEKME: DİNAMİK ÖMÜR ════ -->
+  <div id="tab-omur">
+    <div class="section">
+      <div class="sec-hdr"><div class="sec-ttl">Çalışma Koşulları</div></div>
+      <div class="input-row three" style="margin-bottom:10px">
+        <div class="inp-g">
+          <span class="inp-label">Devir n</span>
+          <div class="inp-wrap">
+            <input type="number" id="inp_n" value="1450" min="1" step="10" oninput="onInput()">
+            <span class="inp-sfx">rpm</span>
+          </div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Güvenilirlik</span>
+          <div class="inp-wrap">
+            <select id="sel_rel" onchange="onInput()">
+              <option value="90" selected>L10 — %90</option>
+              <option value="95">L5  — %95</option>
+              <option value="96">L4  — %96</option>
+              <option value="97">L3  — %97</option>
+              <option value="98">L2  — %98</option>
+              <option value="99">L1  — %99</option>
+            </select>
+          </div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Yağ Viskozitesi ν</span>
+          <div class="inp-wrap">
+            <input type="number" id="inp_nu" value="46" min="1" step="1" oninput="onInput()">
+            <span class="inp-sfx">mm²/s</span>
+          </div>
+        </div>
+      </div>
+      <div class="inp-hint" id="hint-lube"></div>
+    </div>
+
+    <button class="calc-btn" onclick="calcOmur()">HESAPLA — DİNAMİK ÖMÜR</button>
+
+    <div class="result-area" id="res-omur"></div>
+
+    <div class="info-box purple">
+      <span class="ib-ttl">Formüller — ISO 281:2007</span>
+      <div class="fml">
+        <span class="hi">P</span> = X·F<sub>r</sub> + Y·F<sub>a</sub> &nbsp;[kN — eşdeğer dinamik yük]<br>
+        <span class="hi">L₁₀</span> = (C/P)³ × 10⁶ &nbsp;[devir — temel ömür, bilyalı]<br>
+        <span class="hi">L₁₀h</span> = L₁₀ / (60·n) &nbsp;[saat]<br>
+        <span class="tl">L<sub>nmh</sub></span> = a₁ · a<sub>ISO</sub> · L₁₀h &nbsp;[saat — genişletilmiş ömür]<br>
+        a₁: güvenilirlik faktörü (%90→1.0 · %95→0.62 · %99→0.21)<br>
+        a<sub>ISO</sub>: <span class="yl">κ = ν/ν₁</span> viskozite oranı · kirlilik ihmal edilmiş<br>
+        ν₁ = 4500 / √(d<sub>m</sub>·n) &nbsp;[referans viskozite — ISO 281 eğrisi]
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SEKME: STATİK EMNİYET ════ -->
+  <div id="tab-statik" style="display:none">
+    <div class="section">
+      <div class="sec-hdr"><div class="sec-ttl">Uygulama Koşulu</div><div class="sec-tag">s₀ önerisi</div></div>
+      <div class="seg" id="loadtype-seg">
+        <button class="seg-btn active" data-lt="genel" onclick="selLT(this)">
+          Sakin / Titreşimsiz<small>s₀ ≥ 1.0</small>
+        </button>
+        <button class="seg-btn" data-lt="titresim" onclick="selLT(this)">
+          Titreşimli / Darbeli<small>s₀ ≥ 1.5</small>
+        </button>
+        <button class="seg-btn" data-lt="darbe" onclick="selLT(this)">
+          Ağır Darbe / Yüksek P<small>s₀ ≥ 2.0</small>
+        </button>
+      </div>
+    </div>
+
+    <button class="calc-btn" onclick="calcStatik()">HESAPLA — STATİK EMNİYET</button>
+
+    <div class="result-area" id="res-statik"></div>
+
+    <div class="info-box amber">
+      <span class="ib-ttl">Formüller — ISO 76</span>
+      <div class="fml">
+        <span class="hi">P₀</span> = max(X₀·F<sub>r</sub> + Y₀·F<sub>a</sub>, F<sub>r</sub>) &nbsp;[kN — eşdeğer statik yük]<br>
+        6xxx (sabit bilyalı): X₀=0.6, Y₀=0.5<br>
+        7xxx α=40° (eğik bilyalı): X₀=0.5, Y₀=0.46<br>
+        <span class="tl">s₀</span> = C₀ / P₀ &nbsp;[statik emniyet katsayısı]<br>
+        Önerilen s₀: sakin ≥ 1.0 · titreşim ≥ 1.5 · darbe ≥ 2.0
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── SAĞ PANEL: Hesap geçmişi ── -->
+<aside class="right-panel">
+  <div class="rp-hdr">
+    <div class="rp-title">HESAPLAMALARIM</div>
+    <button class="clr-btn" onclick="clearHist()">Tümünü Sil</button>
+  </div>
+  <div class="rp-body" id="hist-body">
+    <div class="empty-st">
+      <div class="ei">🛞</div>
+      <p>Hesapla → Listeye Ekle.<br>Farklı rulman ve<br>yük kombinasyonlarını<br>kaydet ve karşılaştır.</p>
+    </div>
+  </div>
+</aside>
+
+</div><!-- /.app -->
+
+<script src="rulman-data.js"></script>
+<script>
+/* ════════════════════════════════════════════════════════
+   RULMAN ÖMÜR & EMNİYET — Hesap motoru
+   ISO 281:2007 (Dinamik Ömür)  ·  ISO 76 (Statik Emniyet)
+════════════════════════════════════════════════════════ */
+
+/* ── DURUM ── */
+let curS  = '6200';
+let curI  = 5;           /* 6205 */
+let curLT = 'genel';     /* yük tipi */
+let curMode = 'omur';
+let history = [];
+let lastOmur = null;
+let lastStatik = null;
+
+const $ = id => document.getElementById(id);
+
+/* ── YARDIMCI FONKSİYONLAR ── */
+function curBrg()    { return BDB[curS].raw[curI]; }
+function isAC()      { return BDB[curS].ac; }
+function fmtKN(v)    { return v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2); }
+function fmtH(h)     {
+  if (h >= 1e6)  return (h/1e6).toFixed(2)  + ' M saat';
+  if (h >= 1e4)  return (h/1e4).toFixed(2)  + ' ×10⁴ h';
+  if (h >= 1000) return (h/1000).toFixed(1) + ' ksaat';
+  return h.toFixed(0) + ' saat';
+}
+function fmtN(n) { return n.toLocaleString('tr-TR'); }
+
+function hexRgba(hex, a) {
+  const n = parseInt(hex.replace('#',''), 16);
+  return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;
+}
+
+/* ── ISO 281 — DGB X/Y tablosu (Tablo 5) ── */
+const DGB_TBL = [
+  [0.014,0.19,2.30],[0.028,0.22,1.99],[0.056,0.26,1.71],
+  [0.084,0.28,1.55],[0.110,0.30,1.45],[0.170,0.34,1.31],
+  [0.280,0.38,1.15],[0.420,0.42,1.04],[0.560,0.44,1.00]
+];
+
+function dgbEY(Fa, C0) {
+  const r = Fa / C0;
+  if (r <= DGB_TBL[0][0])
+    return { e: DGB_TBL[0][1], Y: DGB_TBL[0][2] };
+  const last = DGB_TBL[DGB_TBL.length - 1];
+  if (r >= last[0]) return { e: last[1], Y: last[2] };
+  for (let i = 1; i < DGB_TBL.length; i++) {
+    if (r <= DGB_TBL[i][0]) {
+      const t = (r - DGB_TBL[i-1][0]) / (DGB_TBL[i][0] - DGB_TBL[i-1][0]);
+      return {
+        e: DGB_TBL[i-1][1] + t*(DGB_TBL[i][1]-DGB_TBL[i-1][1]),
+        Y: DGB_TBL[i-1][2] + t*(DGB_TBL[i][2]-DGB_TBL[i-1][2])
+      };
+    }
+  }
+  return { e: last[1], Y: last[2] };
+}
+
+/* ── Eşdeğer dinamik yük P ── */
+function calcP(Fr, Fa, C0) {
+  if (Fr <= 0) return { P: 0, X: 0, Y: 0, e: 0, note: 'Fr > 0 gerekli' };
+  if (!Fa || Fa <= 0) return { P: Fr, X: 1, Y: 0, e: '—', note: 'Yalnızca radyal yük' };
+
+  if (isAC()) {
+    /* α=40° eğik bilyalı (ISO 281 Tablo 7, B tipi) */
+    const e = 1.14;
+    if (Fa / Fr <= e) return { P: Fr,                         X: 1,    Y: 0,    e, note: 'Fa/Fr ≤ e' };
+    const P = Math.max(0.40 * Fr + 0.93 * Fa, Fr);
+    return { P, X: 0.40, Y: 0.93, e, note: 'Fa/Fr > e' };
+  } else {
+    /* Sabit bilyalı (deep groove) */
+    const { e, Y } = dgbEY(Fa, C0);
+    if (Fa / Fr <= e) return { P: Fr,                              X: 1,    Y: 0, e, note: 'Fa/Fr ≤ e' };
+    const P = Math.max(0.56 * Fr + Y * Fa, Fr);
+    return { P, X: 0.56, Y, e, note: 'Fa/Fr > e' };
+  }
+}
+
+/* ── Referans viskozite ν₁ (ISO 281 eğrisi) ── */
+function calcNu1(dm, n) {
+  const dn = dm * n;
+  if (dn <= 0) return 0;
+  return Math.max(2, 4500 / Math.sqrt(dn));
+}
+
+/* ── a_ISO yağlama faktörü (κ bazlı, basitleştirilmiş) ── */
+function calcAISO(kappa) {
+  if (kappa < 0.10) return 0.10;
+  if (kappa < 0.40) return 0.10 + (kappa - 0.10) / 0.30 * 0.35;
+  if (kappa < 1.00) return 0.45 + (kappa - 0.40) / 0.60 * 0.55;
+  if (kappa < 2.00) return 1.00 + (kappa - 1.00) * 0.80;
+  if (kappa < 4.00) return 1.80 + (kappa - 2.00) * 0.85;
+  return Math.min(50, 3.50 + (kappa - 4.00) * 0.50);
+}
+
+/* ── a₁ güvenilirlik faktörü ── */
+const A1_MAP = { 90: 1.00, 95: 0.62, 96: 0.53, 97: 0.44, 98: 0.33, 99: 0.21 };
+
+/* ── Ömür verdict ── */
+function omurVerdict(Lnmh) {
+  if (Lnmh < 500)   return { cls: 'v-danger', lbl: '✕  Yetersiz', sub: '< 500 saat — rulman veya yük gözden geçirilmeli' };
+  if (Lnmh < 3000)  return { cls: 'v-warn',   lbl: '⚠  Sınırlı',  sub: '< 3 000 saat — kısa ömürlü uygulama' };
+  if (Lnmh < 10000) return { cls: 'v-good',   lbl: '✓  Yeterli',  sub: '3 000–10 000 saat — genel makine yapımı' };
+  if (Lnmh < 30000) return { cls: 'v-safe',   lbl: '✓  İyi',      sub: '10 000–30 000 saat — uzun hizmet ömrü' };
+  return               { cls: 'v-safe',   lbl: '✓  Mükemmel',  sub: '> 30 000 saat — endüstriyel uzun ömür' };
+}
+
+/* ── Statik verdict ── */
+function statikVerdict(s0, minS0) {
+  if (s0 < 0.8)   return { cls: 'v-danger', lbl: '✕  Yetersiz',  sub: `s₀ < 0.8 — statik hasar riski yüksek` };
+  if (s0 < minS0) return { cls: 'v-warn',   lbl: '⚠  Sınırda',   sub: `s₀ < ${minS0} — uygulama için yetersiz` };
+  if (s0 < minS0 * 1.5) return { cls: 'v-good', lbl: '✓  Yeterli', sub: `s₀ ≥ ${minS0} — koşul karşılanıyor` };
+  return { cls: 'v-safe', lbl: '✓  Güvenli', sub: `s₀ = ${s0.toFixed(2)} — güçlü emniyet marjı` };
+}
+
+/* ════════ DİNAMİK ÖMÜR HESABI ════════ */
+function calcOmur() {
+  const [kod, d, D, B, C, C0] = curBrg();
+  const Fr = parseFloat($('inp_fr').value) || 0;
+  const Fa = parseFloat($('inp_fa').value) || 0;
+  const n  = parseFloat($('inp_n').value)  || 0;
+  const rel = parseInt($('sel_rel').value) || 90;
+  const nu  = parseFloat($('inp_nu').value) || 46;
+
+  if (Fr <= 0 || n <= 0) {
+    $('res-omur').innerHTML = `<div style="padding:0 0 8px;color:var(--yellow);font-family:var(--font-m);font-size:var(--fz-11)">⚠ Fr ve n değerlerini girin.</div>`;
+    $('res-omur').classList.add('visible'); return;
+  }
+
+  const { P, X, Y, e, note } = calcP(Fr, Fa, C0);
+  if (P <= 0) return;
+
+  /* Temel ömür */
+  const L10_Mrev = Math.pow(C / P, 3);
+  const L10h     = (L10_Mrev * 1e6) / (60 * n);
+
+  /* Genişletilmiş ömür */
+  const a1   = A1_MAP[rel] || 1.00;
+  const dm   = (d + D) / 2;
+  const nu1  = calcNu1(dm, n);
+  const kap  = nu / nu1;
+  const aISO = calcAISO(kap);
+  const Lnmh = a1 * aISO * L10h;
+
+  const vrd = omurVerdict(Lnmh);
+
+  $('res-omur').innerHTML = `
+    <div class="res-grid" style="margin-top:8px">
+      <div class="res-card hi">
+        <div class="res-lbl">Eşd. Yük P</div>
+        <div class="res-val c-mc">${fmtKN(P)}</div>
+        <div class="res-unt">kN · X=${X} Y=${typeof Y==='number'?Y.toFixed(2):Y}</div>
+      </div>
+      <div class="res-card">
+        <div class="res-lbl">Temel Ömür L₁₀</div>
+        <div class="res-val c-bl">${L10_Mrev >= 1000 ? (L10_Mrev/1000).toFixed(1) + 'G' : L10_Mrev.toFixed(1)}</div>
+        <div class="res-unt">milyon devir</div>
+      </div>
+      <div class="res-card">
+        <div class="res-lbl">L₁₀h Temel</div>
+        <div class="res-val c-bl">${fmtH(L10h)}</div>
+        <div class="res-unt">%90 güvenilirlik</div>
+      </div>
+    </div>
+    <div class="res-grid three" style="margin-bottom:8px">
+      <div class="res-card">
+        <div class="res-lbl">κ = ν/ν₁</div>
+        <div class="res-val c-yl">${kap.toFixed(2)}</div>
+        <div class="res-unt">ν₁ = ${nu1.toFixed(1)} mm²/s</div>
+      </div>
+      <div class="res-card">
+        <div class="res-lbl">a₁ · a<sub>ISO</sub></div>
+        <div class="res-val c-tl">${a1.toFixed(2)} · ${aISO.toFixed(2)}</div>
+        <div class="res-unt">%${rel} güven · κ=${kap.toFixed(2)}</div>
+      </div>
+      <div class="res-card hi">
+        <div class="res-lbl">L<sub>nmh</sub> Genişletilmiş</div>
+        <div class="res-val c-tl">${fmtH(Lnmh)}</div>
+        <div class="res-unt">a₁·a_ISO·L₁₀h</div>
+      </div>
+    </div>
+    <div class="verdict-row">
+      <div class="verdict-txt">
+        <div class="verdict-lbl">Ömür Değerlendirmesi</div>
+        <span class="serv-badge ${vrd.cls}">${vrd.lbl}</span>
+        <div class="verdict-sub">${vrd.sub}</div>
+      </div>
+      <button class="add-btn" onclick="saveResult('omur')">LİSTEYE EKLE</button>
+    </div>
+  `;
+  $('res-omur').classList.add('visible');
+  lastOmur = { kod, C, C0, Fr, Fa, n, rel, P, L10h, Lnmh, kap, aISO, vrd };
+  updateHint();
+}
+
+/* ════════ STATİK EMNİYET HESABI ════════ */
+function calcStatik() {
+  const [kod, d, D, B, C, C0] = curBrg();
+  const Fr = parseFloat($('inp_fr').value) || 0;
+  const Fa = parseFloat($('inp_fa').value) || 0;
+
+  if (Fr <= 0) {
+    $('res-statik').innerHTML = `<div style="padding:0 0 8px;color:var(--yellow);font-family:var(--font-m);font-size:var(--fz-11)">⚠ Fr değerini girin.</div>`;
+    $('res-statik').classList.add('visible'); return;
+  }
+
+  /* Statik eşdeğer yük P0 */
+  let X0, Y0;
+  if (isAC()) { X0 = 0.50; Y0 = 0.46; }
+  else        { X0 = 0.60; Y0 = 0.50; }
+
+  const P0_formula = X0 * Fr + Y0 * Fa;
+  const P0 = Math.max(P0_formula, Fr);     /* P0 ≥ Fr zorunluluğu */
+  const s0 = C0 / P0;
+
+  const minS0 = { genel: 1.0, titresim: 1.5, darbe: 2.0 }[curLT];
+  const vrd  = statikVerdict(s0, minS0);
+
+  $('res-statik').innerHTML = `
+    <div class="res-grid two" style="margin-top:8px;margin-bottom:8px">
+      <div class="res-card">
+        <div class="res-lbl">P₀ Statik Yük</div>
+        <div class="res-val c-yl">${fmtKN(P0)}</div>
+        <div class="res-unt">kN · X₀=${X0} Y₀=${Y0}${P0 > P0_formula ? ' · P₀=Fr' : ''}</div>
+      </div>
+      <div class="res-card hi">
+        <div class="res-lbl">s₀ Emniyet</div>
+        <div class="res-val c-mc">${s0.toFixed(2)}</div>
+        <div class="res-unt">C₀/P₀ · min ${minS0} önerilen</div>
+      </div>
+    </div>
+    <div class="res-grid two" style="margin-bottom:8px">
+      <div class="res-card">
+        <div class="res-lbl">C₀ Statik Kapasite</div>
+        <div class="res-val c-bl">${fmtKN(C0)}</div>
+        <div class="res-unt">kN · tipik ortalama</div>
+      </div>
+      <div class="res-card">
+        <div class="res-lbl">Marj (C₀−P₀)</div>
+        <div class="res-val" style="color:${C0-P0>0?'var(--green)':'var(--red)'}">
+          ${fmtKN(Math.abs(C0-P0))}
+        </div>
+        <div class="res-unt">kN · ${C0-P0>0?'yük kapasitesi içinde':'kapasite aşımı!'}</div>
+      </div>
+    </div>
+    <div class="verdict-row">
+      <div class="verdict-txt">
+        <div class="verdict-lbl">Statik Emniyet Değerlendirmesi</div>
+        <span class="serv-badge ${vrd.cls}">${vrd.lbl}</span>
+        <div class="verdict-sub">${vrd.sub}</div>
+      </div>
+      <button class="add-btn" onclick="saveResult('statik')">LİSTEYE EKLE</button>
+    </div>
+  `;
+  $('res-statik').classList.add('visible');
+  lastStatik = { kod, C, C0, Fr, Fa, P0, s0, minS0, vrd };
+}
+
+/* ════════ KAYDET ════════ */
+function saveResult(type) {
+  if (type === 'omur'   && !lastOmur)   return;
+  if (type === 'statik' && !lastStatik) return;
+  const r = type === 'omur' ? lastOmur : lastStatik;
+  r._id   = Date.now() + Math.random();
+  r._type = type;
+  r._color = BDB[curS].color;
+  history.unshift(r);
+  renderHist();
+}
+
+function delResult(id) {
+  history = history.filter(r => r._id !== id);
+  renderHist();
+}
+
+function clearHist() { history = []; renderHist(); }
+
+function renderHist() {
+  if (!history.length) {
+    $('hist-body').innerHTML = `<div class="empty-st"><div class="ei">🛞</div>
+      <p>Hesapla → Listeye Ekle.<br>Farklı rulman ve<br>yük kombinasyonlarını<br>kaydet ve karşılaştır.</p></div>`;
+    return;
+  }
+  $('hist-body').innerHTML = history.map(r => {
+    const rows = r._type === 'omur'
+      ? `<div class="hi-row"><span class="hi-k">Fr / Fa</span><span class="hi-v">${r.Fr.toFixed(1)} / ${r.Fa.toFixed(1)} kN</span></div>
+         <div class="hi-row"><span class="hi-k">P</span><span class="hi-v mc">${fmtKN(r.P)} kN</span></div>
+         <div class="hi-row"><span class="hi-k">n</span><span class="hi-v">${fmtN(r.n)} rpm</span></div>
+         <div class="hi-row"><span class="hi-k">L₁₀h</span><span class="hi-v bl">${fmtH(r.L10h)}</span></div>
+         <div class="hi-row" style="grid-column:1/-1"><span class="hi-k">L<sub>nmh</sub></span><span class="hi-v tl">${fmtH(r.Lnmh)}</span></div>`
+      : `<div class="hi-row"><span class="hi-k">Fr / Fa</span><span class="hi-v">${r.Fr.toFixed(1)} / ${r.Fa.toFixed(1)} kN</span></div>
+         <div class="hi-row"><span class="hi-k">P₀</span><span class="hi-v yl">${fmtKN(r.P0)} kN</span></div>
+         <div class="hi-row"><span class="hi-k">C₀</span><span class="hi-v">${fmtKN(r.C0)} kN</span></div>
+         <div class="hi-row"><span class="hi-k">s₀</span><span class="hi-v mc">${r.s0.toFixed(2)}</span></div>`;
+    return `
+      <div class="hist-item">
+        <div class="hi-top">
+          <span class="hi-code" style="color:${r._color}">${r.kod}</span>
+          <span class="hi-type ${r._type}">${r._type === 'omur' ? 'ÖMÜR' : 'STATİK'}</span>
+          <button class="hi-del" onclick="delResult(${r._id})">×</button>
+        </div>
+        <div class="hi-grid">${rows}</div>
+        <div class="hi-verdict">
+          <span class="serv-badge ${r.vrd.cls}" style="font-size:var(--fz-10);padding:3px 8px">${r.vrd.lbl}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* ════════ SVG YÜK DİYAGRAMI ════════ */
+function drawDiagram() {
+  const Fr = parseFloat($('inp_fr')?.value) || 0;
+  const Fa = parseFloat($('inp_fa')?.value) || 0;
+  const n  = parseFloat($('inp_n')?.value)  || 0;
+  const [kod, d, D, B] = curBrg();
+  const AC = isAC();
+  const SC = BDB[curS].color;
+
+  const MONO = "font-family:'JetBrains Mono',monospace";
+  const BL   = '#60a5fa';
+  const YL   = '#fbbf24';
+  const DIM  = '#3a3a5c';
+
+  /* Ölçekleme: rulman gerçek D/B oranı korunur, sabit alanı doldurur */
+  const cx = 185, cy = 77;
+  const sc = Math.min(160 / D, 90 / B, 3.8);
+  const OR = D / 2 * sc;      /* dış bilezik yarıçapı */
+  const IR = d / 2 * sc;      /* iç bilezik (mil) yarıçapı */
+  const BW = B * sc;          /* genişlik */
+  const TH = (OR - IR) * 0.34 * sc; /* bilezik et kalınlığı yaklaşımı */
+  const RB = (OR - IR) * 0.30 * sc; /* bilya yarıçapı */
+  const RM = (OR + IR) / 2;   /* bilya merkez yarıçapı (px) */
+  const x0 = cx - BW / 2, x1 = cx + BW / 2;
+
+  let s = `<defs>
+    <marker id="ah-bl" viewBox="0 0 8 6" refX="8" refY="3" markerWidth="6" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L8,3 L0,6 z" fill="${BL}"/></marker>
+    <marker id="ah-yl" viewBox="0 0 8 6" refX="8" refY="3" markerWidth="6" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L8,3 L0,6 z" fill="${YL}"/></marker>
+  </defs>`;
+
+  /* Eksen */
+  s += `<line x1="0" y1="${cy}" x2="448" y2="${cy}" stroke="${DIM}" stroke-width="1" stroke-dasharray="14 4 3 4" opacity="0.6"/>`;
+
+  /* Mil (shaft band) */
+  s += `<rect x="0" y="${cy-IR}" width="448" height="${IR*2}" fill="rgba(23,23,42,0.9)" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>`;
+
+  /* Rulman – yarım kesit (üst + alt) */
+  for (const sign of [-1, 1]) {
+    const ry  = sign < 0 ? cy - OR : cy + IR;
+    const ih  = OR - IR;
+    /* Dış bilezik plakası */
+    s += `<rect x="${x0}" y="${ry}" width="${BW}" height="${TH}" fill="${hexRgba(SC,0.22)}" stroke="${SC}" stroke-width="1.4" rx="1"/>`;
+    /* İç bilezik plakası */
+    const iry = sign < 0 ? cy - IR - TH : cy + IR;
+    s += `<rect x="${x0}" y="${iry}" width="${BW}" height="${TH}" fill="${hexRgba(SC,0.14)}" stroke="${SC}" stroke-width="1.2" rx="1"/>`;
+    /* Yiv efekti (dolu daire ile bilezik oyulmuş görünümü) */
+    const by = cy + sign * RM;
+    s += `<circle cx="${cx}" cy="${by}" r="${RB*1.2}" fill="rgba(7,7,14,0.95)"/>`;
+    /* Bilya */
+    s += `<circle cx="${cx}" cy="${by}" r="${RB}" fill="${hexRgba(SC,0.20)}" stroke="${SC}" stroke-width="1.3"/>`;
+    /* Eğik bilyalı: α=40° temas çizgisi */
+    if (AC) {
+      const LL = RB * 2.2, s40 = Math.sin(40*Math.PI/180), c40 = Math.cos(40*Math.PI/180);
+      s += `<line x1="${cx-s40*LL}" y1="${by+sign*c40*LL}" x2="${cx+s40*LL}" y2="${by-sign*c40*LL}"
+             stroke="#fbbf24" stroke-width="1" stroke-dasharray="4 3" opacity="0.80"/>`;
+    }
+  }
+  /* Yan duvarlar */
+  const wallH = OR * 2;
+  s += `<rect x="${x0}"    y="${cy-OR}" width="7" height="${wallH}" fill="${hexRgba(SC,0.28)}" stroke="${SC}" stroke-width="1" rx="1"/>`;
+  s += `<rect x="${x1-7}"  y="${cy-OR}" width="7" height="${wallH}" fill="${hexRgba(SC,0.28)}" stroke="${SC}" stroke-width="1" rx="1"/>`;
+
+  /* ── Fr oku (radyal, yukarıdan aşağı) ── */
+  const frY1 = cy - OR - 38, frY2 = cy - OR - 3;
+  s += `<line x1="${cx}" y1="${frY1}" x2="${cx}" y2="${frY2}" stroke="${BL}" stroke-width="1.8" marker-end="url(#ah-bl)"/>`;
+  const frTxt = Fr > 0 ? `Fr = ${Fr.toFixed(2)} kN` : 'Fr [kN]';
+  s += `<text x="${cx+6}" y="${frY1+13}" style="${MONO}" font-size="11" fill="${BL}">${frTxt}</text>`;
+
+  /* ── Fa oku (eksenel, sağdan sola) ── */
+  const faX1 = x1 + 62, faX2 = x1 + 4;
+  const faAlpha = Fa > 0 ? 1 : 0.35;
+  const faDash  = Fa > 0 ? '' : 'stroke-dasharray="5 4"';
+  s += `<line x1="${faX1}" y1="${cy}" x2="${faX2}" y2="${cy}" stroke="${YL}" stroke-width="1.8" opacity="${faAlpha}" ${faDash} marker-end="url(#ah-yl)"/>`;
+  const faTxt = Fa > 0 ? `Fa = ${Fa.toFixed(2)} kN` : 'Fa [kN]';
+  s += `<text x="${faX1+4}" y="${cy-6}" style="${MONO}" font-size="11" fill="${YL}" opacity="${faAlpha}" text-anchor="end">${faTxt}</text>`;
+
+  /* ── n etiketi ── */
+  if (n > 0) s += `<text x="12" y="14" style="${MONO}" font-size="10" fill="#a78bfa">n = ${fmtN(n)} rpm</text>`;
+
+  /* Alt etiket */
+  const subTxt = AC ? `${kod} eğik bilyalı · α=40°` : `${kod} sabit bilyalı`;
+  s += `<text x="12" y="150" style="${MONO}" font-size="10" fill="#3a3a5c">${subTxt}</text>`;
+
+  $('load-svg').innerHTML = s;
+}
+
+/* ════════ SEÇİM & GÜNCELLEME ════════ */
+function selSeries(key) {
+  const prevD = curBrg() ? curBrg()[1] : null;
+  curS = key;
+  const i = BDB[key].raw.findIndex(r => r[1] === prevD);
+  curI = i >= 0 ? i : Math.min(5, BDB[key].raw.length - 1);
+
+  document.querySelectorAll('.type-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.s === key));
+
+  const c = BDB[key].color;
+  document.documentElement.style.setProperty('--mc',    c);
+  document.documentElement.style.setProperty('--mc-bg', hexRgba(c, 0.12));
+  document.documentElement.style.setProperty('--mc-bd', hexRgba(c, 0.28));
+
+  renderSzGrid();
+  updateStrip();
+  drawDiagram();
+  lastOmur = null; lastStatik = null;
+  $('res-omur').classList.remove('visible');
+  $('res-statik').classList.remove('visible');
+}
+
+function selSize(i) {
+  curI = i;
+  document.querySelectorAll('.bsz-btn').forEach((b, k) =>
+    b.classList.toggle('active', k === i));
+  updateStrip();
+  drawDiagram();
+  lastOmur = null; lastStatik = null;
+  $('res-omur').classList.remove('visible');
+  $('res-statik').classList.remove('visible');
+}
+
+function renderSzGrid() {
+  const raw = BDB[curS].raw;
+  $('bsz-grid').innerHTML = raw.map((r, i) =>
+    `<button class="bsz-btn${i===curI?' active':''}" onclick="selSize(${i})">
+      <b>${r[0]}</b><small>⌀${r[1]}</small>
+    </button>`).join('');
+}
+
+function updateStrip() {
+  const [kod, d, D, B, C, C0] = curBrg();
+  $('bs-kod').textContent = kod;
+  $('bs-dim').textContent = `${d}×${D}×${B}`;
+  $('bs-C').textContent   = fmtKN(C);
+  $('bs-C0').textContent  = fmtKN(C0);
+  $('brg-badge').textContent = kod;
+  $('page-sub').textContent  = `${BDB[curS].tag} · ISO 281 · ISO 76`;
+}
+
+function updateHint() {
+  const Fr = parseFloat($('inp_fr').value) || 0;
+  const Fa = parseFloat($('inp_fa').value) || 0;
+  const [, d, D, , C, C0] = curBrg();
+  const n  = parseFloat($('inp_n').value) || 0;
+
+  if (Fr > 0 && (Fa > 0 || true)) {
+    const { P, e, note } = calcP(Fr, Fa, C0);
+    const fa_fr = Fr > 0 && Fa > 0 ? (Fa/Fr).toFixed(2) : '—';
+    $('hint-pq').innerHTML =
+      `P = ${fmtKN(P)} kN · e=${typeof e==='number'?e.toFixed(2):e} · Fa/Fr=${fa_fr} → ${note}`;
+  } else {
+    $('hint-pq').innerHTML = '';
+  }
+
+  if (n > 0) {
+    const dm  = (d + D) / 2;
+    const nu1 = calcNu1(dm, n);
+    const nu  = parseFloat($('inp_nu')?.value) || 46;
+    const kap = nu / nu1;
+    $('hint-lube').innerHTML =
+      `ν₁ (ref) = <span class="hv">${nu1.toFixed(1)} mm²/s</span> · κ = ν/ν₁ = <span class="${kap>=1?'hv':'hw'}">${kap.toFixed(2)}</span> · a<sub>ISO</sub> ≈ ${calcAISO(kap).toFixed(2)}`;
+  }
+}
+
+function onInput() { updateHint(); drawDiagram(); }
+
+function setMode(m) {
+  curMode = m;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.m === m));
+  $('tab-omur').style.display   = m === 'omur'   ? '' : 'none';
+  $('tab-statik').style.display = m === 'statik' ? '' : 'none';
+}
+
+function selLT(btn) {
+  curLT = btn.dataset.lt;
+  document.querySelectorAll('#loadtype-seg .seg-btn').forEach(b =>
+    b.classList.toggle('active', b === btn));
+}
+
+/* ════════ BAŞLAT ════════ */
+(function init() {
+  selSeries('6200');
+  renderHist();
+  updateHint();
+})();
+</script>
+</body>
+</html>
