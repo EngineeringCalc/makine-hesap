@@ -3,819 +3,920 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MH Platform — Makine Hesaplama Araçları</title>
+<title>Mühendislik Hesap Araçları — Ana Dizin · Rev 2.0</title>
+<meta name="description" content="Makine mühendisleri için açık kaynak hesaplama araçları: diş standartları, rulman ömrü, cıvata torku, profil ağırlığı, tolerans ve daha fazlası. Tarayıcıda çalışır.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+SemiCondensed:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:      #07070e;
-  --surf1:   #0f0f1c;
-  --surf2:   #161626;
-  --border:  rgba(255,255,255,0.06);
-  --text:    #dde1f0;
-  --dim:     #73739c; /* Standart kodları (DIN/ISO) için kontrast artırıldı */
-  --dim2:    #a3a3c2; /* Kart açıklamaları için daha okunabilir gri tonu */
-  --orange:  #f97316;
-  --teal:    #00d4aa;
+/* ════════════════════════════════════════════════════════════
+   MH PLATFORM — REV 2.0  ·  "Dijital Teknik Resim Paftası"
+   ════════════════════════════════════════════════════════════ */
+:root{
+  --bg:    #07080d;
+  --bg2:   #0b0d15;
+  --surf:  #0f1119;
+  --surf2: #141826;
+  --line:  rgba(148,163,205,.10);
+  --line2: rgba(148,163,205,.18);
+  --ink:   #e6e9f4;
+  --mute:  #99a1bc;
+  --faint: #5b6380;
+  --acc:   #f97316;
+  --live:  #00d4aa;
+  --fd: 'Saira SemiCondensed', sans-serif;
+  --fb: 'IBM Plex Sans', sans-serif;
+  --fm: 'JetBrains Mono', monospace;
+  --ease: cubic-bezier(.22,.61,.25,1);
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:148px}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--fb);
+  font-size:14px;
+  min-height:100vh;
+  overflow-x:hidden;
 }
 
-body::before {
-  content: '';
-  position: fixed; inset: 0;
+/* ── Milimetrik kâğıt dokusu (ince + ana ızgara) ───────────── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background-image:
-    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
-  background-size: 44px 44px;
-  pointer-events: none;
+    linear-gradient(rgba(148,163,205,.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148,163,205,.022) 1px, transparent 1px),
+    linear-gradient(rgba(148,163,205,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148,163,205,.05) 1px, transparent 1px);
+  background-size:24px 24px, 24px 24px, 120px 120px, 120px 120px;
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(820px 340px at 24% -60px, rgba(249,115,22,.055), transparent 70%);
 }
 
-/* ─── NAV ─────────────────────────────────────── */
-nav {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(7,7,14,0.9);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center;
-  padding: 0 32px; height: 54px; gap: 24px;
+::selection{background:rgba(249,115,22,.30)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:4px}
+
+/* ── Pafta çerçevesi + ortalama işaretleri ─────────────────── */
+.frame{position:fixed;inset:10px;border:1px solid rgba(148,163,205,.12);pointer-events:none;z-index:5}
+.frame i{position:absolute;background:rgba(148,163,205,.32)}
+.frame .t{top:-1px;left:50%;width:1px;height:9px}
+.frame .b{bottom:-1px;left:50%;width:1px;height:9px}
+.frame .l{left:-1px;top:50%;height:1px;width:9px}
+.frame .r{right:-1px;top:50%;height:1px;width:9px}
+@media(max-width:980px){.frame{display:none}}
+
+.wrap{max-width:1180px;margin:0 auto;padding-left:28px;padding-right:28px}
+
+/* ════════ HERO ════════ */
+.hero{position:relative;z-index:1;display:grid;grid-template-columns:1.04fr .96fr;gap:52px;align-items:center;padding-top:74px;padding-bottom:50px}
+.eyebrow{font:500 11px/1 var(--fm);letter-spacing:3.2px;color:var(--acc);margin-bottom:22px;display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.eyebrow b{font-weight:600;letter-spacing:1.5px;color:var(--ink);background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.3);border-radius:4px;padding:4px 8px}
+h1{
+  font-family:var(--fd);
+  font-size:clamp(42px, 5.6vw, 68px);
+  font-weight:800;
+  line-height:.99;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  margin-bottom:22px;
 }
-.brand {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 20px; letter-spacing: 3px;
-  color: var(--orange); text-decoration: none;
-  display: flex; align-items: center; gap: 8px;
+.h-outline{color:transparent;-webkit-text-stroke:1.1px rgba(230,233,244,.50)}
+@supports not (-webkit-text-stroke:1px #fff){.h-outline{color:var(--faint)}}
+.sub{font-size:15px;line-height:1.75;color:var(--mute);max-width:54ch;margin-bottom:26px}
+.sub b{color:var(--ink);font-weight:500}
+.stats{display:flex;flex-wrap:wrap;gap:10px 24px;font:500 11px/1 var(--fm);letter-spacing:1px;color:var(--faint)}
+.stats b{color:var(--ink);font-weight:600;margin-right:5px}
+.stats .d{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.stats .d.dl{background:var(--live);box-shadow:0 0 8px rgba(0,212,170,.55)}
+.stats .d.ds{border:1.5px solid var(--faint)}
+
+/* Hero teknik çizim */
+.draw{position:relative}
+.draw svg{display:block;width:100%;height:auto}
+.caption{margin-top:10px;font:400 9.5px/1.6 var(--fm);letter-spacing:1.2px;color:var(--faint);text-align:center}
+
+@keyframes hdraw{to{stroke-dashoffset:0}}
+@keyframes hfade{to{opacity:1}}
+.dw{stroke-dasharray:1;stroke-dashoffset:1;animation:hdraw 1.3s var(--ease) forwards}
+.fa{opacity:0;animation:hfade .8s ease forwards}
+
+/* ════════ ARAÇ ÇUBUĞU (yapışkan) ════════ */
+.toolbar{
+  position:sticky;top:0;z-index:100;
+  background:color-mix(in srgb, var(--bg) 84%, transparent);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding:12px 0 10px;
 }
-.brand em { color: var(--text); font-style: normal; }
-.nav-tag {
-  font-size: 11px; color: var(--dim2);
-  font-family: 'JetBrains Mono', monospace;
+.tb-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.search{
+  flex:1;min-width:230px;
+  display:flex;align-items:center;gap:10px;
+  background:var(--surf);
+  border:1px solid var(--line2);
+  border-radius:7px;
+  padding:0 12px;height:42px;
+  transition:border-color .22s var(--ease), box-shadow .22s var(--ease);
+  cursor:text;
+}
+.search:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px rgba(249,115,22,.14)}
+.search svg{flex-shrink:0;width:15px;height:15px;stroke:var(--faint);fill:none;stroke-width:1.8;stroke-linecap:round}
+.search input{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--ink);font:400 13.5px/1 var(--fb);height:100%;min-width:0;
+}
+.search input::placeholder{color:var(--faint)}
+.search kbd{
+  font:500 10px/1 var(--fm);color:var(--faint);
+  border:1px solid var(--line2);border-bottom-width:2px;
+  border-radius:4px;padding:3px 7px;
+}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:7px;overflow:hidden;background:var(--surf)}
+.seg button{
+  appearance:none;border:none;cursor:pointer;
+  background:transparent;color:var(--mute);
+  font:600 12.5px/1 var(--fd);letter-spacing:.8px;text-transform:uppercase;
+  padding:0 15px;height:40px;
+  display:flex;align-items:center;gap:7px;
+  transition:background .18s, color .18s, box-shadow .18s;
+}
+.seg button + button{border-left:1px solid var(--line)}
+.seg button i{font:500 10px/1 var(--fm);font-style:normal;color:var(--faint)}
+.seg button:hover{color:var(--ink)}
+.seg button.on{background:var(--surf2);color:var(--ink);box-shadow:inset 0 -2px 0 var(--acc)}
+.seg button.on i{color:var(--acc)}
+.res{font:500 10.5px/1 var(--fm);letter-spacing:1.2px;color:var(--faint);white-space:nowrap}
+
+.chips{display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips a{
+  flex-shrink:0;display:inline-flex;align-items:center;gap:8px;
+  font:600 12px/1 var(--fd);letter-spacing:.6px;text-transform:uppercase;
+  color:var(--mute);text-decoration:none;
+  border:1px solid var(--line);border-radius:999px;
+  padding:7px 13px;background:rgba(15,17,25,.6);
+  transition:border-color .2s var(--ease), color .2s, transform .2s var(--ease), opacity .2s;
+}
+.chips a i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+.chips a:hover{border-color:color-mix(in srgb, var(--c) 55%, transparent);color:var(--ink);transform:translateY(-1px)}
+.chips a.off{opacity:.3;pointer-events:none}
+
+/* ════════ BÖLÜMLER ════════ */
+main{position:relative;z-index:1}
+.sec{padding-top:46px;scroll-margin-top:140px}
+.sec-head{display:flex;align-items:baseline;gap:13px;margin-bottom:18px}
+.sec-mark{width:9px;height:9px;border:2px solid var(--c);transform:rotate(45deg);flex-shrink:0;align-self:center}
+.sec-head h2{font:700 20px/1 var(--fd);letter-spacing:1.6px;text-transform:uppercase;color:var(--ink)}
+.sec-n{font:500 10px/1 var(--fm);letter-spacing:1.2px;color:var(--faint);white-space:nowrap}
+.sec-rule{flex:1;height:1px;background:linear-gradient(90deg, color-mix(in srgb, var(--c) 28%, transparent), transparent);align-self:center}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(272px,100%),1fr));gap:14px}
+
+/* ── Kartlar ───────────────────────────────────────────────── */
+.card{
+  position:relative;display:flex;flex-direction:column;gap:10px;
+  background:linear-gradient(180deg, var(--surf2), var(--surf));
+  border:1px solid var(--line);border-radius:8px;
+  padding:18px 18px 15px;
+  text-decoration:none;color:inherit;
+  transition:border-color .25s var(--ease), transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+/* Köşe braketi — pafta bölge işareti */
+.card::before{
+  content:'';position:absolute;top:-1px;left:-1px;width:14px;height:14px;
+  border-top:2px solid var(--c);border-left:2px solid var(--c);
+  border-top-left-radius:8px;opacity:.55;
+  transition:opacity .25s, width .25s var(--ease), height .25s var(--ease);
+}
+a.card:hover{
+  border-color:color-mix(in srgb, var(--c) 50%, transparent);
+  transform:translateY(-3px);
+  box-shadow:0 16px 36px -14px color-mix(in srgb, var(--c) 30%, rgba(0,0,0,.65));
+}
+a.card:hover::before{opacity:1;width:22px;height:22px}
+
+.card-top{display:flex;align-items:center;gap:10px}
+.chip-ic{
+  width:34px;height:34px;border-radius:7px;flex-shrink:0;
+  background:rgba(148,163,205,.06);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--mute);
+  transition:color .25s, border-color .25s;
+}
+a.card:hover .chip-ic{color:var(--c);border-color:color-mix(in srgb, var(--c) 35%, transparent)}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.std{margin-left:auto;text-align:right;font:500 10px/1.5 var(--fm);letter-spacing:.3px;color:var(--faint)}
+
+.card h3{font:600 17px/1.2 var(--fd);letter-spacing:.3px;color:var(--ink);transition:color .2s}
+.card p{flex:1;font-size:12.5px;line-height:1.65;color:var(--mute)}
+
+.foot{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.badge{display:inline-flex;align-items:center;gap:7px;font:600 9.5px/1 var(--fm);letter-spacing:1.2px;padding:5px 9px;border-radius:4px}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%}
+.badge.live{color:var(--live);background:rgba(0,212,170,.09);border:1px solid rgba(0,212,170,.22)}
+.badge.live::before{background:var(--live)}
+.badge.soon{color:var(--faint);background:rgba(148,163,205,.05);border:1px dashed var(--line2)}
+.badge.soon::before{border:1px solid var(--faint)}
+.go{font:600 12px/1 var(--fd);letter-spacing:.8px;text-transform:uppercase;color:var(--faint);display:flex;align-items:center;gap:6px;transition:color .2s}
+.go em{font-style:normal;font-family:var(--fm);transition:transform .25s var(--ease)}
+a.card:hover .go{color:var(--acc)}
+a.card:hover .go em{transform:translateX(3px)}
+
+/* Yakında kartları — kesikli "taslak" görünümü */
+.card.soon{border-style:dashed;background:rgba(15,17,25,.45);cursor:default}
+.card.soon::before{opacity:.25}
+.card.soon .chip-ic{color:var(--faint);opacity:.7}
+.card.soon h3{color:var(--mute)}
+.card.soon p{color:var(--faint)}
+
+/* ── Uzmanlık ayracı ───────────────────────────────────────── */
+.divide{display:flex;align-items:center;gap:16px;padding-top:54px}
+.divide span{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--line2))}
+.divide span:last-child{background:linear-gradient(90deg,var(--line2),transparent)}
+.divide p{font:500 10.5px/1 var(--fm);letter-spacing:4px;color:var(--faint);white-space:nowrap}
+
+/* ── Boş durum ─────────────────────────────────────────────── */
+.empty{margin:54px auto 0;max-width:430px;text-align:center;border:1px dashed var(--line2);border-radius:10px;padding:42px 28px}
+.empty .e1{font:600 17px/1 var(--fd);letter-spacing:.6px;color:var(--ink);margin-bottom:9px}
+.empty .e2{font-size:12.5px;color:var(--faint);margin-bottom:20px}
+.empty button{
+  appearance:none;cursor:pointer;
+  background:transparent;color:var(--acc);
+  border:1px solid rgba(249,115,22,.4);border-radius:6px;
+  font:600 12.5px/1 var(--fd);letter-spacing:1px;text-transform:uppercase;
+  padding:10px 18px;
+  transition:background .2s,border-color .2s;
+}
+.empty button:hover{background:rgba(249,115,22,.10);border-color:var(--acc)}
+
+/* ════════ ANTET (başlık bloğu) FOOTER ════════ */
+footer{position:relative;z-index:1;margin-top:78px;padding-bottom:42px}
+.tblock{
+  display:grid;grid-template-columns:1.7fr .8fr .7fr 1.1fr;
+  gap:1px;background:var(--line2);
+  border:1px solid var(--line2);border-radius:8px;overflow:hidden;
+}
+.cell{background:var(--bg2);padding:11px 14px 12px}
+.cell.w2{grid-column:span 2}
+.cell span{display:block;font:500 8.5px/1 var(--fm);letter-spacing:1.6px;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+.cell b{font:600 13px/1.45 var(--fd);letter-spacing:.5px;color:var(--ink)}
+.cell b.soft{font-family:var(--fb);font-weight:400;font-size:11.5px;color:var(--mute)}
+.colophon{margin-top:16px;text-align:center;font:400 10.5px/1.7 var(--fm);letter-spacing:.8px;color:var(--faint)}
+
+.hide{display:none!important}
+
+/* ════════ DUYARLILIK ════════ */
+@media(max-width:920px){
+  html{scroll-padding-top:188px}
+  .hero{grid-template-columns:1fr;gap:36px;padding-top:50px;padding-bottom:36px}
+  .draw{max-width:520px;margin:0 auto;width:100%}
+  .sec{scroll-margin-top:184px}
+}
+@media(max-width:640px){
+  .wrap{padding-left:18px;padding-right:18px}
+  .tb-row{gap:9px}
+  .res{display:none}
+  .tblock{grid-template-columns:1fr 1fr}
+  .cell.w2{grid-column:span 2}
+  .sec-n{display:none}
 }
 
-/* ─── HERO ────────────────────────────────────── */
-/* ─── HERO (GİRİŞ) BÖLÜMÜ ────────────────────────────────────── */
-.hero {
-  position: relative;
-  padding: 100px 32px 80px;
-  max-width: 1000px;
-  margin: 0 auto;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 1;
-}
-
-/* Arkadaki teknolojik neon parlaması */
-.hero-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 60vw;
-  height: 400px;
-  background: radial-gradient(circle, rgba(249, 115, 22, 0.08) 0%, rgba(0, 212, 170, 0.03) 40%, transparent 70%);
-  filter: blur(40px);
-  z-index: -1;
-  pointer-events: none; /* Tıklamaları engellememesi için */
-}
-
-/* V1.0 - Geliştirme Aşamasında Yazısı */
-.hero-eyebrow {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  color: var(--orange);
-  letter-spacing: 5px;
-  text-transform: uppercase;
-  margin-bottom: 24px;
-  text-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
-}
-
-
-
-/* Ana Başlık (Metalik Titanyum Efekti) */
-.hero-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(70px, 9vw, 130px);
-  letter-spacing: 2px;
-  line-height: 0.95;
-  margin-bottom: 24px;
-  
-  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 45%, #8892b0 100%);
-  -webkit-background-clip: text;
-  background-clip: text; /* <-- VS Code'un istediği standart özellik eklendi */
-  -webkit-text-fill-color: transparent;
-  
-  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.9)) drop-shadow(0 2px 1px rgba(255,255,255,0.1));
-}
-
-/* "VE" Kelimesine Özel Vurgu ve Konumlandırma */
-.hero-ve {
-  display: inline-block;
-  font-size: clamp(30px, 4vw, 50px);
-  
-  background: linear-gradient(180deg, #ffb380 0%, var(--orange) 100%);
-  -webkit-background-clip: text;
-  background-clip: text; /* <-- VS Code'un istediği standart özellik eklendi */
-  -webkit-text-fill-color: transparent;
-  
-  transform: translateY(-18px);
-  margin-bottom: -20px;
-}
-/* Açıklama Metni */
-.hero-sub {
-  font-size: 17px;
-  color: #cbd5e1; /* Daha parlak, okunabilir gümüş tonu */
-  line-height: 1.8;
-  max-width: 650px;
-  margin: 0 auto 40px;
-}
-
-/* 7 Araç Yayında Rozeti */
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(15, 15, 28, 0.6); /* Yarı şeffaf arka plan */
-  border: 1px solid rgba(0, 212, 170, 0.3); /* Teal rengi çerçeve */
-  border-radius: 100px;
-  padding: 10px 24px;
-  font-size: 13px;
-  color: var(--teal);
-  font-family: 'JetBrains Mono', monospace;
-  box-shadow: 0 0 20px rgba(0, 212, 170, 0.1);
-  backdrop-filter: blur(10px); /* Arkadaki gridi bulanıklaştırır */
-  transition: all 0.3s ease;
-}
-
-.hero-badge:hover {
-  border-color: rgba(0, 212, 170, 0.7);
-  box-shadow: 0 0 30px rgba(0, 212, 170, 0.25);
-  transform: translateY(-2px);
-}
-
-/* Rozetteki Atan (Pulsing) Nokta */
-.hero-badge::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--teal);
-  box-shadow: 0 0 10px var(--teal);
-  animation: pulse-teal 2s infinite;
-}
-
-/* Atım (Pulse) Animasyonu Tanımı */
-@keyframes pulse-teal {
-  0% { box-shadow: 0 0 0 0 rgba(0, 212, 170, 0.6); }
-  70% { box-shadow: 0 0 0 12px rgba(0, 212, 170, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(0, 212, 170, 0); }
-}
-
-/* ─── SECTION WRAPPER ─────────────────────────── */
-.grid-section {
-  padding: 0 32px 52px;
-  max-width: 1100px; margin: 0 auto;
-}
-.grid-section + .grid-section {
-  padding-top: 4px;
-}
-
-/* ─── SECTION LABEL ───────────────────────────── */
-.section-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 18px; /* Boyut büyütüldü */
-    font-weight: 700; /* Kalınlık artırıldı */
-    letter-spacing: 2px;
-    color: #ffffff; /* Saf beyaz yapılarak kontrast artırıldı */
-    text-transform: uppercase;
-    margin-bottom: 25px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.section-label::before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--sl-color, var(--orange)); /* Kategori rengini alır */
-    box-shadow: 0 0 10px var(--sl-color, var(--orange)); /* Hafif ışıma */
-}
-.section-label::after {
-  content: ''; flex: 1; height: 1px;
-  background: var(--sl-color, var(--border));
-  opacity: 0.18;
-}
-
-/* ─── SPECIALTY DIVIDER ───────────────────────── */
-.specialty-divider {
-  max-width: 1100px; margin: 0 auto;
-  padding: 16px 32px 40px;
-  display: flex; align-items: center; gap: 18px;
-}
-.specialty-divider-line {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--orange), transparent);
-    opacity: 0.5;
-}
-.specialty-divider-label {
-    font-family: 'Bebas Neue', sans-serif; /* Daha çarpıcı bir font */
-    font-size: 24px; /* Boyut büyütüldü */
-    letter-spacing: 5px;
-    color: var(--orange); /* Renk turuncu yapılarak vurgu artırıldı */
-    text-transform: uppercase;
-    padding: 8px 25px;
-    border: 1px solid rgba(249, 115, 22, 0.3); /* Turuncu transparan çerçeve */
-    border-radius: 4px;
-    background: rgba(249, 115, 22, 0.05);
-    white-space: nowrap;
-}
-
-/* ─── CARD GRID ───────────────────────────────── */
-.calc-grid {
-  display: grid;
-  /* Ekran genişliği 260px'ten küçükse otomatik %100 genişlik yapar, taşmayı önler */
-  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
-  gap: 16px;
-}
-
-/* ─── CARDS ───────────────────────────────────── */
-.card {
-  background: rgba(15, 15, 28, 0.7); /* Şeffaflık artırıldı */
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 24px;
-  position: relative;
-  overflow: hidden;
-  text-decoration: none; /* Link olarak kullanılacağı için alt çizgiyi kaldırır */
-  display: flex; /* Kart içeriğini dikeyde hizalamak için */
-  flex-direction: column;
-  backdrop-filter: blur(10px); /* Arka plandaki grid çizgilerini estetik şekilde bulanıklaştırır */
-  -webkit-backdrop-filter: blur(10px);
-  transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
-}
-.card::before {
-  content: ''; position: absolute;
-  top: 0; left: 0; right: 0; height: 2px;
-  background: var(--card-accent, var(--dim));
-  opacity: 0.55; transition: opacity .2s;
-}
-.card:hover {
-  border-color: var(--card-accent, var(--dim));
-  transform: translateY(-4px); /* Yukarı kalkma hareketi belirginleştirildi */
-  /* Kartın kendi vurgu rengine (--card-accent) göre dışa doğru şık bir ışıma (glow) ekler */
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.03);
-}
-.card:hover::before { opacity: 1; }
-.card.active { cursor: pointer; }
-.card.soon {
-  opacity: 0.8;
-  border-style: dashed; /* Kesikli çizgi ile 'taslak' imajı */
-  background: rgba(15, 15, 28, 0.4); /* Daha şeffaf ve sönük bir arka plan */
-  cursor: not-allowed; /* Üzerine gelince tıklanamaz imleci gösterir */
-}
-.card.soon:hover {
-  transform: none;
-  box-shadow: none;
-}
-
-.card-icon {
-  width: 42px; height: 42px; border-radius: 10px;
-  background: rgba(255,255,255,0.04);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; margin-bottom: 16px;
-}
-.card-name {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 18px; font-weight: 700;
-  letter-spacing: .5px; margin-bottom: 6px;
-  color: var(--text);
-}
-.card-desc {
-  font-size: 12px; color: var(--dim2); line-height: 1.65;
-  margin-bottom: 20px;
-}
-.card-foot {
-  display: flex; align-items: center;
-  justify-content: space-between;
-}
-.card-std {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px; color: var(--dim);
-}
-.badge {
-  font-size: 10px; font-family: 'JetBrains Mono', monospace;
-  padding: 3px 8px; border-radius: 4px;
-  font-weight: 600; letter-spacing: .5px;
-}
-.badge-live {
-  background: rgba(0,212,170,.12);
-  color: var(--teal); border: 1px solid rgba(0,212,170,.25);
-}
-.badge-soon {
-  background: rgba(255,255,255,.05);
-  color: var(--dim); border: 1px solid var(--border);
-}
-.card-link { text-decoration: none; display: block; }
-
-/* ─── FOOTER ──────────────────────────────────── */
-footer {
-  border-top: 1px solid var(--border);
-  padding: 24px 32px;
-  text-align: center;
-  font-size: 12px; color: var(--dim);
-  font-family: 'JetBrains Mono', monospace;
-}
-@media (max-width: 768px) {
-  html, body { overflow-x: hidden !important; }
-  nav { padding: 0 16px !important; }
-  .hero { padding: 48px 20px 36px !important; }
-  .tools-grid {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
+/* ════════ AZALTILMIŞ HAREKET ════════ */
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition:none!important;animation:none!important}
+  .dw{stroke-dashoffset:0}
+  .fa{opacity:1}
 }
 </style>
 </head>
 <body>
 
-<nav>
-  <a class="brand" href="index.html">MH<em>Platform</em></a>
-</nav>
+<!-- Pafta çerçevesi -->
+<div class="frame" aria-hidden="true"><i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i></div>
 
-<div class="hero">
-  <div class="hero-glow"></div>
+<!-- ════════ SVG İKON SETİ ════════ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-chain" viewBox="0 0 24 24"><rect x="2.5" y="9" width="10.5" height="6" rx="3"/><rect x="11" y="9" width="10.5" height="6" rx="3"/></symbol>
+<symbol id="i-belt" viewBox="0 0 24 24"><circle cx="6.8" cy="12" r="3.6"/><circle cx="17.2" cy="12" r="3.6"/><line x1="6.8" y1="8.4" x2="17.2" y2="8.4"/><line x1="6.8" y1="15.6" x2="17.2" y2="15.6"/></symbol>
+<symbol id="i-screw" viewBox="0 0 24 24"><path d="M2.5 9.5h13v5h-13z"/><path d="M5 9.5l2 5M8.5 9.5l2 5M12 9.5l2 5"/><rect x="15.5" y="8" width="6" height="8" rx="1"/></symbol>
+<symbol id="i-motor" viewBox="0 0 24 24"><path d="M13 2.5 5.5 13h5L9.5 21.5 18.5 10h-5z"/></symbol>
+<symbol id="i-conv" viewBox="0 0 24 24"><line x1="2.5" y1="10" x2="21.5" y2="10"/><circle cx="7" cy="15" r="2.6"/><circle cx="17" cy="15" r="2.6"/><rect x="9" y="4.5" width="6" height="5.5"/></symbol>
+<symbol id="i-weight" viewBox="0 0 24 24"><path d="M7.5 8.5h9L19 20.5H5z"/><path d="M9.5 8.5a2.5 2.5 0 0 1 5 0"/></symbol>
+<symbol id="i-tol" viewBox="0 0 24 24"><rect x="2.5" y="8" width="19" height="8" rx="1"/><path d="M6 8v3.2M9.5 8v4.8M13 8v3.2M16.5 8v4.8M20 8v3.2"/></symbol>
+<symbol id="i-beam" viewBox="0 0 24 24"><path d="M6 4.5h12M6 19.5h12M12 4.5v15"/></symbol>
+<symbol id="i-thread" viewBox="0 0 24 24"><path d="M2.5 16.5l3.2-9 3.2 9 3.2-9 3.2 9 3.2-9 2.9 8.2"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M8 3h8l2 3.25L16 9.5H8L6 6.25z"/><path d="M9.8 9.5V20.5M14.2 9.5V20.5"/><path d="M9.8 13h4.4M9.8 16h4.4M9.8 19h4.4"/></symbol>
+<symbol id="i-conv2" viewBox="0 0 24 24"><path d="M3.5 9h13.5l-3-3M20.5 15H7l3 3"/></symbol>
+<symbol id="i-spring" viewBox="0 0 24 24"><line x1="7" y1="3.5" x2="17" y2="3.5"/><line x1="7" y1="20.5" x2="17" y2="20.5"/><path d="M9 3.5l6 2.4-6 2.4 6 2.4-6 2.4 6 2.4-6 2.4 6 2.5"/></symbol>
+<symbol id="i-cyl" viewBox="0 0 24 24"><rect x="2.5" y="8" width="13" height="8" rx="1"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="15.5" y1="12" x2="21.5" y2="12"/></symbol>
+<symbol id="i-pump" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 5.5l4.5 7h-9z"/></symbol>
+<symbol id="i-pipe" viewBox="0 0 24 24"><path d="M2.5 7h9.5a6.5 6.5 0 0 1 6.5 6.5v8"/><path d="M2.5 11h9.5a2.5 2.5 0 0 1 2.5 2.5v8"/></symbol>
+<symbol id="i-air" viewBox="0 0 24 24"><path d="M2.5 8h9.5a2.6 2.6 0 1 0-2.5-3.3M2.5 12.5h13.5a2.6 2.6 0 1 1-2.5 3.3M2.5 17h7"/></symbol>
+<symbol id="i-tank" viewBox="0 0 24 24"><rect x="7" y="6" width="10" height="14.5" rx="3.5"/><path d="M9.5 3h5M12 3v3"/></symbol>
+<symbol id="i-valve" viewBox="0 0 24 24"><path d="M3.5 7.5l8.5 4.5-8.5 4.5zM20.5 7.5 12 12l8.5 4.5z"/></symbol>
+<symbol id="i-mat" viewBox="0 0 24 24"><path d="M12 2.8l7.5 4.3v9.8L12 21.2l-7.5-4.3V7.1z"/><circle cx="12" cy="12" r="1.6"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M3.5 3.5v17h17"/><path d="M7 15.5l4-4.5 3 2.5 5.5-6.5"/></symbol>
+<symbol id="i-heat" viewBox="0 0 24 24"><line x1="10.7" y1="4" x2="10.7" y2="13"/><circle cx="10.7" cy="16.6" r="3.6"/><path d="M16 6.5h4.5M16 9.5h3.5"/></symbol>
+<symbol id="i-bear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.8"/><circle cx="12" cy="12" r="3.4"/><circle cx="12" cy="5.9" r="1.15"/><circle cx="12" cy="18.1" r="1.15"/><circle cx="5.9" cy="12" r="1.15"/><circle cx="18.1" cy="12" r="1.15"/></symbol>
+<symbol id="i-life" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.8"/><path d="M12 6.8V12l3.6 2.2"/></symbol>
+<symbol id="i-fit" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.8"/><circle cx="12" cy="12" r="4.2"/><path d="M12 3.2v4.6M12 16.2v4.6"/></symbol>
+<symbol id="i-shaft" viewBox="0 0 24 24"><path d="M2.5 9h5.5V6.5h7V9h6.5M2.5 15h5.5v2.5h7V15h6.5"/><path d="M2.5 12h19" stroke-dasharray="4 3"/></symbol>
+<symbol id="i-whirl" viewBox="0 0 24 24"><path d="M2.5 12h19" stroke-dasharray="4 3"/><path d="M2.5 12c3.2-7.5 6.3-7.5 9.5 0s6.3 7.5 9.5 0"/></symbol>
+<symbol id="i-key" viewBox="0 0 24 24"><circle cx="12" cy="13.4" r="7.4"/><path d="M9.8 6.4V3.4h4.4v3"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.2"/><circle cx="12" cy="12" r="2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1"/></symbol>
+<symbol id="i-gears" viewBox="0 0 24 24"><circle cx="8.3" cy="8.3" r="4.8"/><circle cx="15.6" cy="15.6" r="5.6"/><path d="M8.3 2v1.5M2 8.3h1.5M8.3 14.6v-1.5M14.6 8.3h-1.5M15.6 21.2v-1.6M21.7 15.6h-1.6M15.6 10v1.6M9.5 15.6h1.6"/></symbol>
+<symbol id="i-tooth" viewBox="0 0 24 24"><path d="M7.5 20.5v-8.5c0-4.2 2-6.5 4.5-6.5s4.5 2.3 4.5 6.5v8.5"/><path d="M21.5 7.5h-3.4M19.6 5.8 17.8 7.5l1.8 1.7"/></symbol>
+<symbol id="i-lathe" viewBox="0 0 24 24"><rect x="2.5" y="8.5" width="12" height="7" rx="1"/><path d="M14.5 12l6-3.2v6.4z"/></symbol>
+<symbol id="i-millc" viewBox="0 0 24 24"><rect x="9" y="2.5" width="6" height="9.5" rx="1"/><path d="M9 6h6M9 9h6"/><path d="M9 12l3 4.5 3-4.5"/><line x1="3.5" y1="20.5" x2="20.5" y2="20.5"/></symbol>
+<symbol id="i-curve" viewBox="0 0 24 24"><path d="M3.5 3.5v17h17"/><path d="M6 6.5c4.5 1 8.5 5.5 11.5 11"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M3.5 3.5h17M3.5 3.5v7M20.5 3.5v7"/><path d="M9.5 7.5h5l-1.3 3.4h-2.4z"/><path d="M6.5 20.5h11M7.8 17.2h8.4"/></symbol>
+<symbol id="i-offset" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.6" stroke-dasharray="3 3"/></symbol>
+<symbol id="i-spool" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="7.3"/><circle cx="10.8" cy="10.8" r="2.2"/><path d="M15.8 16.2c2.7 1.6 3 4.3 5.7 4.3"/></symbol>
+</defs></svg>
 
-  <p class="hero-eyebrow">v1.0 — GELİŞTİRME AŞAMASINDA</p>
-  
-  <h1 class="hero-title">
-    MEKANİK TASARIM<br>
-    <span class="hero-ve">VE</span><br>
-    İMALAT ARAÇLARI
-  </h1>
-  
-  <p class="hero-sub">
-    Makine mühendisleri için açık kaynak hesaplama araçları. Diş, tolerans, ağırlık, 
-    hidrolik, pnömatik, rulman, mil, dişli ve daha fazlası.
-  </p>
-  
-  <span class="hero-badge">17 araç yayında</span>
-</div>
-<!-- ════════════════════════════════════════════════════════ -->
-<!--  TEMEL ARAÇLAR                                         -->
-<!-- ════════════════════════════════════════════════════════ -->
-<div class="grid-section">
-  <p class="section-label" style="--sl-color: var(--orange)">Temel Araçlar</p>
-  <div class="calc-grid">
-
-
-    <a href="zincir-disli.html" class="card active" style="--card-accent:#a78bfa">
-      <div class="card-icon">🔩</div>
-      <div class="card-name">Zincir-Dişli Hesabı</div>
-      <p class="card-desc">Zincir adımı, dişli oranı, aks mesafesi ve zincir uzunluğu hesabı.</p>
-      <div class="card-foot">
-        <span class="card-std">DIN 8187 · ISO 606</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
-
-    <a href="triger-disli.html" class="card active" style="--card-accent:#fbbf24">
-      <div class="card-icon">🏃</div>
-      <div class="card-name">Triger Dişli Hesabı</div>
-      <p class="card-desc">HTD / GT profil seçimi, kayış uzunluğu, aks mesafesi ve kasnak hesabı.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 5296</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
-
-    <a href="vidali-mil.html" class="card active" style="--card-accent:#e879f9">
-      <div class="card-icon">🔩</div>
-      <div class="card-name">Vidalı Mil Hesapları</div>
-      <p class="card-desc">Kinematik, stabilite (whirling / burkulma), otoblokaj, ömür ve termal uzama — ortak girdi ile tek sayfada.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 3408 · DIN 69051</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    
-
-    <a href="motor-reduktor.html" class="card active" style="--card-accent:#f97316">
-      <div class="card-icon">⚡</div>
-      <div class="card-name">Motor-Redüktör Seçimi</div>
-      <p class="card-desc">Gerekli tork, güç, çevrim oranı ve redüktör tipi belirleme hesapları.</p>
-      <div class="card-foot">
-        <span class="card-std">IEC 60034</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
-
-    <a href="konveyor.html" class="card active" style="--card-accent:#34d399">
-      <div class="card-icon">🔄</div>
-      <div class="card-name">Konveyör Hesabı</div>
-      <p class="card-desc">Bant hızı, yük ve eğimden gerekli güç, devir, IEC motor seçimi ve kalkış süresi.</p>
-      <div class="card-foot">
-        <span class="card-std">DIN 22101</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
-
-
-    <a href="agirlik-hesaplama.html" class="card active" style="--card-accent:#60a5fa">
-      <div class="card-icon">⚖️</div>
-      <div class="card-name">Profil Ağırlık Hesabı</div>
-      <p class="card-desc">Kare/dikdörtgen profil, boru, mil, köşebent, U profil, lama, sac, IPE, HEB — malzeme seçimi ve hesaplama listesi ile toplam ağırlık.</p>
-      <div class="card-foot">
-        <span class="card-std">DIN · EN · ASTM</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
-
-
-
-    <a href="tolerans.html" class="card active" style="--card-accent:#a78bfa">
-      <div class="card-icon">📏</div>
-      <div class="card-name">ISO Toleranslar</div>
-      <p class="card-desc">Çap girin, delik veya mil seçin — ES/EI, maks/min boyutlar, IT değeri ve H7/g6 · H7/k6 · H7/p6 gibi hazır uyum analizleri.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 286-1</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
-
-    <a href="kiris-profil.html" class="card active" style="--card-accent:#f472b6">
-      <div class="card-icon">📐</div>
-      <div class="card-name">Kiriş / Profil Hesabı</div>
-      <p class="card-desc">HEB, IPE, UPN profiller — eğilme, kayma, sehim ve atalet momenti.</p>
-      <div class="card-foot">
-        <span class="card-std">EN 10034</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
-
-
-    <a href="dis-referans.html" class="card active" style="--card-accent:#44dd88">
-      <div class="card-icon">⚙️</div>
-      <div class="card-name">Diş Referans Tablosu</div>
-      <p class="card-desc">G, Metrik, R/Rc, Trapez, UNC, NPT — diş profili, matkap çapı, SolidWorks parametreleri ve 3D baskı offset hesabı.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 228 · ISO 68-1 · DIN 103</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
-
-
-    <a href="civata.html" class="card active" style="--card-accent:#00d4aa">
-      <div class="card-icon">🔧</div>
-      <div class="card-name">Cıvata Sıkma Torku</div>
-      <p class="card-desc">Sıkma kuvveti, tork hesabı, sürtünme katsayısı ve öngerilme kontrolü.</p>
-      <div class="card-foot">
-        <span class="card-std">VDI 2230</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
-
-    <a href="birim-cevirici.html" class="card active" style="--card-accent:#22d3ee">
-      <div class="card-icon" style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:-1px;color:#22d3ee;font-weight:700">mm↔m</div>
-      <div class="card-name">Birim Çevirici</div>
-      <p class="card-desc">Uzunluk, kuvvet, basınç, tork, güç ve daha fazlası — 13 mühendislik kategorisinde çift yönlü birim dönüştürme.</p>
-      <div class="card-foot">
-        <span class="card-std">SI · Imperial · Metrik</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
-
-    <div class="card soon" style="--card-accent:#34d399">
-      <div class="card-icon">🔄</div>
-      <div class="card-name">Yay Hesabı</div>
-      <p class="card-desc">Basma / çekme yayı — tel çapı, ön yük, yay sabitesi ve çalışma boyu.</p>
-      <div class="card-foot">
-        <span class="card-std">DIN 2098</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
+<!-- ════════ HERO ════════ -->
+<header class="hero wrap">
+  <div>
+    <p class="eyebrow">AÇIK KAYNAK · MÜHENDİSLİK ARAÇLARI <b>REV 2.0</b></p>
+    <h1>
+      Mekanik Tasarım<br>
+      <span class="h-outline">ve İmalat İçin</span><br>
+      Hesap Tezgâhı
+    </h1>
+    <p class="sub">
+      Diş standardından rulman ömrüne, cıvata torkundan kiriş sehimine —
+      <b><span id="nTot">36</span> mühendislik hesabı</b> tek dizinde.
+      Kurulum ve üyelik yok; tüm hesaplar tarayıcınızda, istemci tarafında çalışır.
+    </p>
+    <div class="stats">
+      <span><i class="d dl"></i><b id="nLive">17</b>CANLI</span>
+      <span><i class="d ds"></i><b id="nSoon">19</b>GELİŞTİRMEDE</span>
+      <span><b id="nCat">9</b>KATEGORİ</span>
+      <span><b>%100</b>İSTEMCİ TARAFI</span>
     </div>
-
-
-
   </div>
-</div>
 
-<div class="specialty-divider">
-  <div class="specialty-divider-line"></div>
-  <span class="specialty-divider-label">Uzmanlık Modülleri</span>
-  <div class="specialty-divider-line"></div>
-</div>
-
-
-<div class="grid-section">
-  <p class="section-label" style="--sl-color:#38bdf8">Hidrolik Sistemler</p>
-  <div class="calc-grid">
-
-    <div class="card soon" style="--card-accent:#38bdf8">
-      <div class="card-icon">🔵</div>
-      <div class="card-name">Silindir Kuvveti & Hız</div>
-      <p class="card-desc">Piston çapı ve basınçtan itme / çekme kuvveti, piston hızı ve gerekli debi hesabı.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 4391</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
-    <div class="card soon" style="--card-accent:#38bdf8">
-      <div class="card-icon">⛽</div>
-      <div class="card-name">Pompa & Debi Hesabı</div>
-      <p class="card-desc">Sistem çalışma basıncı, gerekli debi, pompa gücü ve hacimsel verimlilik analizi.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 4391</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
-    <div class="card soon" style="--card-accent:#38bdf8">
-      <div class="card-icon">🌊</div>
-      <div class="card-name">Hat & Boru Boyutlandırma</div>
-      <p class="card-desc">Basınç düşümü, akış hızı sınırları, boru çapı ve duvar kalınlığı seçimi.</p>
-      <div class="card-foot">
-        <span class="card-std">DIN 2391 · ISO 4406</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
+  <div class="draw" aria-hidden="true">
+    <svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+      <!-- eksen çizgisi (nokta-tire) -->
+      <path class="fa" style="animation-delay:.1s" d="M30 200H570" stroke="#5b6380" stroke-width="1" stroke-dasharray="16 6 3 6" fill="none" opacity=".8"/>
+      <!-- mil dolgusu -->
+      <path class="fa" style="animation-delay:1s" fill="rgba(249,115,22,.06)" stroke="none"
+        d="M80 172H140V158H220V144H340V158H420V172H500V228H420V242H340V256H220V242H140V228H80Z"/>
+      <!-- mil dış hattı -->
+      <path class="dw" pathLength="1" style="animation-delay:.25s"
+        d="M80 172H140V158H220V144H340V158H420V172H500V228H420V242H340V256H220V242H140V228H80Z"
+        fill="none" stroke="#f97316" stroke-width="2" stroke-linejoin="round"/>
+      <!-- rulmanlar (kare + çapraz: standart gösterim) -->
+      <path class="dw" pathLength="1" style="animation-delay:.95s" d="M167 132h26v26h-26zM167 132l26 26M193 132l-26 26" fill="none" stroke="#7c86f8" stroke-width="1.5"/>
+      <path class="dw" pathLength="1" style="animation-delay:1.0s" d="M167 242h26v26h-26zM167 242l26 26M193 242l-26 26" fill="none" stroke="#7c86f8" stroke-width="1.5"/>
+      <path class="dw" pathLength="1" style="animation-delay:1.05s" d="M367 132h26v26h-26zM367 132l26 26M393 132l-26 26" fill="none" stroke="#7c86f8" stroke-width="1.5"/>
+      <path class="dw" pathLength="1" style="animation-delay:1.1s" d="M367 242h26v26h-26zM367 242l26 26M393 242l-26 26" fill="none" stroke="#7c86f8" stroke-width="1.5"/>
+      <text class="fa" style="animation-delay:1.5s" x="180" y="121" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#5b6380">6206</text>
+      <text class="fa" style="animation-delay:1.55s" x="380" y="121" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#5b6380">6208</text>
+      <!-- merkez işareti -->
+      <g class="fa" style="animation-delay:1.4s" stroke="#5b6380" stroke-width="1" fill="none">
+        <circle cx="80" cy="200" r="5"/>
+        <path d="M68 200h24M80 188v24"/>
+      </g>
+      <!-- boy ölçüsü -->
+      <path class="dw" pathLength="1" style="animation-delay:1.35s" d="M80 234v84M500 234v84M90 310h400" fill="none" stroke="#60a5fa" stroke-width="1.1" opacity=".9"/>
+      <path class="fa" style="animation-delay:1.75s" fill="#60a5fa" stroke="none" d="M80 310l10-3.5v7zM500 310l-10-3.5v7z"/>
+      <text class="fa" style="animation-delay:1.8s" x="295" y="303" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11.5" fill="#99a1bc">420</text>
+      <!-- çap ölçüsü -->
+      <path class="dw" pathLength="1" style="animation-delay:1.45s" d="M346 144h202M346 256h202M540 154v92" fill="none" stroke="#60a5fa" stroke-width="1.1" opacity=".9"/>
+      <path class="fa" style="animation-delay:1.85s" fill="#60a5fa" stroke="none" d="M540 144l-3.5 10h7zM540 256l-3.5-10h7z"/>
+      <text class="fa" style="animation-delay:1.9s" transform="rotate(-90 560 200)" x="560" y="200" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#99a1bc">⌀112 k6</text>
+    </svg>
+    <p class="caption">ŞEKİL 1 — TEMSİLİ MİL &amp; RULMAN YERLEŞİMİ · ÖLÇEKSİZ</p>
   </div>
-</div>
+</header>
 
-<div class="grid-section">
-  <p class="section-label" style="--sl-color:#cbd5e1">Pnömatik Sistemler</p>
-  <div class="calc-grid">
-
-    <a href="pnomatik-silindir.html" class="card active" style="--card-accent:#94a3b8">
-      <div class="card-icon">💨</div>
-      <div class="card-name">Silindir Kuvveti & Tüketim</div>
-      <p class="card-desc">Çalışma kuvveti, teorik / pratik kuvvet farkı ve devir başı hava tüketimi hesabı.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 6358</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
-
-    <div class="card soon" style="--card-accent:#94a3b8">
-      <div class="card-icon">🗜️</div>
-      <div class="card-name">Kompresör & Depo Seçimi</div>
-      <p class="card-desc">Serbest hava debisi (FAD), tank hacmi, dolum süresi ve kompresör gücü hesabı.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 1217</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
+<!-- ════════ ARAÇ ÇUBUĞU ════════ -->
+<div class="toolbar" id="araclar">
+  <div class="wrap tb-row">
+    <label class="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+      <input id="q" type="search" autocomplete="off" placeholder="Araç, standart veya konu ara — örn. rulman, ISO 286, tork" aria-label="Araç ara">
+      <kbd>/</kbd>
+    </label>
+    <div class="seg" role="group" aria-label="Durum filtresi">
+      <button class="on" data-f="all" type="button">Tümü <i id="cAll">36</i></button>
+      <button data-f="live" type="button">Canlı <i id="cLive">17</i></button>
+      <button data-f="soon" type="button">Yakında <i id="cSoon">19</i></button>
     </div>
-
-    <div class="card soon" style="--card-accent:#94a3b8">
-      <div class="card-icon">🔘</div>
-      <div class="card-name">Vana Akış Katsayısı (Kv/Cv)</div>
-      <p class="card-desc">Kv / Cv hesabı, vana boyutlandırma; hava ve sıvı akışları için akış faktörü.</p>
-      <div class="card-foot">
-        <span class="card-std">IEC 60534</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
+    <span class="res" id="res">36 ARAÇ</span>
   </div>
+  <nav class="wrap chips" id="chips" aria-label="Kategoriler">
+    <a href="#temel"    style="--c:#f97316"><i></i>Temel</a>
+    <a href="#hidrolik" style="--c:#38bdf8"><i></i>Hidrolik</a>
+    <a href="#pnomatik" style="--c:#94a3b8"><i></i>Pnömatik</a>
+    <a href="#malzeme"  style="--c:#fbbf24"><i></i>Malzeme</a>
+    <a href="#rulman"   style="--c:#818cf8"><i></i>Rulman</a>
+    <a href="#mil"      style="--c:#fb7185"><i></i>Mil</a>
+    <a href="#disli"    style="--c:#c084fc"><i></i>Dişli</a>
+    <a href="#talasli"  style="--c:#4ade80"><i></i>Talaşlı İmalat</a>
+    <a href="#yazici"   style="--c:#67e8f9"><i></i>3D Yazıcı</a>
+  </nav>
 </div>
 
-<div class="grid-section">
-  <p class="section-label" style="--sl-color:#fbbf24">Malzeme Veritabanı</p>
-  <div class="calc-grid">
+<main class="wrap">
 
-    
-    <a class="card" href="malzeme-veritabani.html" style="--card-accent:#fbbf24">
-      <div class="card-icon">🔬</div>
-      <div class="card-name">Malzeme Veritabanı</div>
-      <p class="card-desc">Çelik · Alüminyum · Plastik · Bronz · Titanyum… 40+ malzeme mekanik, fiziksel ve teknolojik özelliklerle karşılaştırılır..</p>
-      <div class="card-foot">
-        <span class="card-std">EN 10027 · AISI</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
+  <!-- ─── TEMEL ARAÇLAR ─── -->
+  <section class="sec" id="temel" style="--c:#f97316" data-zone="core">
+    <header class="sec-head">
+      <span class="sec-mark" aria-hidden="true"></span>
+      <h2>Temel Araçlar</h2>
+      <span class="sec-n">12 ARAÇ</span>
+      <span class="sec-rule" aria-hidden="true"></span>
+    </header>
+    <div class="grid">
 
-    <div class="card soon" style="--card-accent:#fbbf24">
-      <div class="card-icon">📊</div>
-      <div class="card-name">Mekanik Özellikler Referansı</div>
-      <p class="card-desc">Rm, Re, A%, sertlik (HB/HRC), E modülü, yoğunluk ve ısıl genleşme katsayısı veritabanı.</p>
-      <div class="card-foot">
-        <span class="card-std">EN 10025 · ISO 683</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
+      <a class="card" href="zincir-disli.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-chain"/></svg></span><span class="std">DIN 8187<br>ISO 606</span></div>
+        <h3>Zincir-Dişli Hesabı</h3>
+        <p>Zincir adımı, dişli oranı, aks mesafesi ve zincir uzunluğu hesabı.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <a class="card" href="triger-disli.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-belt"/></svg></span><span class="std">ISO 5296</span></div>
+        <h3>Triger Dişli Hesabı</h3>
+        <p>HTD / GT profil seçimi, kayış uzunluğu, aks mesafesi ve kasnak hesabı.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <a class="card" href="vidali-mil.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-screw"/></svg></span><span class="std">ISO 3408<br>DIN 69051</span></div>
+        <h3>Vidalı Mil Hesapları</h3>
+        <p>Kinematik, stabilite (whirling / burkulma), otoblokaj, ömür ve termal uzama — ortak girdiyle tek sayfada.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <a class="card" href="motor-reduktor.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-motor"/></svg></span><span class="std">IEC 60034</span></div>
+        <h3>Motor-Redüktör Seçimi</h3>
+        <p>Gerekli tork, güç, çevrim oranı ve redüktör tipi belirleme hesapları.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <a class="card" href="konveyor.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-conv"/></svg></span><span class="std">DIN 22101</span></div>
+        <h3>Konveyör Hesabı</h3>
+        <p>Bant hızı, yük ve eğimden gerekli güç, devir, IEC motor seçimi ve kalkış süresi.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <a class="card" href="agirlik-hesaplama.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-weight"/></svg></span><span class="std">DIN · EN · ASTM</span></div>
+        <h3>Profil Ağırlık Hesabı</h3>
+        <p>Kare profil, boru, mil, köşebent, U profil, lama, sac, IPE, HEB — malzeme seçimi ve hesap listesiyle toplam ağırlık.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <a class="card" href="tolerans.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-tol"/></svg></span><span class="std">ISO 286-1</span></div>
+        <h3>ISO Toleranslar</h3>
+        <p>Çap girin, delik veya mil seçin — ES/EI, maks/min boyutlar, IT değeri ve H7/g6 · H7/k6 · H7/p6 gibi hazır uyum analizleri.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <a class="card" href="kiris-profil.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-beam"/></svg></span><span class="std">EN 10034</span></div>
+        <h3>Kiriş / Profil Hesabı</h3>
+        <p>HEB, IPE, UPN profiller — eğilme, kayma, sehim ve atalet momenti.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <a class="card" href="dis-referans.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-thread"/></svg></span><span class="std">ISO 228 · ISO 68-1<br>DIN 103</span></div>
+        <h3>Diş Referans Tablosu</h3>
+        <p>G, Metrik, R/Rc, Trapez, UNC, NPT — diş profili, matkap çapı, SolidWorks parametreleri ve 3D baskı offset hesabı.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <a class="card" href="civata.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-bolt"/></svg></span><span class="std">VDI 2230</span></div>
+        <h3>Cıvata Sıkma Torku</h3>
+        <p>Sıkma kuvveti, tork hesabı, sürtünme katsayısı ve öngerilme kontrolü.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <a class="card" href="birim-cevirici.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-conv2"/></svg></span><span class="std">SI · IMPERIAL</span></div>
+        <h3>Birim Çevirici</h3>
+        <p>Uzunluk, kuvvet, basınç, tork, güç ve daha fazlası — 13 mühendislik kategorisinde çift yönlü birim dönüştürme.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-spring"/></svg></span><span class="std">DIN 2098</span></div>
+        <h3>Yay Hesabı</h3>
+        <p>Basma / çekme yayı — tel çapı, ön yük, yay sabitesi ve çalışma boyu.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
     </div>
+  </section>
 
-    <div class="card soon" style="--card-accent:#fbbf24">
-      <div class="card-icon">🌡️</div>
-      <div class="card-name">Isıl İşlem Tablosu</div>
-      <p class="card-desc">Sertleştirme, menevişleme ve tavlama sıcaklıkları; elde edilecek sertlik aralığı ve soğutma ortamı önerileri.</p>
-      <div class="card-foot">
-        <span class="card-std">DIN 17212 · EN 10083</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
+  <div class="divide" id="divide" aria-hidden="true"><span></span><p>UZMANLIK MODÜLLERİ</p><span></span></div>
+
+  <!-- ─── HİDROLİK ─── -->
+  <section class="sec" id="hidrolik" style="--c:#38bdf8" data-zone="spec">
+    <header class="sec-head">
+      <span class="sec-mark" aria-hidden="true"></span>
+      <h2>Hidrolik Sistemler</h2>
+      <span class="sec-n">3 ARAÇ</span>
+      <span class="sec-rule" aria-hidden="true"></span>
+    </header>
+    <div class="grid">
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-cyl"/></svg></span><span class="std">ISO 4391</span></div>
+        <h3>Silindir Kuvveti &amp; Hız</h3>
+        <p>Piston çapı ve basınçtan itme / çekme kuvveti, piston hızı ve gerekli debi hesabı.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-pump"/></svg></span><span class="std">ISO 4391</span></div>
+        <h3>Pompa &amp; Debi Hesabı</h3>
+        <p>Sistem çalışma basıncı, gerekli debi, pompa gücü ve hacimsel verimlilik analizi.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-pipe"/></svg></span><span class="std">DIN 2391<br>ISO 4406</span></div>
+        <h3>Hat &amp; Boru Boyutlandırma</h3>
+        <p>Basınç düşümü, akış hızı sınırları, boru çapı ve duvar kalınlığı seçimi.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
     </div>
+  </section>
 
+  <!-- ─── PNÖMATİK ─── -->
+  <section class="sec" id="pnomatik" style="--c:#94a3b8" data-zone="spec">
+    <header class="sec-head">
+      <span class="sec-mark" aria-hidden="true"></span>
+      <h2>Pnömatik Sistemler</h2>
+      <span class="sec-n">3 ARAÇ</span>
+      <span class="sec-rule" aria-hidden="true"></span>
+    </header>
+    <div class="grid">
+
+      <a class="card" href="pnomatik-silindir.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-air"/></svg></span><span class="std">ISO 6358</span></div>
+        <h3>Silindir Kuvveti &amp; Tüketim</h3>
+        <p>Çalışma kuvveti, teorik / pratik kuvvet farkı ve devir başı hava tüketimi hesabı.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-tank"/></svg></span><span class="std">ISO 1217</span></div>
+        <h3>Kompresör &amp; Depo Seçimi</h3>
+        <p>Serbest hava debisi (FAD), tank hacmi, dolum süresi ve kompresör gücü hesabı.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-valve"/></svg></span><span class="std">IEC 60534</span></div>
+        <h3>Vana Akış Katsayısı (Kv/Cv)</h3>
+        <p>Kv / Cv hesabı, vana boyutlandırma; hava ve sıvı akışları için akış faktörü.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ─── MALZEME ─── -->
+  <section class="sec" id="malzeme" style="--c:#fbbf24" data-zone="spec">
+    <header class="sec-head">
+      <span class="sec-mark" aria-hidden="true"></span>
+      <h2>Malzeme Veritabanı</h2>
+      <span class="sec-n">3 ARAÇ</span>
+      <span class="sec-rule" aria-hidden="true"></span>
+    </header>
+    <div class="grid">
+
+      <a class="card" href="malzeme-veritabani.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-mat"/></svg></span><span class="std">EN 10027 · AISI</span></div>
+        <h3>Malzeme Veritabanı</h3>
+        <p>Çelik · Alüminyum · Plastik · Bronz · Titanyum… 40+ malzeme; mekanik, fiziksel ve teknolojik özelliklerle karşılaştırma.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-chart"/></svg></span><span class="std">EN 10025<br>ISO 683</span></div>
+        <h3>Mekanik Özellikler Referansı</h3>
+        <p>Rm, Re, A%, sertlik (HB/HRC), E modülü, yoğunluk ve ısıl genleşme katsayısı veritabanı.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-heat"/></svg></span><span class="std">DIN 17212<br>EN 10083</span></div>
+        <h3>Isıl İşlem Tablosu</h3>
+        <p>Sertleştirme, menevişleme ve tavlama sıcaklıkları; hedef sertlik aralığı ve soğutma ortamı önerileri.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ─── RULMAN ─── -->
+  <section class="sec" id="rulman" style="--c:#818cf8" data-zone="spec">
+    <header class="sec-head">
+      <span class="sec-mark" aria-hidden="true"></span>
+      <h2>Rulman Seçimi</h2>
+      <span class="sec-n">3 ARAÇ</span>
+      <span class="sec-rule" aria-hidden="true"></span>
+    </header>
+    <div class="grid">
+
+      <a class="card" href="rulman.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-bear"/></svg></span><span class="std">ISO 15 · ISO 5753<br>ISO 492</span></div>
+        <h3>Rulman Boyut &amp; Kod Referansı</h3>
+        <p>9 seri · 150 rulman · ISO sınır boyutları, yük kapasitesi, devir limiti, conta/boşluk/hassasiyet seçimi ve tam kod oluşturucu.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <a class="card" href="rulman-omur.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-life"/></svg></span><span class="std">ISO 281 · ISO 76</span></div>
+        <h3>Dinamik Ömür &amp; Statik Emniyet</h3>
+        <p>ISO 281 L₁₀h/Lₙₘₕ ömür hesabı ve ISO 76 statik emniyet katsayısı. XY interpolasyonu, κ bazlı a_ISO düzeltmesi.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-fit"/></svg></span><span class="std">ISO 286 · ISO 492</span></div>
+        <h3>Fit &amp; Tolerans Seçimi</h3>
+        <p>İç / dış bilezik oturması, çakma toleransı önerisi ve yük tipine (dönen / sabit halka) göre fit tablosu.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ─── MİL ─── -->
+  <section class="sec" id="mil" style="--c:#fb7185" data-zone="spec">
+    <header class="sec-head">
+      <span class="sec-mark" aria-hidden="true"></span>
+      <h2>Mil Tasarımı</h2>
+      <span class="sec-n">3 ARAÇ</span>
+      <span class="sec-rule" aria-hidden="true"></span>
+    </header>
+    <div class="grid">
+
+      <a class="card" href="mil-hesap.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-shaft"/></svg></span><span class="std">DIN 743</span></div>
+        <h3>Mil Mukavemet Hesabı</h3>
+        <p>Eğilme + burulma birleşik gerilmesi, emniyet katsayısı ve minimum mil çapı belirleme.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-whirl"/></svg></span><span class="std">DIN 743</span></div>
+        <h3>Kritik Devir Hesabı</h3>
+        <p>Euler kritik dönme hızı, Dunkerley yaklaşımı ve rezonans güvenlik marjı kontrolü.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+      <a class="card" href="mil-tasarimi.html" data-s="live">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-key"/></svg></span><span class="std">DIN 6885</span></div>
+        <h3>Segman &amp; Kama Bağlantısı</h3>
+        <p>Segman ve kama boyutu seçimi, yüzey basıncı kontrolü, kesme gerilmesi ve uygun fit önerisi.</p>
+        <div class="foot"><span class="badge live">CANLI</span><span class="go">Aracı aç <em>→</em></span></div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ─── DİŞLİ ─── -->
+  <section class="sec" id="disli" style="--c:#c084fc" data-zone="spec">
+    <header class="sec-head">
+      <span class="sec-mark" aria-hidden="true"></span>
+      <h2>Dişli Tasarımı</h2>
+      <span class="sec-n">3 ARAÇ</span>
+      <span class="sec-rule" aria-hidden="true"></span>
+    </header>
+    <div class="grid">
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-gear"/></svg></span><span class="std">ISO 6336<br>DIN 3990</span></div>
+        <h3>Düz Silindirik Dişli</h3>
+        <p>Modül, diş sayısı, aks mesafesi, temas oranı ve çevresel kuvvet hesabı.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-gears"/></svg></span><span class="std">ISO 6336<br>DIN 3990</span></div>
+        <h3>Helisel Dişli Hesabı</h3>
+        <p>Helis açısı, eksenel kuvvet bileşeni, sanal diş sayısı ve temas oranı analizi.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-tooth"/></svg></span><span class="std">ISO 6336</span></div>
+        <h3>Dişli Mukavemet (Lewis)</h3>
+        <p>Diş dibi eğilme gerilmesi, Hertz temas gerilmesi ve yüzey dayanımı emniyet analizi.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ─── TALAŞLI İMALAT ─── -->
+  <section class="sec" id="talasli" style="--c:#4ade80" data-zone="spec">
+    <header class="sec-head">
+      <span class="sec-mark" aria-hidden="true"></span>
+      <h2>Talaşlı İmalat</h2>
+      <span class="sec-n">3 ARAÇ</span>
+      <span class="sec-rule" aria-hidden="true"></span>
+    </header>
+    <div class="grid">
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-lathe"/></svg></span><span class="std">ISO 3685</span></div>
+        <h3>Tornalama Parametreleri</h3>
+        <p>Kesme hızı (Vc), ilerleme (f), talaş derinliği (ap), MRR, tork ve motor gücü hesabı.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-millc"/></svg></span><span class="std">VDI 3321</span></div>
+        <h3>Frezeleme &amp; Delme</h3>
+        <p>Takım devri, ilerleme hızı, kesme kuvveti, tork ve gerekli makine gücü hesabı.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-curve"/></svg></span><span class="std">ISO 3685</span></div>
+        <h3>Takım Ömrü (Taylor)</h3>
+        <p>T–V ilişkisi, ekonomik kesme hızı belirleme ve Taylor üstel ömür denklemi analizi.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ─── 3D YAZICI ─── -->
+  <section class="sec" id="yazici" style="--c:#67e8f9" data-zone="spec">
+    <header class="sec-head">
+      <span class="sec-mark" aria-hidden="true"></span>
+      <h2>3D Yazıcı</h2>
+      <span class="sec-n">3 ARAÇ</span>
+      <span class="sec-rule" aria-hidden="true"></span>
+    </header>
+    <div class="grid">
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-print"/></svg></span><span class="std">FDM / FFF</span></div>
+        <h3>Baskı Süresi &amp; Filament</h3>
+        <p>Katman yüksekliği, dolgu oranı, duvar sayısı — baskı süresi ve filament ağırlık / maliyet tahmini.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-offset"/></svg></span><span class="std">FFF · ISO 286</span></div>
+        <h3>Tolerans &amp; Delik Offset</h3>
+        <p>FDM delik kompanzasyonu, boyutsal sapma düzeltmesi ve ölçekli baskı parametresi hesabı.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+      <article class="card soon" data-s="soon" aria-disabled="true">
+        <div class="card-top"><span class="chip-ic"><svg class="ic"><use href="#i-spool"/></svg></span><span class="std">ISO 527 · ISO 75</span></div>
+        <h3>Filament Malzeme Karşılaştırma</h3>
+        <p>PLA · PETG · ABS · ASA · PA · TPU — mekanik özellikler, ısıl direnç ve baskı sıcaklığı karşılaştırması.</p>
+        <div class="foot"><span class="badge soon">YAKINDA</span></div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ─── BOŞ DURUM ─── -->
+  <div class="empty hide" id="empty">
+    <p class="e1">Eşleşen araç bulunamadı</p>
+    <p class="e2">Farklı bir terim deneyin ya da filtreleri sıfırlayın.</p>
+    <button id="reset" type="button">Filtreleri temizle</button>
   </div>
-</div>
 
-<div class="grid-section">
-  <p class="section-label" style="--sl-color:#818cf8">Rulman Seçimi</p>
-  <div class="calc-grid">
+</main>
 
-    <a class="card active" href="rulman.html" style="--card-accent:#818cf8">
-      <div class="card-icon">🛞</div>
-      <div class="card-name">Rulman Boyut & Kod Referansı</div>
-      <p class="card-desc">9 seri · 150 rulman · ISO sınır boyutları, yük kapasitesi, devir limiti, conta/boşluk/hassasiyet seçimi ve tam kod oluşturucu.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 15 · ISO 5753 · ISO 492</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
-
-  <a class="card active" href="rulman-omur.html" style="--card-accent:#818cf8">
-    <div class="card-icon">⚙️</div>
-    <div class="card-name">Dinamik Ömür & Statik Emniyet</div>
-    <p class="card-desc">ISO 281 L₁₀h/Lnmh ömür hesabı ve ISO 76 statik emniyet katsayısı. 9 seri, 150 rulman, XY interpolasyonu, κ bazlı aISO.</p>
-    <div class="card-foot">
-      <span class="card-std">ISO 281 · ISO 76</span>
-      <span class="badge badge-live">CANLI</span>
-    </div>
-  </a>
-
-    <div class="card soon" style="--card-accent:#818cf8">
-      <div class="card-icon">🔩</div>
-      <div class="card-name">Fit & Tolerans Seçimi</div>
-      <p class="card-desc">İç / dış bilezik oturması, çakma toleransı önerisi ve yük tipine (dönen / sabit halka) göre fit tablosu.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 286 · ISO 492</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<div class="grid-section">
-  <p class="section-label" style="--sl-color:#fb7185">Mil Tasarımı</p>
-  <div class="calc-grid">
-    
-    <a href="mil-hesap.html" class="card active" style="--card-accent:#fb7185">
-      <div class="card-icon">🔗</div>
-      <div class="card-name">Mil Mukavemet Hesabı</div>
-      <p class="card-desc">Eğilme + burulma birleşik gerilmesi, emniyet katsayısı ve minimum mil çapı belirleme.</p>
-      <div class="card-foot">
-        <span class="card-std">DIN 743</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
-
-    <div class="card soon" style="--card-accent:#fb7185">
-      <div class="card-icon">🌀</div>
-      <div class="card-name">Kritik Devir Hesabı</div>
-      <p class="card-desc">Euler kritik dönme hızı, Dunkerley yaklaşımı ve rezonans güvenlik marjı kontrolü.</p>
-      <div class="card-foot">
-        <span class="card-std">DIN 743</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
-    <a href="mil-tasarimi.html" class="card active" style="--card-accent:#fb7185">
-      <div class="card-icon">🔑</div>
-      <div class="card-name">Segman - Kama Bağlanti </div>
-      <p class="card-desc">Segman ve Kama boyutu seçimi, yüzey basıncı kontrolü, kesme gerilmesi ve uygun fit önerisi.</p>
-      <div class="card-foot">
-        <span class="card-std">DIN 6885</span>
-        <span class="badge badge-live">CANLI</span>
-      </div>
-    </a>
-
-  </div>
-</div>
-
-<div class="grid-section">
-  <p class="section-label" style="--sl-color:#c084fc">Dişli Tasarımı</p>
-  <div class="calc-grid">
-
-    <div class="card soon" style="--card-accent:#c084fc">
-      <div class="card-icon">⚙️</div>
-      <div class="card-name">Düz Silindirik Dişli</div>
-      <p class="card-desc">Modül, diş sayısı, aks mesafesi, temas oranı ve çevresel kuvvet hesabı.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 6336 · DIN 3990</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
-    <div class="card soon" style="--card-accent:#c084fc">
-      <div class="card-icon">🔀</div>
-      <div class="card-name">Helisel Dişli Hesabı</div>
-      <p class="card-desc">Helis açısı, eksenel kuvvet bileşeni, sanal diş sayısı ve çift çiftle temas oranı analizi.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 6336 · DIN 3990</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
-    <div class="card soon" style="--card-accent:#c084fc">
-      <div class="card-icon">💪</div>
-      <div class="card-name">Dişli Mukavemet (Lewis)</div>
-      <p class="card-desc">Diş dibi eğilme gerilmesi, Hertz temas gerilmesi ve yüzey dayanımı emniyet analizi.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 6336</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<div class="grid-section">
-  <p class="section-label" style="--sl-color:#4ade80">Talaşlı İmalat</p>
-  <div class="calc-grid">
-
-    <div class="card soon" style="--card-accent:#4ade80">
-      <div class="card-icon">🔄</div>
-      <div class="card-name">Tornalama Parametreleri</div>
-      <p class="card-desc">Kesme hızı (Vc), ilerleme (f), talaş derinliği (ap), MRR, tork ve motor gücü hesabı.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 3685</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
-    <div class="card soon" style="--card-accent:#4ade80">
-      <div class="card-icon">🔪</div>
-      <div class="card-name">Frezeleme & Delme</div>
-      <p class="card-desc">Takım devri, ilerleme hızı, kesme kuvveti, tork ve gerekli makine gücü hesabı.</p>
-      <div class="card-foot">
-        <span class="card-std">VDI 3321</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
-    <div class="card soon" style="--card-accent:#4ade80">
-      <div class="card-icon">📈</div>
-      <div class="card-name">Takım Ömrü (Taylor)</div>
-      <p class="card-desc">T-V ilişkisi, ekonomik kesme hızı belirleme ve Taylor üstel ömür denklemi analizi.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 3685</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<div class="grid-section">
-  <p class="section-label" style="--sl-color:#67e8f9">3D Yazıcı</p>
-  <div class="calc-grid">
-
-    <div class="card soon" style="--card-accent:#67e8f9">
-      <div class="card-icon">🖨️</div>
-      <div class="card-name">Baskı Süresi & Filament</div>
-      <p class="card-desc">Katman yüksekliği, dolgu oranı, duvar sayısı — baskı süresi ve filament ağırlık / maliyet tahmini.</p>
-      <div class="card-foot">
-        <span class="card-std">FDM / FFF</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
-    <div class="card soon" style="--card-accent:#67e8f9">
-      <div class="card-icon">📐</div>
-      <div class="card-name">Tolerans & Delik Offset</div>
-      <p class="card-desc">FDM delik kompanzasyonu, boyutsal sapma korreksiyonu ve ölçekli baskı parametresi hesabı.</p>
-      <div class="card-foot">
-        <span class="card-std">FFF · ISO 286</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
-    <div class="card soon" style="--card-accent:#67e8f9">
-      <div class="card-icon">🧪</div>
-      <div class="card-name">Filament Malzeme Karşılaştırma</div>
-      <p class="card-desc">PLA · PETG · ABS · ASA · PA · TPU — mekanik özellikler, ısıl direnç dairy ve baskı sıcaklığı karşılaştırması.</p>
-      <div class="card-foot">
-        <span class="card-std">ISO 527 · ISO 75</span>
-        <span class="badge badge-soon">YAKINDA</span>
-      </div>
-    </div>
-
-  </div>
-</div>
+<!-- ════════ ANTET ════════ -->
 <footer>
-  MH Platform — Makine Mühendisleri için Açık Araçlar &nbsp;|&nbsp;
-  Versiyon 1.0
+  <div class="wrap">
+    <div class="tblock">
+      <div class="cell"><span>Belge</span><b>Ana Araç Dizini</b></div>
+      <div class="cell"><span>Revizyon</span><b>2.0</b></div>
+      <div class="cell"><span>Ölçek</span><b>1:1</b></div>
+      <div class="cell"><span>Durum</span><b id="tbStat">17 / 36 Canlı</b></div>
+      <div class="cell w2"><span>Not</span><b class="soft">Tüm hesaplamalar tarayıcınızda çalışır — hiçbir veri sunucuya gönderilmez.</b></div>
+      <div class="cell"><span>Referans</span><b>DIN · ISO · EN · VDI</b></div>
+      <div class="cell"><span>Ortam</span><b>İstemci Tarafı</b></div>
+    </div>
+    <p class="colophon">MH Platform · Makine mühendisleri için açık kaynak hesap araçları</p>
+  </div>
 </footer>
+
+<script>
+(function(){
+  'use strict';
+  var $  = function(s){ return document.querySelector(s); };
+  var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+  var tr = function(s){ return s.toLocaleLowerCase('tr-TR'); };
+
+  var cards = $$('.card');
+  var secs  = $$('.sec');
+
+  /* Arama dizini: kart metni + bölüm adı */
+  cards.forEach(function(c){
+    var secName = c.closest('.sec').querySelector('h2').textContent;
+    c.dataset.k = tr(c.textContent + ' ' + secName);
+  });
+
+  /* Sayaçlar */
+  var nAll  = cards.length;
+  var nLive = cards.filter(function(c){ return c.dataset.s === 'live'; }).length;
+  var nSoon = nAll - nLive;
+  $('#nTot').textContent  = nAll;
+  $('#nLive').textContent = nLive;
+  $('#nSoon').textContent = nSoon;
+  $('#nCat').textContent  = secs.length;
+  $('#cAll').textContent  = nAll;
+  $('#cLive').textContent = nLive;
+  $('#cSoon').textContent = nSoon;
+  $('#tbStat').textContent = nLive + ' / ' + nAll + ' Canlı';
+
+  /* Filtreleme */
+  var f = 'all', q = '';
+  function apply(){
+    var shown = 0;
+    secs.forEach(function(sec){
+      var vis = 0;
+      Array.prototype.forEach.call(sec.querySelectorAll('.card'), function(c){
+        var ok = (f === 'all' || c.dataset.s === f) && (!q || c.dataset.k.indexOf(q) !== -1);
+        c.classList.toggle('hide', !ok);
+        if (ok) vis++;
+      });
+      sec.classList.toggle('hide', vis === 0);
+      shown += vis;
+    });
+
+    var specVisible = secs.some(function(s){ return s.dataset.zone === 'spec' && !s.classList.contains('hide'); });
+    var coreVisible = secs.some(function(s){ return s.dataset.zone === 'core' && !s.classList.contains('hide'); });
+    $('#divide').classList.toggle('hide', !(specVisible && coreVisible));
+    $('#empty').classList.toggle('hide', shown > 0);
+    $('#res').textContent = (q || f !== 'all') ? (shown + ' SONUÇ') : (nAll + ' ARAÇ');
+
+    $$('#chips a').forEach(function(a){
+      var t = $(a.getAttribute('href'));
+      a.classList.toggle('off', !t || t.classList.contains('hide'));
+    });
+  }
+
+  $('#q').addEventListener('input', function(e){
+    q = tr(e.target.value.trim());
+    apply();
+  });
+
+  $$('.seg button').forEach(function(b){
+    b.addEventListener('click', function(){
+      f = b.dataset.f;
+      $$('.seg button').forEach(function(x){ x.classList.toggle('on', x === b); });
+      apply();
+    });
+  });
+
+  $('#reset').addEventListener('click', function(){
+    q = ''; $('#q').value = '';
+    f = 'all';
+    $$('.seg button').forEach(function(x){ x.classList.toggle('on', x.dataset.f === 'all'); });
+    apply();
+    $('#q').focus();
+  });
+
+  /* Klavye kısayolları: "/" arama, Esc temizle */
+  document.addEventListener('keydown', function(e){
+    var inp = $('#q');
+    if (e.key === '/' && document.activeElement !== inp){
+      e.preventDefault();
+      inp.focus();
+    } else if (e.key === 'Escape' && document.activeElement === inp){
+      inp.value = ''; q = '';
+      apply();
+      inp.blur();
+    }
+  });
+
+  apply();
+})();
+</script>
 
 </body>
 </html>
