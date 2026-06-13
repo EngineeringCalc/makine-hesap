@@ -385,7 +385,7 @@
           </div>
         </div>
       </div>
-      <div class="input-row" style="margin-top:10px">
+      <div class="input-row three" style="margin-top:10px">
         <div class="inp-g">
           <span class="inp-label">Tahrik Tamburu Çapı</span>
           <div class="inp-wrap">
@@ -394,10 +394,17 @@
           </div>
         </div>
         <div class="inp-g">
-          <span class="inp-label">Tahvil Oranı i <span class="opt-bdg">motor→tambur</span></span>
+          <span class="inp-label">Tahvil Oranı i <span class="opt-bdg">m→t</span></span>
           <div class="inp-wrap">
             <input type="number" id="i_i" value="1" min="0.1" step="0.1" oninput="liveUpdate()">
             <span class="inp-sfx">:1</span>
+          </div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Bant Genişliği B</span>
+          <div class="inp-wrap">
+            <input type="number" id="i_B" value="500" min="50" step="10" oninput="liveUpdate()">
+            <span class="inp-sfx">mm</span>
           </div>
         </div>
       </div>
@@ -406,22 +413,39 @@
     <!-- BANT & SÜRTÜNME -->
     <div class="section">
       <div class="sec-hdr"><div class="sec-ttl">Bant &amp; Sürtünme</div><div class="sec-tag" id="w-tag">w = —</div></div>
-      <div class="input-row">
+      <div class="input-row three">
         <div class="inp-g">
-          <span class="inp-label" id="lbl_qB">Bant Ağırlığı</span>
-          <div class="inp-wrap">
+          <span class="inp-label" id="lbl_qB" style="justify-content:space-between">
+            <span>Bant Ağ.</span>
+            <span class="start-seg">
+              <button id="qb_man" class="on" onclick="setQbMode('manual')">kg/m</button>
+              <button id="qb_auto" onclick="setQbMode('auto')">B'den</button>
+            </span>
+          </span>
+          <div class="inp-wrap" id="qb-manual">
             <input type="number" id="i_qB" value="8" min="0" step="0.5" oninput="liveUpdate()">
             <span class="inp-sfx">kg/m</span>
+          </div>
+          <div class="inp-wrap" id="qb-auto" style="display:none">
+            <input type="number" id="i_gamma" value="11" min="0.5" step="0.5" oninput="liveUpdate()">
+            <span class="inp-sfx">kg/m²</span>
+          </div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Toplam Tambur Ağ. <span class="opt-bdg">kalkış</span></span>
+          <div class="inp-wrap">
+            <input type="number" id="i_Mt" value="0" min="0" step="1" oninput="calcStart()">
+            <span class="inp-sfx">kg</span>
           </div>
         </div>
         <div class="inp-g">
           <span class="inp-label">Ortam Durumu</span>
           <div class="inp-wrap">
             <select id="sel_env" onchange="liveUpdate()">
-              <option value="1.0">Temiz / kapalı</option>
+              <option value="1.0">Temiz</option>
               <option value="1.1">Tozlu</option>
-              <option value="1.15">Açık hava / nemli</option>
-              <option value="1.25">Kirli / aşındırıcı</option>
+              <option value="1.15">Açık / nemli</option>
+              <option value="1.25">Kirli</option>
             </select>
           </div>
         </div>
@@ -504,9 +528,71 @@
       <div class="q-strip">
         <span class="ql">q_G</span><span class="qv yl" id="q_qg">—</span>
         <span class="qs">·</span>
+        <span class="ql">q_B</span><span class="qv ac" id="q_qb">—</span>
+        <span class="qs">·</span>
         <span class="ql" id="q-cap-lbl">Kapasite</span><span class="qv tl" id="q_cap">—</span>
         <span class="qs">·</span>
-        <span class="ql">Yükseklik H</span><span class="qv bl" id="q_h">—</span>
+        <span class="ql">H</span><span class="qv bl" id="q_h">—</span>
+      </div>
+    </div>
+
+    <!-- BANT KESİTİ & KAPASİTE -->
+    <div class="section" id="sec-cross">
+      <div class="sec-hdr">
+        <div class="sec-ttl">Bant Kesiti &amp; Kapasite</div>
+        <div class="sec-tag" id="cross-tag">B = 500 mm</div>
+      </div>
+      <!-- dökme: oluk + kapasite kontrolü -->
+      <div id="grp-cross-bulk">
+        <div class="input-row three">
+          <div class="inp-g">
+            <span class="inp-label">Oluk Açısı λ</span>
+            <div class="inp-wrap">
+              <select id="sel_trough" onchange="liveUpdate()">
+                <option value="0">Düz (0°)</option>
+                <option value="20" selected>20°</option>
+                <option value="30">30°</option>
+                <option value="35">35°</option>
+                <option value="45">45°</option>
+              </select>
+            </div>
+          </div>
+          <div class="inp-g">
+            <span class="inp-label">Şev Açısı β</span>
+            <div class="inp-wrap">
+              <select id="sel_surch" onchange="liveUpdate()">
+                <option value="5">5° (akışkan)</option>
+                <option value="10">10°</option>
+                <option value="20" selected>20°</option>
+                <option value="30">30° (yapışkan)</option>
+              </select>
+            </div>
+          </div>
+          <div class="inp-g">
+            <span class="inp-label">Yığın Yoğ. ρ</span>
+            <div class="inp-wrap">
+              <input type="number" id="i_rho" value="1.2" min="0.1" step="0.1" oninput="liveUpdate()">
+              <span class="inp-sfx">t/m³</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:stretch;margin-top:10px">
+          <div style="flex-shrink:0;width:120px;background:var(--surf1);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+            <svg id="cross-svg" viewBox="0 0 120 78" style="width:100%;height:100%"></svg>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px;justify-content:center">
+            <div class="ci-row"><span class="ci-k">Faydalı genişlik b</span><span class="ci-v">—<span id="cv_b"></span></span></div>
+            <div class="ci-row"><span class="ci-k">Kesit alanı A</span><span class="ci-v tl" id="cv_A">—</span></div>
+            <div class="ci-row"><span class="ci-k">Maks. kapasite</span><span class="ci-v mc" id="cv_qmax">—</span></div>
+            <div class="ci-row"><span class="ci-k">Doluluk</span><span class="ci-v" id="cv_fill">—</span></div>
+          </div>
+        </div>
+        <div id="cap-note" style="margin-top:8px"></div>
+      </div>
+      <!-- parça: oturma / referans -->
+      <div id="grp-cross-piece" class="inp-hint" style="display:none;padding:2px 0">
+        Parça yükte bant genişliği güç hesabını etkilemez; parçanın bant üzerine
+        oturması için <b style="color:var(--text)">B ≥ parça eni + ~50 mm</b> kenar payı önerilir.
       </div>
     </div>
 
@@ -618,7 +704,11 @@
         <span class="hi">P</span> = F·v/1000 · S/η &nbsp;→ IEC standart güce yuvarlanır<br>
         <span class="hi">n_t</span> = 60000·v/(π·D_t) &nbsp;·&nbsp; n_motor = n_t · i<br>
         <span class="hi">t_k</span> = 1.15·(q_G+2q_B)·L·v / (F_m − F) &nbsp;·&nbsp; F_m = 1000·P_seç·η·k_k/v<br>
-        <span class="hi">P_k</span> = (F + m_e·v/t_k)·v / (1000·η·k_k) &nbsp;[istenen süreden gerekli güç]
+        <span class="hi">P_k</span> = (F + m_e·v/t_k)·v / (1000·η·k_k) &nbsp;[istenen süreden gerekli güç]<br>
+        <span class="hi">m_e</span> = 1.10·(q_G+2q_B)·L + M_tambur &nbsp;[banda indirgenmiş kütle]<br>
+        <span class="hi">q_B</span> = γ·B &nbsp;[B'den modu — γ: bant birim alan ağ. kg/m²]<br>
+        <span class="hi">A</span> = b_üst²·tanβ/4 + l²·sinλ·(1+cosλ) &nbsp;·&nbsp; l=b/3 · b=0.9B−0.05<br>
+        <span class="hi">Q_maks</span> = 3600·A·v·ρ &nbsp;[t/h — dökme taşıma kapasitesi]
       </div>
     </div>
 
@@ -668,6 +758,7 @@ const IEC_KW = [0.09,0.12,0.18,0.25,0.37,0.55,0.75,1.1,1.5,2.2,3,4,5.5,7.5,11,15
 /* ── STATE ── */
 let curType = TYPES[0];
 let curTab  = 'parca';
+let qbMode  = 'manual';     /* manual: kg/m doğrudan · auto: γ·B */
 let calcs   = [];
 let last    = null;     /* son hesap (listeye ekle + kalkış için) */
 
@@ -682,6 +773,8 @@ const fmt = (v, d=1) => Number(v.toFixed(d)).toLocaleString('tr-TR', { maximumFr
        <span class="sb-icon">${t.icon}</span>${t.nm}
        <span class="sb-tag">${t.tag}</span>
      </button>`).join('');
+  $('grp-cross-bulk').style.display  = 'none';
+  $('grp-cross-piece').style.display = '';
   liveUpdate();
 })();
 
@@ -695,7 +788,8 @@ function selType(id){
   $('grp-roller').style.display = roller ? '' : 'none';
   $('grp-slide').style.display  = roller ? 'none' : '';
   if(!roller){ $('i_mu').value = curType.mu; $('mu-hint').textContent = curType.hint; }
-  $('lbl_qB').textContent = curType.qbl;
+  const qbLabel = $('lbl_qB').querySelector('span');
+  if(qbLabel) qbLabel.textContent = curType.model === 'chain' ? 'Zincir Ağ.' : 'Bant Ağ.';
   hideResults();
   liveUpdate();
 }
@@ -707,6 +801,8 @@ function setTab(tab){
     b.classList.toggle('active', b.dataset.tab === tab));
   $('grp-parca').style.display = tab === 'parca' ? '' : 'none';
   $('grp-dokme').style.display = tab === 'dokme' ? '' : 'none';
+  $('grp-cross-bulk').style.display  = tab === 'dokme' ? '' : 'none';
+  $('grp-cross-piece').style.display = tab === 'parca' ? '' : 'none';
   $('load-ttl').textContent = tab === 'parca' ? 'Yük — Parça' : 'Yük — Dökme';
   hideResults();
   liveUpdate();
@@ -717,6 +813,23 @@ function hideResults(){
   last = null;
 }
 
+/* ── Bant ağırlığı modu (elle / B'den) ── */
+function setQbMode(m){
+  qbMode = m;
+  $('qb_man').classList.toggle('on', m === 'manual');
+  $('qb_auto').classList.toggle('on', m === 'auto');
+  $('qb-manual').style.display = m === 'manual' ? '' : 'none';
+  $('qb-auto').style.display   = m === 'auto'   ? '' : 'none';
+  liveUpdate();
+}
+
+/* efektif bant ağırlığı q_B [kg/m] — B'den modunda γ·B */
+function effQb(){
+  return qbMode === 'auto'
+    ? num('i_gamma') * num('i_B') / 1000
+    : num('i_qB');
+}
+
 /* ── Ortak ara değerler ── */
 function gather(){
   const L     = num('i_L');
@@ -724,7 +837,7 @@ function gather(){
   const v     = num('i_v');
   const Dt    = num('i_Dt');
   const i     = num('i_i');
-  const qB    = num('i_qB');
+  const qB    = effQb();
   const cEnv  = parseFloat($('sel_env').value);
   const S     = num('i_S');
   const eta   = num('i_eta');
@@ -767,10 +880,27 @@ function gather(){
   return { L, delta, v, Dt, i, qB, qG, capTH, w, F, S, eta, rad };
 }
 
+/* ── Bant kesit alanı & maksimum kapasite (dökme · ISO 5048 3 eşit makara) ── */
+function crossSection(){
+  const B   = num('i_B') / 1000;                 /* m */
+  const lam = parseFloat($('sel_trough').value) * Math.PI / 180;
+  const bet = parseFloat($('sel_surch').value) * Math.PI / 180;
+  const rho = num('i_rho');                       /* t/m³ */
+  /* faydalı (kenar payı düşülmüş) genişlik — DIN/ISO yaklaşımı */
+  const b = B <= 2 ? Math.max(0, 0.9 * B - 0.05) : Math.max(0, 0.9 * B);
+  const l = b / 3;                                /* 3 eşit makara */
+  const bTop = l * (1 + 2 * Math.cos(lam));       /* malzeme üst yüzey genişliği */
+  const A1 = bTop * bTop * Math.tan(bet) / 4;     /* şev üçgeni */
+  const A2 = l * l * Math.sin(lam) * (1 + Math.cos(lam)); /* oluk yamuğu */
+  const A  = A1 + A2;                              /* m² */
+  return { B, b, A, rho };
+}
+
 /* ── Canlı güncelleme (q-strip + SVG) ── */
 function liveUpdate(){
   const d = gather();
   $('q_qg').textContent  = d.qG > 0 ? fmt(d.qG, 2) + ' kg/m' : '—';
+  $('q_qb').textContent  = d.qB > 0 ? fmt(d.qB, 2) + ' kg/m' : '—';
   $('q_cap').textContent = d.capTH > 0 ? fmt(d.capTH, 1) + ' t/h' : '—';
   if(curTab === 'parca' && d.v > 0 && num('i_a') > 0){
     $('q-cap-lbl').textContent = 'Debi';
@@ -782,6 +912,37 @@ function liveUpdate(){
   $('q_h').textContent = fmt(H, 2) + ' m';
   $('h-tag').textContent = 'H = ' + fmt(H, 2) + ' m';
   $('w-tag').textContent = d.w > 0 ? 'w = ' + d.w.toFixed(4) : 'w = —';
+  $('cross-tag').textContent = 'B = ' + num('i_B') + ' mm';
+
+  /* bant kesiti & kapasite (dökme) */
+  const cs = crossSection();
+  $('cv_b').textContent   = ' ' + fmt(cs.b * 1000, 0) + ' mm';
+  $('cv_A').textContent   = fmt(cs.A * 1e4, 0) + ' cm²';
+  drawCross(cs);
+  if(curTab === 'dokme'){
+    const Qmax = 3600 * cs.A * d.v * cs.rho;       /* t/h */
+    $('cv_qmax').textContent = fmt(Qmax, 1) + ' t/h';
+    const Qdem = num('i_Q');
+    if(Qmax > 0 && Qdem > 0){
+      const fill = Qdem / Qmax * 100;
+      $('cv_fill').textContent = fmt(fill, 0) + ' %';
+      const note = $('cap-note');
+      if(fill > 100){
+        note.innerHTML = `<span class="serv-badge serv-danger">✕ Kapasite aşıldı — bandı genişlet, hızlandır ya da oluk açısını artır</span>`;
+      } else if(fill > 90){
+        note.innerHTML = `<span class="serv-badge serv-warn">△ Doluluk &gt; %90 — pay az, dökülme riski</span>`;
+      } else {
+        note.innerHTML = `<span class="serv-badge serv-safe">✓ Kesit yeterli — %${fmt(fill,0)} dolulukla taşır</span>`;
+      }
+    } else {
+      $('cv_fill').textContent = '—';
+      $('cap-note').innerHTML = '';
+    }
+  } else {
+    $('cv_qmax').textContent = fmt(3600 * cs.A * d.v * cs.rho, 1) + ' t/h';
+    $('cv_fill').textContent = '—';
+  }
+
   drawConv(d);
 }
 
@@ -847,7 +1008,11 @@ function calcStart(){
     note.innerHTML=''; last.tk=null; return;
   }
 
-  const mE = 1.15 * (last.qG + 2*last.qB) * last.L;   /* eşdeğer kütle (+%15 dönen parçalar) */
+  /* eşdeğer (banda indirgenmiş) hızlandırma kütlesi:
+     - bant+yük öteleme: (q_G + 2q_B)·L   · dönen makara/bant payı +%10
+     - tamburlar (içi boş silindir varsayımı, I≈m·R² → banda indirgenmiş ≈ tam kütle) */
+  const Mt = num('i_Mt');
+  const mE = 1.10 * (last.qG + 2*last.qB) * last.L + Mt;
   const pf = p => fmt(p, p < 1 ? 3 : 2);
 
   /* ── MOD A: seçilen güç → kalkış süresi ── */
@@ -910,11 +1075,18 @@ function addCalc(){
   const loadTxt = curTab === 'parca'
     ? `${num('i_m')} kg @ ${num('i_a')} m`
     : `${num('i_Q')} t/h`;
+  let capTxt = '—';
+  if(curTab === 'dokme'){
+    const cs = crossSection();
+    const Qmax = 3600 * cs.A * last.v * cs.rho;
+    const Qdem = num('i_Q');
+    if(Qmax > 0 && Qdem > 0) capTxt = fmt(Qdem/Qmax*100, 0) + ' %';
+  }
   calcs.push({
     _id: Date.now() + Math.random(),
     tab: curTab, type: curType.nm,
     L: last.L, delta: last.delta, v: last.v,
-    loadTxt,
+    loadTxt, capTxt, B: num('i_B'),
     P: last.downhill ? '—' : fmt(last.Preq, last.Preq < 1 ? 3 : 2),
     Piec: last.Piec ?? '—',
     nM: fmt(last.nM, 0),
@@ -950,11 +1122,47 @@ function renderCalcs(){
         <div class="ci-row"><span class="ci-k">Kalkış</span><span class="ci-v">${c.tk}</span></div>
         <div class="ci-row"><span class="ci-k">L · δ</span><span class="ci-v">${c.L} m · ${c.delta}°</span></div>
         <div class="ci-row"><span class="ci-k">Hız</span><span class="ci-v">${c.v} m/s</span></div>
+        <div class="ci-row"><span class="ci-k">Bant B</span><span class="ci-v">${c.B} mm</span></div>
+        <div class="ci-row"><span class="ci-k">Doluluk</span><span class="ci-v">${c.capTxt}</span></div>
       </div>
     </div>`).join('');
 }
 
-/* ══════════ SVG TEKNİK ÇİZİM ══════════ */
+/* ══════════ SVG BANT KESİTİ (önden görünüş) ══════════ */
+function drawCross(cs){
+  const c = { or:'#f97316', yl:'#fbbf24', dim2:'#8080a8', dim:'#52527a', txt:'#dde1f0' };
+  const fm = 'font-family:JetBrains Mono,monospace';
+  const lamDeg = parseFloat($('sel_trough').value);
+  const lam = lamDeg * Math.PI / 180;
+  const bet = parseFloat($('sel_surch').value) * Math.PI / 180;
+
+  /* ölçek: faydalı genişlik b → ~88 px */
+  const cx = 60, baseY = 52;
+  const bpx = 88;
+  const lpx = bpx / 3;
+  const dx = lpx * Math.cos(lam), dy = lpx * Math.sin(lam);
+
+  /* oluk hattı noktaları (sol üst → sol dip → sağ dip → sağ üst) */
+  const x0 = cx - lpx/2 - dx, y0 = baseY - dy;
+  const x1 = cx - lpx/2,      y1 = baseY;
+  const x2 = cx + lpx/2,      y2 = baseY;
+  const x3 = cx + lpx/2 + dx, y3 = baseY - dy;
+
+  /* malzeme şev tepesi */
+  const bTopHalf = (lpx * (1 + 2*Math.cos(lam))) / 2;
+  const apexY = (y0 + y3)/2 - bTopHalf * Math.tan(bet);
+
+  const belt = `<polyline points="${x0},${y0} ${x1},${y1} ${x2},${y2} ${x3},${y3}"
+       fill="none" stroke="${c.or}" stroke-width="2" stroke-linejoin="round"/>`;
+  const mat = `<path d="M ${x0} ${y0} L ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3}
+       L ${cx+bTopHalf} ${(y0+y3)/2} L ${cx} ${apexY} L ${cx-bTopHalf} ${(y0+y3)/2} Z"
+       fill="rgba(251,191,36,0.18)" stroke="${c.yl}" stroke-width="1.1" stroke-linejoin="round"/>`;
+  const label = `<text x="${cx}" y="70" text-anchor="middle" style="${fm};font-size:9px;fill:${c.dim2}">λ=${lamDeg}° · b=${fmt(cs.b*1000,0)}mm</text>`;
+
+  $('cross-svg').innerHTML = mat + belt + label;
+}
+
+/* ══════════ SVG TEKNİK ÇİZİM (yan görünüş) ══════════ */
 function drawConv(d){
   const c = {
     or:'#f97316', bl:'#60a5fa', tl:'#00d4aa', yl:'#fbbf24',

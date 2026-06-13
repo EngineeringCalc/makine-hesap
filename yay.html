@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yay Hesabı | MH Platform</title>
+<meta name="description" content="Basma, çekme ve burulma yayı hesabı. Yay sabiti, kuvvet, kayma/eğilme gerilmesi, Wahl düzeltmesi, blok boyu ve doğal frekans. DIN EN 13906.">
+<link rel="stylesheet" href="mh-tokens.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,0.016) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.016) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none}
+
+/* NAV */
+nav{position:relative;z-index:10;flex-shrink:0;background:rgba(7,7,14,0.92);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;height:52px;gap:20px}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:var(--fz-18);letter-spacing:3px;color:var(--orange);text-decoration:none}
+.brand em{color:var(--text);font-style:normal}
+.breadcrumb{font-size:var(--fz-12);color:var(--dim2);font-family:var(--font-m);display:flex;align-items:center;gap:8px}
+.breadcrumb a{color:var(--dim2);text-decoration:none}
+.breadcrumb .sep{color:var(--dim)}
+.breadcrumb .cur{color:var(--text)}
+
+/* APP LAYOUT */
+.app{position:relative;z-index:1;display:flex;flex:1;overflow:hidden}
+
+/* SOL — yay tipleri */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);width:200px;flex-shrink:0;
+  display:flex;flex-direction:column;overflow-y:auto;padding-bottom:16px}
+.sec-label{font-family:var(--font-h);font-size:var(--fz-13);letter-spacing:2px;color:#9090c0;
+  text-transform:uppercase;padding:14px 14px 8px}
+.type-btn{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;background:transparent;
+  border:none;border-left:3px solid transparent;color:var(--dim2);font-family:var(--font-b);
+  font-size:calc(12.5px * var(--fz));cursor:pointer;text-align:left;transition:all .15s}
+.type-btn:hover{background:var(--surf1);color:var(--text)}
+.type-btn.active{background:var(--surf1);color:var(--text);font-weight:500;border-left-color:var(--orange)}
+.type-icon{font-size:18px;width:24px;text-align:center;flex-shrink:0;color:var(--orange)}
+.sb-note{margin:14px 14px 0;padding:10px 12px;background:var(--surf1);border:1px solid var(--border);
+  border-radius:8px;font-size:var(--fz-11);line-height:1.7;color:var(--dim2)}
+.sb-note b{color:var(--text);font-family:var(--font-m)}
+
+/* ORTA — girişler */
+.content{width:480px;max-width:480px;flex-shrink:0;display:flex;flex-direction:column;
+  overflow-y:auto;padding:14px 16px;gap:12px}
+
+/* Önizleme kartı */
+.preview-card{background:#12122a;border:1px solid rgba(249,115,22,.18);border-radius:10px;
+  padding:10px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+.preview-svg-wrap{width:100%;height:200px;flex-shrink:0;background:#09090f;border-radius:8px;
+  overflow:hidden;display:flex;align-items:center;justify-content:center}
+#springPreview{width:100%;height:100%;display:block}
+.preview-info{display:flex;flex-direction:column;gap:2px;padding:0 2px}
+.preview-title{font-family:var(--font-h);font-size:var(--fz-15);font-weight:700;color:var(--orange)}
+.preview-formula{font-family:var(--font-m);font-size:var(--fz-11);color:#7878a8;line-height:1.7;white-space:pre-line}
+
+/* Inputs */
+.inputs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.inp-group{display:flex;flex-direction:column;gap:5px}
+.inp-group.full{grid-column:1 / -1}
+.inp-label{font-size:var(--fz-14);color:#c0c0e0;font-family:var(--font-h);letter-spacing:1px;text-transform:uppercase}
+.inp-wrap{display:flex;background:var(--surf2);border:1px solid var(--border);border-radius:8px;
+  overflow:hidden;transition:border-color .2s}
+.inp-wrap:focus-within{border-color:var(--orange)}
+.inp-wrap input{flex:1;width:100%;padding:10px 12px;background:transparent;border:none;color:var(--text);
+  font-family:var(--font-m);font-size:var(--fz-15);font-weight:600;outline:none;-moz-appearance:textfield;appearance:none}
+.inp-wrap input::-webkit-outer-spin-button,.inp-wrap input::-webkit-inner-spin-button{-webkit-appearance:none}
+.inp-unit{padding:0 12px;display:flex;align-items:center;font-family:var(--font-m);font-size:var(--fz-12);
+  color:var(--dim);background:var(--surf3);border-left:1px solid var(--border);white-space:nowrap}
+select.sel{padding:10px 12px;background:var(--surf2);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:var(--font-b);font-size:var(--fz-13);cursor:pointer;outline:none;
+  appearance:none;transition:border-color .2s;width:100%}
+select.sel:focus{border-color:var(--orange)}
+.density-tag{margin-top:4px;font-family:var(--font-m);font-size:var(--fz-11);color:var(--dim2)}
+
+.calc-btn{width:100%;padding:14px;background:var(--orange);border:none;border-radius:10px;color:#fff;
+  font-family:var(--font-h);font-size:var(--fz-18);font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.calc-btn:hover{background:#ea6c0d;transform:translateY(-1px);box-shadow:0 6px 24px rgba(249,115,22,.35)}
+.calc-btn:active{transform:translateY(0)}
+
+.info-box{padding:12px 14px;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);
+  border-radius:8px;color:#f0cc80;font-size:var(--fz-11);line-height:1.75}
+.info-box b{color:var(--yellow);font-family:var(--font-m)}
+
+/* SAĞ — sonuçlar */
+.results-col{background:var(--bg2);border-left:1px solid var(--border);width:320px;flex-shrink:0;
+  display:flex;flex-direction:column;overflow:hidden}
+.rp-hdr{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;
+  justify-content:space-between;flex-shrink:0}
+.rp-title{font-family:var(--font-h);font-size:var(--fz-15);font-weight:700;letter-spacing:1px}
+.rp-std{font-family:var(--font-m);font-size:var(--fz-10);color:var(--dim2)}
+.rp-body{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:12px}
+.rp-body::-webkit-scrollbar{width:3px}
+.rp-body::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:2px}
+
+.rp-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  color:var(--dim);font-size:var(--fz-13);text-align:center;padding:30px}
+.rp-empty-icon{font-size:36px;opacity:.3}
+
+.res-group{background:var(--surf1);border:1px solid var(--border);border-radius:8px;overflow:hidden;
+  animation:slideIn .2s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.rg-head{padding:8px 12px;font-family:var(--font-h);font-size:var(--fz-12);letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--dim2);border-bottom:1px solid var(--border);
+  border-left:3px solid var(--orange)}
+.rg-rows{display:flex;flex-direction:column}
+.rg-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:7px 12px}
+.rg-row + .rg-row{border-top:1px solid rgba(255,255,255,0.03)}
+.rg-label{font-family:var(--font-b);font-size:var(--fz-11);color:var(--dim2);line-height:1.3}
+.rg-label small{display:block;color:var(--dim);font-size:calc(9.5px * var(--fz))}
+.rg-val{font-family:var(--font-m);font-size:var(--fz-13);font-weight:600;color:var(--text);
+  white-space:nowrap;text-align:right}
+.rg-val span{font-size:var(--fz-10);color:var(--dim2);font-weight:400;margin-left:3px}
+
+/* Sonuç altlığı — ana değer + kullanım çubuğu */
+.rp-foot{padding:14px;border-top:1px solid var(--border);background:var(--surf1);flex-shrink:0;
+  display:flex;flex-direction:column;gap:10px}
+.foot-main{display:flex;align-items:baseline;justify-content:space-between}
+.fm-label{font-family:var(--font-h);font-size:var(--fz-13);letter-spacing:2px;color:var(--dim2);text-transform:uppercase}
+.fm-val{font-family:var(--font-m);font-size:24px;font-weight:600;color:var(--teal)}
+.util{display:flex;flex-direction:column;gap:5px}
+.util-top{display:flex;align-items:baseline;justify-content:space-between;font-family:var(--font-m);font-size:var(--fz-11)}
+.util-top .ul{color:var(--dim2)}
+.util-top .uv{font-weight:600}
+.util-bar{height:7px;border-radius:4px;background:var(--surf3);overflow:hidden}
+.util-fill{height:100%;border-radius:4px;transition:width .3s ease;background:var(--green)}
+
+/* Uyarılar */
+.warns{display:flex;flex-direction:column;gap:6px}
+.warn{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:7px;
+  font-size:var(--fz-11);line-height:1.5}
+.warn-ico{flex-shrink:0;line-height:1.4}
+.warn.err{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);color:#f3a3a3}
+.warn.warn-y{background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);color:#f0cc80}
+.warn.ok{background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.18);color:#9be8b4}
+
+/* MOBİL */
+@media (max-width:768px){
+  html,body{height:auto!important;overflow:visible!important;overflow-x:hidden!important}
+  .app{flex-direction:column!important;overflow:visible!important;flex:unset!important}
+  nav{padding:0 12px!important;gap:12px!important;height:48px!important}
+  .breadcrumb{display:none!important}
+  .sidebar{width:100%!important;max-width:100%!important;flex-direction:row!important;
+    overflow-x:auto!important;overflow-y:hidden!important;border-right:none!important;
+    border-bottom:1px solid var(--border)!important;padding:0!important;flex-shrink:0!important;scrollbar-width:none}
+  .sidebar::-webkit-scrollbar{display:none}
+  .sec-label,.sb-note{display:none!important}
+  .type-btn{flex-direction:column!important;align-items:center!important;padding:10px 16px!important;
+    border-left:none!important;border-bottom:3px solid transparent!important;white-space:nowrap!important;
+    min-width:max-content!important;font-size:11px!important;gap:3px!important}
+  .type-btn.active{border-left-color:transparent!important;border-bottom-color:var(--orange)!important}
+  .content{width:100%!important;max-width:100%!important;flex-shrink:1!important;padding:12px!important}
+  .inputs-grid{grid-template-columns:1fr 1fr}
+  .results-col{width:100%!important;border-left:none!important;border-top:1px solid var(--border)!important}
+  .preview-svg-wrap{height:170px!important}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a class="brand" href="index.html">MH<em>Platform</em></a>
+  <div class="breadcrumb">
+    <a href="index.html">Ana Sayfa</a>
+    <span class="sep">/</span>
+    <span class="cur">Yay Hesabı</span>
+  </div>
+</nav>
+
+<div class="app">
+  <!-- SOL -->
+  <aside class="sidebar">
+    <p class="sec-label">Yay Tipi</p>
+    <div id="typeList"></div>
+    <div class="sb-note" id="sbNote">
+      Tüm hesaplar <b>silindirik</b> ve <b>yuvarlak kesitli</b> tel içindir.
+      Önerilen yay indeksi <b>C = 4…12</b>.
+    </div>
+  </aside>
+
+  <!-- ORTA -->
+  <div class="content">
+    <div class="preview-card">
+      <div class="preview-svg-wrap">
+        <svg id="springPreview" viewBox="0 0 280 200" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="preview-info">
+        <div class="preview-title" id="prevTitle">—</div>
+        <div class="preview-formula" id="prevFormula">—</div>
+      </div>
+    </div>
+
+    <div id="inputsWrap"></div>
+
+    <div class="inp-group full">
+      <span class="inp-label">Malzeme</span>
+      <select class="sel" id="matSelect" onchange="onMat()"></select>
+      <div class="density-tag" id="densityTag">—</div>
+    </div>
+
+    <div id="customMatWrap" class="inputs-grid" style="display:none">
+      <div class="inp-group">
+        <span class="inp-label">G — Kayma Mod.</span>
+        <div class="inp-wrap"><input type="number" id="cG" value="81500"><span class="inp-unit">MPa</span></div>
+      </div>
+      <div class="inp-group">
+        <span class="inp-label">E — Elast. Mod.</span>
+        <div class="inp-wrap"><input type="number" id="cE" value="206000"><span class="inp-unit">MPa</span></div>
+      </div>
+      <div class="inp-group">
+        <span class="inp-label">ρ — Yoğunluk</span>
+        <div class="inp-wrap"><input type="number" id="cRho" value="7850" step="10"><span class="inp-unit">kg/m³</span></div>
+      </div>
+      <div class="inp-group">
+        <span class="inp-label">τ izin (statik)</span>
+        <div class="inp-wrap"><input type="number" id="cTau" value="700" step="10"><span class="inp-unit">MPa</span></div>
+      </div>
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">HESAPLA</button>
+
+    <div class="info-box" id="infoBox"></div>
+  </div>
+
+  <!-- SAĞ -->
+  <div class="results-col">
+    <div class="rp-hdr">
+      <span class="rp-title">Sonuçlar</span>
+      <span class="rp-std" id="rpStd">DIN EN 13906-1</span>
+    </div>
+    <div class="rp-body" id="rpBody">
+      <div class="rp-empty" id="rpEmpty">
+        <span class="rp-empty-icon">🌀</span>
+        <span>Değerleri girin ve<br><b>Hesapla</b>'ya basın.</span>
+      </div>
+    </div>
+    <div class="rp-foot" id="rpFoot" style="display:none">
+      <div class="foot-main">
+        <span class="fm-label" id="footLabel">Yay Sabiti</span>
+        <span class="fm-val" id="footVal">—</span>
+      </div>
+      <div class="util">
+        <div class="util-top">
+          <span class="ul" id="utilLabel">Gerilme kullanımı</span>
+          <span class="uv" id="utilVal">—</span>
+        </div>
+        <div class="util-bar"><div class="util-fill" id="utilFill" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  Malzeme Veritabanı  (G,E: MPa | rho: kg/m³ | tau,sig: MPa statik referans)
+// ═══════════════════════════════════════════════════════════
+const MAT = {
+  'yay-celik':    {name:'Yay Çeliği – patentli (DH)',   G:81500, E:206000, rho:7850, tau:700,  sig:980},
+  'vdsicr':       {name:'Yağda Menevişli (VDSiCr)',     G:79500, E:206000, rho:7850, tau:900,  sig:1260},
+  'paslanmaz':    {name:'Paslanmaz 1.4310 (302)',       G:70000, E:185000, rho:7900, tau:600,  sig:840},
+  'fosfor-bronz': {name:'Fosfor Bronz (CuSn6)',         G:42000, E:115000, rho:8800, tau:350,  sig:490},
+  'berilyum':     {name:'Berilyum Bronz (CuBe2)',       G:47000, E:130000, rho:8250, tau:500,  sig:700},
+  'custom':       {name:'Özel malzeme gir…',            custom:true},
+};
+
+// ═══════════════════════════════════════════════════════════
+//  Yay Tipleri
+// ═══════════════════════════════════════════════════════════
+const TYPES = {
+  'basma': {
+    name:'Basma Yayı', icon:'≣', std:'DIN EN 13906-1', uses:'G',
+    formula:'R = G·d⁴ / (8·Dm³·n)\nτk = k·8·F·Dm / (π·d³)',
+    inputs:[
+      {id:'d',  label:'d — Tel çapı',     unit:'mm', def:3,  step:0.1},
+      {id:'De', label:'De — Dış çap',     unit:'mm', def:25, step:0.5},
+      {id:'n',  label:'n — Aktif sarım',  unit:'',   def:6,  step:0.5},
+      {id:'L0', label:'L0 — Serbest boy', unit:'mm', def:60, step:1},
+      {id:'s',  label:'s — Çalışma yolu', unit:'mm', def:15, step:1},
+    ],
+    select:{id:'ends', label:'Uç Tipi', opts:[
+      {v:'kg', t:'Kapalı + Taşlanmış (squared & ground)'},
+      {v:'k',  t:'Kapalı / Squared'},
+      {v:'g',  t:'Açık + Taşlanmış'},
+      {v:'a',  t:'Açık / Plain'},
+    ]},
+    info:'<b>Basma yayı.</b> τk düzeltilmiş kayma gerilmesidir (Wahl faktörü dahil). '+
+         'İzin verilen gerilme tel çapına ve yüke (statik/dinamik) bağlıdır — gösterilen τ_izin '+
+         'yalnızca statik referanstır. Narin yaylarda (L0/Dm &gt; 4) burkulma kontrol edilmelidir.',
+  },
+  'cekme': {
+    name:'Çekme Yayı', icon:'⊐', std:'DIN EN 13906-2', uses:'G',
+    formula:'R = G·d⁴ / (8·Dm³·n)\nF = F0 + R·s',
+    inputs:[
+      {id:'d',  label:'d — Tel çapı',       unit:'mm', def:2.5, step:0.1},
+      {id:'De', label:'De — Dış çap',       unit:'mm', def:20,  step:0.5},
+      {id:'n',  label:'n — Aktif sarım',    unit:'',   def:10,  step:0.5},
+      {id:'L0', label:'L0 — Serbest boy',   unit:'mm', def:80,  step:1},
+      {id:'F0', label:'F0 — Ön gerilme',    unit:'N',  def:20,  step:1},
+      {id:'s',  label:'s — Çalışma yolu',   unit:'mm', def:20,  step:1},
+    ],
+    info:'<b>Çekme yayı.</b> Sarımlar serbest durumda temas halindedir; hareket için önce '+
+         '<b>F0 ön gerilme</b> aşılmalıdır. En kritik bölge <b>kancalardır</b> — kanca yarıçapında '+
+         'gerilme gövdeye göre çok yükselir, ayrıca hesaplanmalıdır.',
+  },
+  'burulma': {
+    name:'Burulma Yayı', icon:'↻', std:'DIN EN 13906-3', uses:'E',
+    formula:'Rα = E·d⁴ / (3888·Dm·n)  [Nmm/°]\nσ = q·32·M / (π·d³)',
+    inputs:[
+      {id:'d',     label:'d — Tel çapı',      unit:'mm', def:3,  step:0.1},
+      {id:'De',    label:'De — Dış çap',      unit:'mm', def:25, step:0.5},
+      {id:'n',     label:'n — Sarım sayısı',  unit:'',   def:6,  step:0.5},
+      {id:'alpha', label:'α — Çalışma açısı', unit:'°',  def:90, step:5},
+      {id:'leg',   label:'Kol uzunluğu',      unit:'mm', def:30, step:1},
+    ],
+    info:'<b>Burulma yayı.</b> Tel <b>eğilmeye</b> zorlanır (kayma değil). Yüklenince sarımlar '+
+         'birbirine yaklaşır ve <b>iç çap küçülür</b> — mil/kılavuz çapı buna göre seçilmeli. '+
+         'σ iç lif eğilme gerilmesidir (düzeltme faktörü q dahil). Rα birim sürtünme payı içerir.',
+  },
+};
+
+// ═══════════════════════════════════════════════════════════
+//  Durum
+// ═══════════════════════════════════════════════════════════
+let curType='basma';
+
+// ═══════════════════════════════════════════════════════════
+//  SVG ÖNİZLEME
+// ═══════════════════════════════════════════════════════════
+const PW=280, PH=200;
+const DW={x:34,y:22,w:182,h:150};
+const SC='#f97316';
+const FC='rgba(249,115,22,.32)';
+
+function hDim(x1,x2,y,txt,col='#60a5fa'){
+  const mx=(x1+x2)/2;
+  return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${col}" stroke-width=".9"/>
+    <polygon points="${x1},${y} ${x1+7},${y-3} ${x1+7},${y+3}" fill="${col}"/>
+    <polygon points="${x2},${y} ${x2-7},${y-3} ${x2-7},${y+3}" fill="${col}"/>
+    <rect x="${mx-txt.length*3}" y="${y-16}" width="${txt.length*6+2}" height="13" fill="#09090f" rx="2"/>
+    <text x="${mx}" y="${y-6}" text-anchor="middle" font-size="10" fill="${col}" font-family="JetBrains Mono,monospace">${txt}</text>`;
+}
+function vDim(y1,y2,x,txt,col='#60a5fa'){
+  const my=(y1+y2)/2;
+  return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${col}" stroke-width=".9"/>
+    <polygon points="${x},${y1} ${x-3},${y1+7} ${x+3},${y1+7}" fill="${col}"/>
+    <polygon points="${x},${y2} ${x-3},${y2-7} ${x+3},${y2-7}" fill="${col}"/>
+    <rect x="${x+5}" y="${my-7}" width="${txt.length*6+4}" height="13" fill="#09090f" rx="2"/>
+    <text x="${x+7}" y="${my+4}" font-size="10" fill="${col}" font-family="JetBrains Mono,monospace">${txt}</text>`;
+}
+function ph(t='Ölçüleri giriniz…'){
+  return `<text x="${PW/2}" y="${PH/2}" text-anchor="middle" dominant-baseline="middle"
+    font-size="11" fill="#444468" font-family="DM Sans,sans-serif">${t}</text>`;
+}
+// Helis yan görünüm path'i (sinüs)
+function coilPath(cx,top,h,amp,coils,steps=120){
+  let d='';
+  for(let i=0;i<=steps;i++){
+    const t=i/steps;
+    const x=cx+amp*Math.sin(t*coils*2*Math.PI);
+    const y=top+t*h;
+    d+=(i===0?'M':'L')+x.toFixed(2)+' '+y.toFixed(2)+' ';
+  }
+  return d;
+}
+
+function drawBasma(d){
+  const {d:wd,De,n,L0}=d;
+  if(!wd||!De||!n||!L0) return ph();
+  if(De<=wd) return ph('De, tel çapından büyük olmalı');
+  const Dm=De-wd;
+  // ölçek
+  const sx=Math.min(DW.w/De, 6);
+  const amp=(De/2)*sx;
+  const sH=Math.min(L0* Math.min(DW.h/L0,6), DW.h);
+  const cx=DW.x+DW.w/2;
+  const top=DW.y+(DW.h-sH)/2, bot=top+sH;
+  const coils=Math.max(3,Math.min(Math.round(n),11));
+  return `
+    <line x1="${cx}" y1="${top-6}" x2="${cx}" y2="${bot+6}" stroke="#2a2a48" stroke-width=".7" stroke-dasharray="5 4"/>
+    <line x1="${cx-amp-6}" y1="${top}" x2="${cx+amp+6}" y2="${top}" stroke="${SC}" stroke-width="2.4"/>
+    <line x1="${cx-amp-6}" y1="${bot}" x2="${cx+amp+6}" y2="${bot}" stroke="${SC}" stroke-width="2.4"/>
+    <path d="${coilPath(cx,top,sH,amp,coils)}" fill="none" stroke="${SC}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    ${hDim(cx-amp,cx+amp,bot+18,'De '+De+'mm')}
+    ${vDim(top,bot,cx+amp+14,'L0 '+L0+'mm')}
+    <text x="${cx-amp-10}" y="${top+sH/2}" text-anchor="end" font-size="9.5" fill="#00d4aa"
+      font-family="JetBrains Mono,monospace">Dm ${Dm.toFixed(1)}</text>
+    <text x="${DW.x}" y="${PH-4}" font-size="9.5" fill="#00d4aa" font-family="JetBrains Mono,monospace">d=${wd}mm · n=${n}</text>`;
+}
+
+function drawCekme(d){
+  const {d:wd,De,n,L0}=d;
+  if(!wd||!De||!n||!L0) return ph();
+  if(De<=wd) return ph('De, tel çapından büyük olmalı');
+  const Dm=De-wd;
+  const sx=Math.min(DW.w/De,6);
+  const amp=(De/2)*sx;
+  const sH=Math.min(L0*Math.min(DW.h/L0,6),DW.h-34); // kancalara yer
+  const cx=DW.x+DW.w/2;
+  const top=DW.y+17+(DW.h-34-sH)/2, bot=top+sH;
+  const coils=Math.max(5,Math.min(Math.round(n),16));
+  const hr=amp*0.55; // kanca yarıçapı
+  return `
+    <line x1="${cx}" y1="${top-hr*2-4}" x2="${cx}" y2="${bot+hr*2+4}" stroke="#2a2a48" stroke-width=".7" stroke-dasharray="5 4"/>
+    <path d="M${cx} ${top-hr*2} a${hr} ${hr} 0 1 1 ${0.1} ${0}" fill="none" stroke="${SC}" stroke-width="2"/>
+    <path d="M${cx} ${bot+hr*2} a${hr} ${hr} 0 1 0 ${0.1} ${0}" fill="none" stroke="${SC}" stroke-width="2"/>
+    <line x1="${cx}" y1="${top-hr*2}" x2="${cx}" y2="${top}" stroke="${SC}" stroke-width="2"/>
+    <line x1="${cx}" y1="${bot+hr*2}" x2="${cx}" y2="${bot}" stroke="${SC}" stroke-width="2"/>
+    <path d="${coilPath(cx,top,sH,amp,coils)}" fill="none" stroke="${SC}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    ${hDim(cx-amp,cx+amp,bot+hr*2+16,'De '+De+'mm')}
+    ${vDim(top,bot,cx+amp+14,'gövde')}
+    <text x="${DW.x}" y="${PH-4}" font-size="9.5" fill="#00d4aa" font-family="JetBrains Mono,monospace">d=${wd} · n=${n} · Dm ${Dm.toFixed(1)}</text>`;
+}
+
+function drawBurulma(d){
+  const {d:wd,De,n,alpha,leg}=d;
+  if(!wd||!De||!n) return ph();
+  if(De<=wd) return ph('De, tel çapından büyük olmalı');
+  const Dm=De-wd;
+  const cx=DW.x+DW.w/2-6, cy=DW.y+DW.h/2-6;
+  const R=Math.min(DW.w,DW.h)*0.30;
+  const turns=Math.max(2,Math.min(Math.round(n),5));
+  // spiral
+  let sp='';
+  const steps=turns*40;
+  for(let i=0;i<=steps;i++){
+    const t=i/steps;
+    const ang=t*turns*2*Math.PI - Math.PI/2;
+    const rr=R*(0.62+0.38*t);
+    const x=cx+rr*Math.cos(ang), y=cy+rr*Math.sin(ang);
+    sp+=(i===0?'M':'L')+x.toFixed(2)+' '+y.toFixed(2)+' ';
+  }
+  const Lleg=Math.min((leg||30)*1.3, R*1.6);
+  // sabit kol: aşağı
+  const x1=cx, y1=cy+R, x1e=cx, y1e=cy+R+Lleg;
+  // hareketli kol: α açısında (saat yönünde, 0=aşağı)
+  const a=(alpha||90)*Math.PI/180;
+  const sx2=cx - R*Math.sin(a), sy2=cy + R*Math.cos(a);
+  const ex2=cx - (R+Lleg)*Math.sin(a), ey2=cy + (R+Lleg)*Math.cos(a);
+  // açı yayı
+  let arc='';
+  if(alpha){
+    const ar=R+Lleg*0.55;
+    const ax1=cx, ay1=cy+ar;
+    const ax2=cx - ar*Math.sin(a), ay2=cy + ar*Math.cos(a);
+    const large=a>Math.PI?1:0;
+    arc=`<path d="M${ax1} ${ay1} A${ar} ${ar} 0 ${large} 1 ${ax2} ${ay2}" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="${cx - ar*0.7*Math.sin(a/2)}" y="${cy + ar*0.7*Math.cos(a/2)+4}" font-size="10" fill="#fbbf24"
+        font-family="JetBrains Mono,monospace" text-anchor="middle">${alpha}°</text>`;
+  }
+  return `
+    <path d="${sp}" fill="none" stroke="${SC}" stroke-width="2" stroke-linecap="round"/>
+    <line x1="${x1}" y1="${y1}" x2="${x1e}" y2="${y1e}" stroke="${SC}" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="${sx2}" y1="${sy2}" x2="${ex2}" y2="${ey2}" stroke="${SC}" stroke-width="2.4" stroke-linecap="round"/>
+    ${arc}
+    <text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="9.5" fill="#00d4aa"
+      font-family="JetBrains Mono,monospace">Dm ${Dm.toFixed(1)}</text>
+    <text x="${DW.x}" y="${PH-4}" font-size="9.5" fill="#00d4aa" font-family="JetBrains Mono,monospace">d=${wd} · n=${n} · De=${De}</text>`;
+}
+
+function drawSpring(type,d){
+  if(type==='basma')   return drawBasma(d);
+  if(type==='cekme')   return drawCekme(d);
+  if(type==='burulma') return drawBurulma(d);
+  return ph();
+}
+
+function getDims(){
+  const t=TYPES[curType], dims={};
+  t.inputs.forEach(inp=>{
+    const el=document.getElementById('inp_'+inp.id);
+    dims[inp.id]=el?(parseFloat(el.value)||0):0;
+  });
+  return dims;
+}
+function updatePreview(){
+  document.getElementById('springPreview').innerHTML=drawSpring(curType,getDims());
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Malzeme
+// ═══════════════════════════════════════════════════════════
+function buildMatSelect(){
+  const sel=document.getElementById('matSelect');
+  sel.innerHTML=Object.keys(MAT).map(k=>{
+    const m=MAT[k];
+    const suf=m.custom?'':` — G ${m.G} / E ${m.E} MPa`;
+    return `<option value="${k}">${m.name}${suf}</option>`;
+  }).join('');
+  onMat();
+}
+function onMat(){
+  const k=document.getElementById('matSelect').value;
+  const m=MAT[k];
+  const cw=document.getElementById('customMatWrap');
+  if(m.custom){
+    cw.style.display='grid';
+    document.getElementById('densityTag').textContent='Özel malzeme — G, E, ρ ve τ_izin değerlerini girin';
+  } else {
+    cw.style.display='none';
+    const useE=TYPES[curType].uses==='E';
+    document.getElementById('densityTag').textContent=
+      `${useE?'E='+m.E:'G='+m.G} MPa · ρ=${m.rho} kg/m³ · ${useE?'σ':'τ'}_izin≈${useE?m.sig:m.tau} MPa`;
+  }
+}
+function getMat(){
+  const k=document.getElementById('matSelect').value;
+  const m=MAT[k];
+  if(m.custom){
+    const tau=parseFloat(document.getElementById('cTau').value)||700;
+    return {name:'Özel', G:parseFloat(document.getElementById('cG').value)||81500,
+      E:parseFloat(document.getElementById('cE').value)||206000,
+      rho:parseFloat(document.getElementById('cRho').value)||7850,
+      tau, sig:tau*1.4};
+  }
+  return m;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Yardımcılar
+// ═══════════════════════════════════════════════════════════
+const f=(n,dec=2)=>{
+  if(!isFinite(n)) return '—';
+  return Number(n.toFixed(dec)).toLocaleString('tr-TR',{maximumFractionDigits:dec});
+};
+function wahl(C){ return (4*C-1)/(4*C-4) + 0.615/C; } // basma/çekme kayma düzeltmesi
+function bendK(C){ return (4*C*C - C - 1)/(4*C*(C-1)); } // burulma iç lif eğilme düzeltmesi
+
+// ═══════════════════════════════════════════════════════════
+//  Tip Seçimi & Giriş Render
+// ═══════════════════════════════════════════════════════════
+(function init(){
+  const list=document.getElementById('typeList');
+  for(const key in TYPES){
+    const t=TYPES[key];
+    const btn=document.createElement('button');
+    btn.className='type-btn'+(key===curType?' active':'');
+    btn.dataset.key=key;
+    btn.innerHTML=`<span class="type-icon">${t.icon}</span>${t.name}`;
+    btn.onclick=()=>selectType(key);
+    list.appendChild(btn);
+  }
+  buildMatSelect();
+  selectType(curType);
+})();
+
+function selectType(key){
+  curType=key;
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('active',b.dataset.key===key));
+  const t=TYPES[key];
+  document.getElementById('prevTitle').textContent=t.name;
+  document.getElementById('prevFormula').textContent=t.formula;
+  document.getElementById('rpStd').textContent=t.std;
+  document.getElementById('infoBox').innerHTML=t.info;
+
+  // girişleri kur
+  const wrap=document.getElementById('inputsWrap');
+  let html='<div class="inputs-grid">';
+  t.inputs.forEach(inp=>{
+    html+=`<div class="inp-group">
+      <span class="inp-label">${inp.label}</span>
+      <div class="inp-wrap">
+        <input type="number" id="inp_${inp.id}" value="${inp.def}" min="0" step="${inp.step}">
+        ${inp.unit?`<span class="inp-unit">${inp.unit}</span>`:''}
+      </div></div>`;
+  });
+  if(t.select){
+    html+=`<div class="inp-group full">
+      <span class="inp-label">${t.select.label}</span>
+      <select class="sel" id="inp_${t.select.id}">
+        ${t.select.opts.map(o=>`<option value="${o.v}">${o.t}</option>`).join('')}
+      </select></div>`;
+  }
+  html+='</div>';
+  wrap.innerHTML=html;
+
+  // sonucu sıfırla
+  document.getElementById('rpBody').innerHTML=
+    `<div class="rp-empty" id="rpEmpty"><span class="rp-empty-icon">🌀</span>
+     <span>Değerleri girin ve<br><b>Hesapla</b>'ya basın.</span></div>`;
+  document.getElementById('rpFoot').style.display='none';
+
+  onMat();
+  setTimeout(()=>{
+    document.querySelectorAll('#inputsWrap input,#inputsWrap select').forEach(el=>{
+      el.addEventListener('input',updatePreview);
+      el.addEventListener('change',updatePreview);
+    });
+    updatePreview();
+  },10);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  HESAPLAMA
+// ═══════════════════════════════════════════════════════════
+function calculate(){
+  const t=TYPES[curType];
+  const d=getDims();
+  const mat=getMat();
+  const warns=[];
+
+  // ortak doğrulama
+  if(!d.d||!d.De||!d.n){ alert('Tel çapı, dış çap ve sarım sayısı zorunludur.'); return; }
+  if(d.De<=d.d){ alert('Dış çap (De), tel çapından büyük olmalı.'); return; }
+
+  const Dm=d.De-d.d;            // orta çap
+  const Di=d.De-2*d.d;          // iç çap
+  const C=Dm/d.d;               // yay indeksi
+
+  if(C<4) warns.push(['warn-y','⚠','Yay indeksi C='+f(C,1)+' küçük (&lt;4). Sarımı zor, gerilme yığılması yüksek.']);
+  else if(C>12) warns.push(['warn-y','⚠','Yay indeksi C='+f(C,1)+' büyük (&gt;12). Yay kararsız, taşıma/burkulma riski.']);
+  else warns.push(['ok','✓','Yay indeksi C='+f(C,1)+' uygun aralıkta (4–12).']);
+
+  let groups=[], footLabel='', footVal='', utilLabel='', util=0, utilCol='var(--green)';
+
+  if(curType==='basma'){
+    const k=(mat.G*Math.pow(d.d,4))/(8*Math.pow(Dm,3)*d.n);   // N/mm
+    const kw=wahl(C);
+    // uç tipi → toplam sarım & blok boyu (Shigley)
+    const ends=(document.getElementById('inp_ends')||{}).value||'kg';
+    let nt, Lc, pitch;
+    if(ends==='kg'){ nt=d.n+2; Lc=d.d*nt;       pitch=(d.L0-2*d.d)/d.n; }
+    else if(ends==='k'){ nt=d.n+2; Lc=d.d*(nt+1); pitch=(d.L0-3*d.d)/d.n; }
+    else if(ends==='g'){ nt=d.n+1; Lc=d.d*nt;     pitch=(d.L0-d.d)/d.n; }
+    else { nt=d.n; Lc=d.d*(nt+1);                 pitch=(d.L0-d.d)/d.n; }
+    const sc=d.L0-Lc;                 // bloğa kadar yol
+    const Fc=k*sc;                    // blok kuvveti
+    const F=k*(d.s||0);               // çalışma kuvveti
+    const tau=8*F*Dm/(Math.PI*Math.pow(d.d,3));
+    const tauC=kw*tau;
+    const tauCmax=kw*8*Fc*Dm/(Math.PI*Math.pow(d.d,3)); // blokta gerilme
+    // doğal frekans (her iki uç sabit)
+    const dM=d.d/1000, DmM=Dm/1000, Gpa=mat.G*1e6;
+    const fe=(dM/(2*Math.PI*d.n*DmM*DmM))*Math.sqrt(Gpa/(2*mat.rho));
+    // kütle
+    const Lw=Math.PI*Dm*nt;
+    const mass=Lw*(Math.PI*d.d*d.d/4)*mat.rho*1e-6; // g
+
+    util=tauC/mat.tau*100;
+    if(d.s>0 && d.s>=sc) warns.push(['err','✕','Çalışma yolu s='+f(d.s,1)+'mm, bloğa kadar olan yol sc='+f(sc,1)+'mm’den büyük! Yay tıkanır.']);
+    if(sc<=0) warns.push(['err','✕','Blok boyu Lc='+f(Lc,2)+'mm ≥ serbest boy L0. L0 veya sarım sayısını gözden geçirin.']);
+    if(d.L0/Dm>4) warns.push(['warn-y','⚠','Narinlik L0/Dm='+f(d.L0/Dm,1)+' (&gt;4). Serbest yaslanan uçlarda burkulma riski — kılavuzlama önerilir.']);
+    if(util>100) warns.push(['err','✕','Çalışma gerilmesi τ_izin değerini aşıyor (%'+f(util,0)+').']);
+
+    groups=[
+      {title:'Geometri', rows:[
+        ['Orta çap  Dm','De − d', f(Dm,2),'mm'],
+        ['İç çap  Di','De − 2d', f(Di,2),'mm'],
+        ['Yay indeksi  C','Dm / d', f(C,2),''],
+        ['Toplam sarım  nt','', f(nt,1),''],
+        ['Adım  p','≈', f(pitch,2),'mm'],
+        ['Blok boyu  Lc','', f(Lc,2),'mm'],
+        ['Bloğa kadar yol  sc','L0 − Lc', f(sc,2),'mm'],
+      ]},
+      {title:'Yay Sabiti & Kuvvet', color:'var(--teal)', rows:[
+        ['Yay sabiti  R','G·d⁴/(8Dm³n)', f(k,3),'N/mm', 'var(--teal)'],
+        ['Çalışma kuvveti  F','R·s', f(F,2),'N'],
+        ['Blok kuvveti  Fc','R·sc', f(Fc,2),'N'],
+      ]},
+      {title:'Gerilme (kayma)', color:'var(--blue)', rows:[
+        ['Wahl faktörü  k','(4C−1)/(4C−4)+0.615/C', f(kw,3),''],
+        ['τ düzeltilmemiş','8FDm/πd³', f(tau,1),'MPa'],
+        ['τk çalışma','k·τ', f(tauC,1),'MPa', util>100?'var(--red)':'var(--blue)'],
+        ['τk blokta','', f(tauCmax,1),'MPa'],
+        ['τ_izin (statik)','', f(mat.tau,0),'MPa'],
+      ]},
+      {title:'Dinamik & Kütle', color:'var(--purple)', rows:[
+        ['Doğal frekans  fe','her iki uç sabit', f(fe,1),'Hz', 'var(--purple)'],
+        ['Tel uzunluğu','π·Dm·nt', f(Lw,1),'mm'],
+        ['Kütle  m','', f(mass,2),'g'],
+      ]},
+    ];
+    footLabel='Yay Sabiti R'; footVal=f(k,2)+' N/mm';
+    utilLabel='τk / τ_izin'; 
+  }
+
+  else if(curType==='cekme'){
+    const k=(mat.G*Math.pow(d.d,4))/(8*Math.pow(Dm,3)*d.n);
+    const kw=wahl(C);
+    const F=(d.F0||0)+k*(d.s||0);     // toplam kuvvet
+    const tau=8*F*Dm/(Math.PI*Math.pow(d.d,3));
+    const tauC=kw*tau;
+    const Lk=(d.n+1)*d.d;             // gövde boyu (sarımlar temas)
+    const Lw=Math.PI*Dm*(d.n+2);
+    const mass=Lw*(Math.PI*d.d*d.d/4)*mat.rho*1e-6;
+    util=tauC/mat.tau*100;
+
+    if(d.L0 && d.L0<Lk) warns.push(['warn-y','⚠','Serbest boy L0='+f(d.L0,1)+'mm, gövde boyu Lk='+f(Lk,1)+'mm’den küçük görünüyor (kancalar dahil mi?).']);
+    warns.push(['warn-y','⚠','Kanca gerilmesi gövdeden yüksektir — kanca yarıçapına göre ayrıca kontrol edin.']);
+    if(util>100) warns.push(['err','✕','Gövde gerilmesi τ_izin değerini aşıyor (%'+f(util,0)+').']);
+
+    groups=[
+      {title:'Geometri', rows:[
+        ['Orta çap  Dm','De − d', f(Dm,2),'mm'],
+        ['İç çap  Di','De − 2d', f(Di,2),'mm'],
+        ['Yay indeksi  C','Dm / d', f(C,2),''],
+        ['Gövde boyu  Lk','≈(n+1)·d', f(Lk,2),'mm'],
+      ]},
+      {title:'Yay Sabiti & Kuvvet', color:'var(--teal)', rows:[
+        ['Yay sabiti  R','G·d⁴/(8Dm³n)', f(k,3),'N/mm', 'var(--teal)'],
+        ['Ön gerilme  F0','', f(d.F0||0,2),'N'],
+        ['Toplam kuvvet  F','F0 + R·s', f(F,2),'N', 'var(--teal)'],
+      ]},
+      {title:'Gerilme (kayma)', color:'var(--blue)', rows:[
+        ['Wahl faktörü  k','', f(kw,3),''],
+        ['τ düzeltilmemiş','8FDm/πd³', f(tau,1),'MPa'],
+        ['τk gövde','k·τ', f(tauC,1),'MPa', util>100?'var(--red)':'var(--blue)'],
+        ['τ_izin (statik)','', f(mat.tau,0),'MPa'],
+      ]},
+      {title:'Kütle', color:'var(--purple)', rows:[
+        ['Tel uzunluğu','π·Dm·(n+2)', f(Lw,1),'mm'],
+        ['Kütle  m','', f(mass,2),'g'],
+      ]},
+    ];
+    footLabel='Yay Sabiti R'; footVal=f(k,2)+' N/mm';
+    utilLabel='τk / τ_izin';
+  }
+
+  else { // burulma
+    const q=bendK(C);
+    // açısal sabit: Rα [Nmm/°] = E·d⁴/(3667·Dm·n)  (sürtünme payı dahil ~10.8/turn → /360)
+    const kPerTurn=(mat.E*Math.pow(d.d,4))/(10.8*Dm*d.n); // Nmm/tur
+    const kDeg=kPerTurn/360;                               // Nmm/°
+    const M=kDeg*(d.alpha||0);                             // moment
+    const sigma=q*32*M/(Math.PI*Math.pow(d.d,3));          // iç lif eğilme
+    const sigmaUnc=32*M/(Math.PI*Math.pow(d.d,3));
+    // yük altında iç çap küçülmesi (yaklaşık): n' = n + α/360
+    const nLoaded=d.n + (d.alpha||0)/360;
+    const DiLoaded=(Math.PI*Dm*d.n)/(Math.PI*nLoaded) - d.d; // Dm·n/n' − d
+    const Lw=Math.PI*Dm*d.n + 2*(d.leg||0);
+    const mass=Lw*(Math.PI*d.d*d.d/4)*mat.rho*1e-6;
+    util=sigma/mat.sig*100;
+
+    if(DiLoaded<=0) warns.push(['warn-y','⚠','Yük altında iç çap çok küçülüyor — geometri/açıyı kontrol edin.']);
+    else warns.push(['warn-y','⚠','Yük altında iç çap ≈ '+f(DiLoaded,2)+'mm’ye düşer. Mil/kılavuz çapı bundan küçük olmalı.']);
+    if(util>100) warns.push(['err','✕','Eğilme gerilmesi σ_izin değerini aşıyor (%'+f(util,0)+').']);
+
+    groups=[
+      {title:'Geometri', rows:[
+        ['Orta çap  Dm','De − d', f(Dm,2),'mm'],
+        ['İç çap  Di (boş)','De − 2d', f(Di,2),'mm'],
+        ['İç çap  Di (yük)','', f(DiLoaded,2),'mm'],
+        ['Yay indeksi  C','Dm / d', f(C,2),''],
+      ]},
+      {title:'Moment & Açı', color:'var(--teal)', rows:[
+        ['Açısal sabit  Rα','E·d⁴/(3888·Dm·n)', f(kDeg,3),'Nmm/°', 'var(--teal)'],
+        ['Birim tur  Rα·360','', f(kPerTurn,1),'Nmm/tur'],
+        ['Çalışma açısı  α','', f(d.alpha||0,1),'°'],
+        ['Moment  M','Rα·α', f(M,1),'Nmm', 'var(--teal)'],
+        ['Moment  M','', f(M/1000,3),'Nm'],
+      ]},
+      {title:'Gerilme (eğilme)', color:'var(--blue)', rows:[
+        ['Düzeltme  q','iç lif', f(q,3),''],
+        ['σ düzeltilmemiş','32M/πd³', f(sigmaUnc,1),'MPa'],
+        ['σ iç lif','q·32M/πd³', f(sigma,1),'MPa', util>100?'var(--red)':'var(--blue)'],
+        ['σ_izin (statik)','', f(mat.sig,0),'MPa'],
+      ]},
+      {title:'Kütle', color:'var(--purple)', rows:[
+        ['Tel uzunluğu','π·Dm·n + kollar', f(Lw,1),'mm'],
+        ['Kütle  m','', f(mass,2),'g'],
+      ]},
+    ];
+    footLabel='Moment  M'; footVal=f(M,1)+' Nmm';
+    utilLabel='σ / σ_izin';
+  }
+
+  if(util>100) utilCol='var(--red)';
+  else if(util>70) utilCol='var(--yellow)';
+  else utilCol='var(--green)';
+
+  renderResults(groups, warns, footLabel, footVal, utilLabel, util, utilCol);
+}
+
+function renderResults(groups, warns, footLabel, footVal, utilLabel, util, utilCol){
+  const body=document.getElementById('rpBody');
+  let html='';
+  // uyarılar
+  if(warns.length){
+    html+='<div class="warns">'+warns.map(w=>
+      `<div class="warn ${w[0]}"><span class="warn-ico">${w[1]}</span><span>${w[2]}</span></div>`).join('')+'</div>';
+  }
+  // gruplar
+  groups.forEach(g=>{
+    html+=`<div class="res-group" style="${g.color?`--gc:${g.color}`:''}">
+      <div class="rg-head" ${g.color?`style="border-left-color:${g.color}"`:''}>${g.title}</div>
+      <div class="rg-rows">`;
+    g.rows.forEach(r=>{
+      const col=r[4]?`style="color:${r[4]}"`:'';
+      html+=`<div class="rg-row">
+        <span class="rg-label">${r[0]}${r[1]?`<small>${r[1]}</small>`:''}</span>
+        <span class="rg-val" ${col}>${r[2]}${r[3]?`<span>${r[3]}</span>`:''}</span>
+      </div>`;
+    });
+    html+='</div></div>';
+  });
+  body.innerHTML=html;
+
+  // altlık
+  document.getElementById('rpFoot').style.display='flex';
+  document.getElementById('footLabel').textContent=footLabel;
+  document.getElementById('footVal').textContent=footVal;
+  document.getElementById('utilLabel').textContent=utilLabel;
+  const uv=document.getElementById('utilVal');
+  uv.textContent='%'+f(util,0);
+  uv.style.color=utilCol;
+  const fill=document.getElementById('utilFill');
+  fill.style.width=Math.min(util,100)+'%';
+  fill.style.background=utilCol;
+}
+</script>
+</body>
+</html>

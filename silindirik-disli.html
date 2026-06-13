@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Düz & Helisel Dişli Hesabı — MH Platform</title>
+  <link rel="stylesheet" href="mh-tokens.css">
+  <style>
+    :root {
+      --dim:  #52527a;
+      --dim2: #8080a8;
+      --gc:    #c084fc;                     /* dişli teması (mor) */
+      --gc-bg: rgba(192,132,252,0.12);
+      --gc-bd: rgba(192,132,252,0.28);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--font-b);
+      display: flex; flex-direction: column;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(7,7,14,0.92); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 20px; height: 52px; gap: 20px; flex-shrink: 0;
+    }
+    .brand { font-family: var(--font-logo); font-size: var(--fz-18); letter-spacing: 3px; color: var(--accent); text-decoration: none; }
+    .brand em { color: var(--text); font-style: normal; }
+    .breadcrumb { font-size: var(--fz-12); color: var(--dim2); font-family: var(--font-m); display: flex; align-items: center; gap: 8px; }
+    .breadcrumb .sep { color: var(--dim); }
+
+    /* ── APP ── */
+    .app { display: flex; flex: 1; overflow: hidden; position: relative; z-index: 1; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--bg2); border-right: 1px solid var(--border);
+      width: 200px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto; padding-bottom: 16px;
+    }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+    .sec-label {
+      font-family: var(--font-h); font-size: var(--fz-11);
+      letter-spacing: 2px; color: #9090c0; text-transform: uppercase;
+      padding: 12px 14px 5px; flex-shrink: 0;
+    }
+    .sb-div { height: 1px; background: var(--border); margin: 6px 14px; }
+    .type-btn {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 9px 14px;
+      background: transparent; border: none; border-left: 3px solid transparent;
+      color: var(--dim2); font-family: var(--font-b); font-size: var(--fz-12);
+      cursor: pointer; text-align: left; transition: all 0.15s;
+    }
+    .type-btn:hover { background: var(--surf1); color: var(--text); }
+    .type-btn.active {
+      background: var(--surf1); color: var(--text);
+      font-weight: 500; border-left-color: var(--gc);
+    }
+    .type-ic { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+    .type-txt { display: flex; flex-direction: column; line-height: 1.25; }
+    .type-txt b { font-weight: 500; }
+    .type-txt span { font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim); }
+    .type-btn.active .type-txt span { color: var(--dim2); }
+
+    /* ── CONTENT ── */
+    .content {
+      width: 480px; max-width: 480px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      overflow-y: auto; border-right: 1px solid var(--border);
+    }
+    .content::-webkit-scrollbar { width: 3px; }
+    .content::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+
+    .page-hdr {
+      padding: 13px 16px 11px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 8px; flex-shrink: 0;
+    }
+    .page-title { font-family: var(--font-h); font-size: var(--fz-20); font-weight: 700; letter-spacing: 1px; }
+    .page-sub { font-size: var(--fz-11); color: var(--dim2); font-family: var(--font-m); margin-top: 3px; }
+    .page-badge {
+      font-family: var(--font-m); font-size: var(--fz-13); font-weight: 600;
+      color: var(--gc); flex-shrink: 0; padding-top: 2px; letter-spacing: 0.5px;
+    }
+
+    .preview-wrap { padding: 10px 16px 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .preview-box {
+      background: #07070e; border: 1px solid var(--border); border-radius: 10px;
+      height: 210px; overflow: hidden;
+    }
+    #gearSVG { width: 100%; height: 100%; display: block; }
+
+    /* Sections */
+    .section { padding: 11px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .sec-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+    .sec-ttl { font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 2px; color: #9090c0; text-transform: uppercase; }
+    .sec-tag { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); }
+
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .input-row.full { grid-template-columns: 1fr; }
+    .inp-g { display: flex; flex-direction: column; gap: 4px; }
+    .inp-g.hide { display: none; }
+    .inp-label {
+      font-family: var(--font-h); font-size: var(--fz-13);
+      letter-spacing: 1px; color: #c0c0e0; text-transform: uppercase;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .opt-tag {
+      font-family: var(--font-m); font-size: var(--fz-9); color: var(--dim);
+      padding: 2px 5px; background: var(--surf3); border-radius: 3px;
+    }
+    .inp-wrap {
+      display: flex; background: var(--surf2);
+      border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; transition: border-color 0.2s;
+    }
+    .inp-wrap:focus-within { border-color: var(--gc); }
+    .inp-wrap input {
+      flex: 1; padding: 10px 12px; background: transparent; border: none;
+      color: var(--text); font-family: var(--font-m);
+      font-size: var(--fz-15); font-weight: 600; outline: none; min-width: 0;
+      -moz-appearance: textfield;
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .inp-sfx {
+      padding: 0 11px; display: flex; align-items: center;
+      font-family: var(--font-m); font-size: var(--fz-12);
+      color: var(--dim); background: var(--surf3);
+      border-left: 1px solid var(--border); flex-shrink: 0;
+    }
+    .inp-sfx.hi { color: var(--gc); background: var(--gc-bg); border-left-color: var(--gc-bd); }
+    .inp-sel {
+      width: 100%; padding: 10px 12px;
+      background: var(--surf2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-family: var(--font-m); font-size: var(--fz-14);
+      font-weight: 600; cursor: pointer; outline: none; appearance: none;
+      transition: border-color 0.2s;
+    }
+    .inp-sel:focus { border-color: var(--gc); }
+    .inp-hint { font-family: var(--font-m); font-size: var(--fz-10); color: var(--dim2); min-height: 14px; }
+    .inp-hint.warn { color: var(--yellow); }
+    .inp-static {
+      padding: 10px 12px; background: var(--surf2);
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: var(--font-m); font-size: var(--fz-15); font-weight: 600; color: var(--gc);
+    }
+
+    /* Ratio strip — büyük vurgu */
+    .ratio-strip {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; padding: 11px 14px; margin-top: 10px;
+      background: linear-gradient(90deg, var(--gc-bg), rgba(192,132,252,0.02));
+      border: 1px solid var(--gc-bd); border-radius: 9px;
+    }
+    .ratio-strip .rl { font-family: var(--font-h); font-size: var(--fz-12); letter-spacing: 1.5px; color: var(--dim2); text-transform: uppercase; }
+    .ratio-strip .rv { font-family: var(--font-m); font-size: var(--fz-24); font-weight: 600; color: var(--gc); }
+    .ratio-strip .rsub { font-family: var(--font-m); font-size: var(--fz-10); color: var(--dim2); }
+
+    .q-strip {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 4px 10px; padding: 8px 12px;
+      background: var(--surf1); border-radius: 8px; margin-top: 10px;
+    }
+    .ql { font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 1px; color: var(--dim2); text-transform: uppercase; }
+    .qv { font-family: var(--font-m); font-size: var(--fz-14); font-weight: 600; }
+    .qs { color: var(--dim); font-size: var(--fz-11); }
+    .c-pur { color: var(--gc); }
+    .c-tl  { color: var(--teal); }
+    .c-bl  { color: var(--blue); }
+    .c-yl  { color: var(--yellow); }
+    .c-grn { color: var(--green); }
+    .c-rd  { color: var(--red); }
+    .c-dim { color: var(--dim2); }
+
+    .calc-btn {
+      display: block; width: calc(100% - 32px); margin: 12px 16px; padding: 14px;
+      background: var(--accent); border: none; border-radius: 10px;
+      color: white; font-family: var(--font-h);
+      font-size: var(--fz-18); font-weight: 700; letter-spacing: 2px;
+      cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    }
+    .calc-btn:hover { background: #ea6c0d; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(249,115,22,0.35); }
+    .calc-btn:active { transform: translateY(0); }
+
+    .result-area { padding: 0 16px 14px; display: none; flex-shrink: 0; }
+    .result-area.show { display: block; animation: fadeUp 0.2s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+    .result-card { background: var(--surf1); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .res-hdr {
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .res-hdr-lbl { font-family: var(--font-h); font-size: var(--fz-13); letter-spacing: 2px; color: var(--dim2); text-transform: uppercase; }
+    .res-main-val { font-family: var(--font-m); font-size: var(--fz-22); font-weight: 600; color: var(--gc); }
+    .spec-grid { padding: 6px 14px 10px; }
+    .spec-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .spec-row:last-child { border-bottom: none; }
+    .spec-nm { font-family: var(--font-h); font-size: var(--fz-13); letter-spacing: 0.5px; color: var(--dim2); text-transform: uppercase; }
+    .spec-vl { font-family: var(--font-m); font-size: var(--fz-13); font-weight: 600; }
+    .warn-strip {
+      padding: 9px 14px; border-top: 1px solid rgba(251,191,36,0.2);
+      background: rgba(251,191,36,0.07);
+      font-family: var(--font-m); font-size: var(--fz-10); color: var(--yellow); line-height: 1.7;
+    }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel {
+      background: var(--bg2); border-left: 1px solid var(--border);
+      width: 340px; flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .rp-hdr {
+      padding: 12px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .rp-title { font-family: var(--font-h); font-size: var(--fz-15); font-weight: 700; letter-spacing: 1px; }
+    .rp-tag { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); }
+    .rp-body { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; }
+    .rp-body::-webkit-scrollbar { width: 3px; }
+    .rp-body::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+    .rp-card { background: var(--surf1); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .rp-card-hdr {
+      padding: 7px 12px; border-bottom: 1px solid var(--border);
+      font-family: var(--font-h); font-size: var(--fz-11);
+      letter-spacing: 2px; color: #9090c0; text-transform: uppercase;
+    }
+    .rp-card-body { padding: 6px 12px 8px; }
+    .rp-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .rp-row:last-child { border-bottom: none; }
+    .rp-nm { font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 0.5px; color: var(--dim2); text-transform: uppercase; }
+    .rp-vl { font-family: var(--font-m); font-size: var(--fz-12); font-weight: 600; }
+
+    .dg-comp { display: grid; grid-template-columns: 1fr auto auto; border-bottom: 1px solid var(--border); }
+    .dg-col-hdr {
+      font-family: var(--font-h); font-size: var(--fz-10);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--border);
+    }
+    .dg-col-hdr.lbl { text-align: left; color: var(--dim2); }
+    .dg-col-hdr.z1c { color: var(--gc); }
+    .dg-col-hdr.z2c { color: var(--blue); }
+    .dg-lbl {
+      font-family: var(--font-b); font-size: var(--fz-10); color: var(--dim2);
+      padding: 4px 10px; display: flex; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .dg-val {
+      font-family: var(--font-m); font-size: var(--fz-11); font-weight: 600;
+      color: var(--text); text-align: right; padding: 4px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .dg-val.pur { color: var(--gc); }
+    .dg-val.blu { color: var(--blue); }
+    .dg-val.tl  { color: var(--teal); }
+    .dg-val.dim { color: var(--dim2); }
+    .dg-sep {
+      grid-column: 1/-1; font-family: var(--font-h); font-size: var(--fz-10);
+      letter-spacing: 2px; color: var(--dim2); text-transform: uppercase;
+      padding: 7px 10px 4px; border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.015);
+    }
+
+    .fml-box {
+      padding: 10px 12px; background: rgba(192,132,252,0.05);
+      border: 1px solid rgba(192,132,252,0.15); border-radius: 8px;
+      font-family: var(--font-m); font-size: var(--fz-10); color: #d8bafd; line-height: 1.95;
+    }
+    .fml-ttl { font-family: var(--font-h); font-size: var(--fz-11); letter-spacing: 1px; display: block; margin-bottom: 5px; color: #d8bafd; }
+
+    .empty-st {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px; color: var(--dim); font-size: var(--fz-12); text-align: center; padding: 30px;
+    }
+    .empty-ic { font-size: var(--fz-28); opacity: 0.22; }
+    .empty-st p { font-family: var(--font-m); font-size: var(--fz-11); color: var(--dim2); line-height: 1.75; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="index.html">MH<em>Platform</em></a>
+  <div class="breadcrumb">
+    <a href="index.html" style="color:var(--dim2);text-decoration:none">Ana Sayfa</a>
+    <span class="sep">/</span>
+    <span style="color:var(--text)">Düz &amp; Helisel Dişli Hesabı</span>
+  </div>
+</nav>
+
+<div class="app">
+
+  <!-- ── SOL SIDEBAR — DİŞLİ TİPİ ── -->
+  <aside class="sidebar">
+    <p class="sec-label">Silindirik Dişli</p>
+    <button class="type-btn" data-g="spur"     onclick="selectGear('spur')">
+      <span class="type-ic">⚙</span><span class="type-txt"><b>Düz Dişli</b><span>Spur · ISO 21771</span></span></button>
+    <button class="type-btn" data-g="helical"  onclick="selectGear('helical')">
+      <span class="type-ic">🌀</span><span class="type-txt"><b>Helisel Dişli</b><span>Helical · β açılı</span></span></button>
+    <button class="type-btn" data-g="internal" onclick="selectGear('internal')">
+      <span class="type-ic">◎</span><span class="type-txt"><b>İç Dişli</b><span>Internal / Ring</span></span></button>
+
+    <div class="sb-div"></div>
+    <p class="sec-label">Konik Dişli</p>
+    <button class="type-btn" data-g="bevel"    onclick="selectGear('bevel')">
+      <span class="type-ic">▲</span><span class="type-txt"><b>Konik Dişli</b><span>Ayna-Mahruti · Bevel</span></span></button>
+
+    <div class="sb-div"></div>
+    <p class="sec-label">Doğrusal</p>
+    <button class="type-btn" data-g="rack"     onclick="selectGear('rack')">
+      <span class="type-ic">▭</span><span class="type-txt"><b>Kremayer</b><span>Rack &amp; Pinion</span></span></button>
+  </aside>
+
+  <!-- ── ORTA İÇERİK ── -->
+  <main class="content">
+
+    <div class="page-hdr">
+      <div>
+        <div class="page-title" id="pageTitle">DÜZ DİŞLİ HESABI</div>
+        <div class="page-sub" id="pageSub">ISO 21771 · DIN 3960 · involüt profil</div>
+      </div>
+      <div class="page-badge" id="pageBadge">SPUR</div>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="preview-box">
+        <svg id="gearSVG" viewBox="0 0 448 210" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+    </div>
+
+    <!-- TEMEL PARAMETRELER -->
+    <div class="section">
+      <div class="sec-hdr">
+        <span class="sec-ttl">Temel Parametreler</span>
+        <span class="sec-tag" id="pBasic">m = 2 · α = 20°</span>
+      </div>
+      <div class="input-row">
+        <div class="inp-g">
+          <span class="inp-label">Modül (m)</span>
+          <select class="inp-sel" id="mSel" onchange="onChange()"></select>
+          <div class="inp-hint">DIN 780 standart modül</div>
+        </div>
+        <div class="inp-g" id="customMG" style="display:none">
+          <span class="inp-label">Özel m</span>
+          <div class="inp-wrap">
+            <input type="number" id="mCustom" value="2" min="0.1" step="0.1" oninput="onChange()">
+            <span class="inp-sfx hi">mm</span>
+          </div>
+          <div class="inp-hint">mn = normal modül</div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Kavrama Açısı (α)</span>
+          <select class="inp-sel" id="aSel" onchange="onChange()">
+            <option value="20">20°  (standart)</option>
+            <option value="14.5">14.5°  (eski US)</option>
+            <option value="25">25°  (yük dişli)</option>
+          </select>
+          <div class="inp-hint" id="aHint">αn — normal kavrama açısı</div>
+        </div>
+      </div>
+
+      <!-- Helis açısı (yalnız helisel) -->
+      <div class="input-row" id="rowHelix" style="display:none">
+        <div class="inp-g">
+          <span class="inp-label">Helis Açısı (β)</span>
+          <div class="inp-wrap">
+            <input type="number" id="betaInp" value="15" min="0" max="45" step="0.5" oninput="onChange()">
+            <span class="inp-sfx hi">°</span>
+          </div>
+          <div class="inp-hint" id="betaHint">Tipik: 8°–20°</div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Diş Yönü</span>
+          <select class="inp-sel" id="handSel" onchange="onChange()">
+            <option value="R">Sağ (RH)</option>
+            <option value="L">Sol (LH)</option>
+          </select>
+          <div class="inp-hint">Çiftte ters yön gerekir</div>
+        </div>
+      </div>
+
+      <!-- Mil açısı (yalnız konik) -->
+      <div class="input-row" id="rowShaft" style="display:none">
+        <div class="inp-g">
+          <span class="inp-label">Mil Açısı (Σ)</span>
+          <div class="inp-wrap">
+            <input type="number" id="sigmaInp" value="90" min="10" max="170" step="1" oninput="onChange()">
+            <span class="inp-sfx hi">°</span>
+          </div>
+          <div class="inp-hint">Ayna-mahruti: genellikle 90°</div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Tip</span>
+          <select class="inp-sel" id="bevelSel" onchange="onChange()">
+            <option value="straight">Düz Konik</option>
+            <option value="spiral">Spiral Konik</option>
+          </select>
+          <div class="inp-hint">Tredgold eşdeğer diş</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DİŞ SAYILARI & ORAN -->
+    <div class="section">
+      <div class="sec-hdr">
+        <span class="sec-ttl">Diş Sayıları &amp; Oran</span>
+        <span class="sec-tag" id="pTeeth">z₁ / z₂</span>
+      </div>
+      <div class="input-row">
+        <div class="inp-g">
+          <span class="inp-label" style="color:var(--gc)" id="z1Lab">Pinyon z₁ <span style="font-size:var(--fz-10);color:var(--dim);font-family:var(--font-m)">(küçük)</span></span>
+          <div class="inp-wrap" style="border-color:var(--gc-bd)">
+            <input type="number" id="z1Inp" value="18" min="5" max="400" step="1" oninput="onChange()">
+            <span class="inp-sfx hi">diş</span>
+          </div>
+          <div class="inp-hint" id="z1Hint">d₁ = —</div>
+        </div>
+        <div class="inp-g" id="z2G">
+          <span class="inp-label" style="color:var(--blue)" id="z2Lab">Çark z₂ <span style="font-size:var(--fz-10);color:var(--dim);font-family:var(--font-m)">(büyük)</span></span>
+          <div class="inp-wrap" style="border-color:rgba(96,165,250,0.3)">
+            <input type="number" id="z2Inp" value="54" min="5" max="600" step="1" oninput="onChange()">
+            <span class="inp-sfx" style="color:var(--blue);background:rgba(96,165,250,0.08);border-left-color:rgba(96,165,250,0.18)">diş</span>
+          </div>
+          <div class="inp-hint" id="z2Hint">d₂ = —</div>
+        </div>
+      </div>
+
+      <!-- Kremayer strok (yalnız rack) -->
+      <div class="input-row" id="rowRack" style="display:none">
+        <div class="inp-g">
+          <span class="inp-label">Kremayer Boyu</span>
+          <div class="inp-wrap">
+            <input type="number" id="rackLen" value="1000" min="10" step="10" oninput="onChange()">
+            <span class="inp-sfx">mm</span>
+          </div>
+          <div class="inp-hint" id="rackHint">Toplam diş sayısı: —</div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Strok / Devir</span>
+          <div class="inp-static" id="rackStroke">—</div>
+        </div>
+      </div>
+
+      <div class="ratio-strip">
+        <div>
+          <div class="rl" id="ratioLab">İletim Oranı (i = z₂ / z₁)</div>
+          <div class="rsub" id="ratioSub">redüksiyon</div>
+        </div>
+        <div class="rv" id="ratioVal">—</div>
+      </div>
+
+      <div class="q-strip">
+        <span class="ql">Eksen Mes. a</span><span class="qv c-tl" id="qa">—</span>
+        <span class="qs">·</span>
+        <span class="ql">Adım p</span><span class="qv c-bl" id="qp">—</span>
+        <span class="qs">·</span>
+        <span class="ql">Diş Boyu h</span><span class="qv" id="qh">—</span>
+      </div>
+    </div>
+
+    <!-- YÜK & HIZ (OPSİYONEL) -->
+    <div class="section">
+      <div class="sec-hdr">
+        <span class="sec-ttl">Yük &amp; Hız <span style="font-weight:400;opacity:.6">— isteğe bağlı</span></span>
+      </div>
+      <div class="input-row full">
+        <div class="inp-g">
+          <span class="inp-label">Giriş Devri n₁ <span class="opt-tag">OPT</span></span>
+          <div class="inp-wrap">
+            <input type="number" id="n1Inp" placeholder="—" min="0" step="1" oninput="onChange()">
+            <span class="inp-sfx">rpm</span>
+          </div>
+          <div class="inp-hint" id="n2Hint">n₂ = —</div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Diş Genişliği b <span class="opt-tag">OPT</span></span>
+          <div class="inp-wrap">
+            <input type="number" id="bInp" placeholder="—" min="0" step="1" oninput="onChange()">
+            <span class="inp-sfx">mm</span>
+          </div>
+          <div class="inp-hint" id="bHint">εβ / face oranı için</div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">İletilen Güç P <span class="opt-tag">OPT</span></span>
+          <div class="inp-wrap">
+            <input type="number" id="pInp" placeholder="—" min="0" step="0.1" oninput="onChange()">
+            <span class="inp-sfx">kW</span>
+          </div>
+          <div class="inp-hint" id="tHint">T₁ = —</div>
+        </div>
+        <div class="inp-g">
+          <span class="inp-label">Çevresel Hız v</span>
+          <div class="inp-static" id="vDisp">—</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">HESAPLA</button>
+    <div class="result-area" id="resultArea"></div>
+
+  </main>
+
+  <!-- ── SAĞ PANEL ── -->
+  <section class="right-panel">
+    <div class="rp-hdr">
+      <span class="rp-title" id="rpTitle">DİŞLİ GEOMETRİSİ</span>
+      <span class="rp-tag" id="rpTag">SPUR</span>
+    </div>
+    <div class="rp-body" id="rpBody">
+      <div class="empty-st">
+        <div class="empty-ic">⚙</div>
+        <p>Dişli tipini seçin ve<br>modül + diş sayısını girin.</p>
+      </div>
+    </div>
+  </section>
+
+</div><!-- .app -->
+
+<script>
+/* ════════════════════════════════════════════════════════
+   DİŞLİ TİPLERİ
+════════════════════════════════════════════════════════ */
+const GEARS = {
+  spur:     { title:'DÜZ DİŞLİ HESABI',     badge:'SPUR',     sub:'ISO 21771 · DIN 3960 · involüt profil', std:'ISO 21771 / DIN 3960' },
+  helical:  { title:'HELİSEL DİŞLİ HESABI',  badge:'HELICAL',  sub:'ISO 21771 · helis açısı β · eksenel kuvvet', std:'ISO 21771 / DIN 3960' },
+  internal: { title:'İÇ DİŞLİ HESABI',       badge:'INTERNAL', sub:'DIN 3960 · iç (ring) + pinyon', std:'DIN 3960' },
+  bevel:    { title:'KONİK DİŞLİ HESABI',    badge:'BEVEL',    sub:'ISO 23509 · DIN 3971 · ayna-mahruti', std:'ISO 23509 / DIN 3971' },
+  rack:     { title:'KREMAYER HESABI',       badge:'RACK',     sub:'DIN 3961 · pinyon + kremayer (doğrusal)', std:'DIN 3961' },
+};
+
+/* DIN 780 standart modüller (Reihe 1 öncelikli) */
+const MOD_R1 = [0.5,0.6,0.8,1,1.25,1.5,2,2.5,3,4,5,6,8,10,12,16,20,25];
+const MOD_R2 = [0.7,0.9,1.125,1.375,1.75,2.25,2.75,3.5,4.5,5.5,7,9,11,14,18,22];
+
+/* DURUM */
+let curGear = 'spur';
+
+/* ════════════════════════════════════════════════════════
+   YARDIMCILAR
+════════════════════════════════════════════════════════ */
+const PI = Math.PI;
+const rad = d => d*PI/180;
+const deg = r => r*180/PI;
+function fmt(v, dec=2)  { return (typeof v==='number' && isFinite(v)) ? v.toFixed(dec) : '—'; }
+function val(id)  { return parseFloat(document.getElementById(id).value); }
+function ival(id) { return parseInt(document.getElementById(id).value); }
+function setTxt(id, t){ const e=document.getElementById(id); if(e) e.textContent=t; }
+
+function getModule(){
+  const s = document.getElementById('mSel').value;
+  if(s==='custom') return val('mCustom')||2;
+  return parseFloat(s);
+}
+
+/* Tek dişli involüt geometri — standart diş (ha=m, hf=1.25m) */
+function spurGeo(m, z, alphaDeg){
+  const a = rad(alphaDeg);
+  const d  = m*z;
+  const da = m*(z+2);
+  const df = m*(z-2.5);
+  const db = d*Math.cos(a);
+  return { d, da, df, db, ha:m, hf:1.25*m, h:2.25*m, p:PI*m };
+}
+/* Helisel — mn normal modül, β helis açısı */
+function helicalGeo(mn, z, alphaNDeg, betaDeg){
+  const an = rad(alphaNDeg), b = rad(betaDeg);
+  const mt = mn/Math.cos(b);
+  const at = Math.atan(Math.tan(an)/Math.cos(b));
+  const d  = mt*z;                 /* = mn*z/cosβ */
+  const da = d + 2*mn;
+  const df = d - 2.5*mn;
+  const db = d*Math.cos(at);
+  const zv = z/Math.pow(Math.cos(b),3);
+  const px = (b>0.0001) ? PI*mn/Math.sin(b) : Infinity;
+  const bb = Math.asin(Math.sin(b)*Math.cos(an));
+  return { d, da, df, db, mt, at:deg(at), zv, px, betaB:deg(bb), ha:mn, hf:1.25*mn, h:2.25*mn, pn:PI*mn };
+}
+
+/* Profil kayma temas oranı (transverse) — dış-dış kavrama */
+function contactRatio(da1, db1, da2, db2, a, alphaDeg, pbt){
+  const al = rad(alphaDeg);
+  const t1 = Math.sqrt(Math.max((da1/2)**2-(db1/2)**2,0));
+  const t2 = Math.sqrt(Math.max((da2/2)**2-(db2/2)**2,0));
+  return (t1 + t2 - a*Math.sin(al)) / pbt;
+}
+
+/* ════════════════════════════════════════════════════════
+   TİP SEÇİMİ
+════════════════════════════════════════════════════════ */
+function selectGear(key){
+  curGear = key;
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('active', b.dataset.g===key));
+  const g = GEARS[key];
+  setTxt('pageTitle', g.title);
+  setTxt('pageSub', g.sub);
+  setTxt('pageBadge', g.badge);
+  setTxt('rpTag', g.badge);
+
+  document.getElementById('rowHelix').style.display = key==='helical' ? '' : 'none';
+  document.getElementById('rowShaft').style.display = key==='bevel'   ? '' : 'none';
+  document.getElementById('rowRack').style.display  = key==='rack'    ? '' : 'none';
+  document.getElementById('z2G').style.display      = key==='rack'    ? 'none' : '';
+
+  /* Etiketler tipe göre */
+  const z1L = document.getElementById('z1Lab'), z2L = document.getElementById('z2Lab');
+  const rLab = document.getElementById('ratioLab');
+  if(key==='internal'){
+    z1L.innerHTML = 'Pinyon z₁ <span style="font-size:var(--fz-10);color:var(--dim);font-family:var(--font-m)">(dış)</span>';
+    z2L.innerHTML = 'İç Dişli z₂ <span style="font-size:var(--fz-10);color:var(--dim);font-family:var(--font-m)">(ring)</span>';
+    rLab.textContent = 'İletim Oranı (i = z₂ / z₁)';
+  } else if(key==='bevel'){
+    z1L.innerHTML = 'Pinyon z₁ <span style="font-size:var(--fz-10);color:var(--dim);font-family:var(--font-m)">(mahruti)</span>';
+    z2L.innerHTML = 'Ayna z₂ <span style="font-size:var(--fz-10);color:var(--dim);font-family:var(--font-m)">(crown)</span>';
+    rLab.textContent = 'İletim Oranı (u = z₂ / z₁)';
+  } else if(key==='rack'){
+    z1L.innerHTML = 'Pinyon z₁';
+    rLab.textContent = 'Doğrusal Oran (strok / devir)';
+  } else {
+    z1L.innerHTML = 'Pinyon z₁ <span style="font-size:var(--fz-10);color:var(--dim);font-family:var(--font-m)">(küçük)</span>';
+    z2L.innerHTML = 'Çark z₂ <span style="font-size:var(--fz-10);color:var(--dim);font-family:var(--font-m)">(büyük)</span>';
+    rLab.textContent = 'İletim Oranı (i = z₂ / z₁)';
+  }
+
+  setTxt('aHint', key==='helical' ? 'αn — normal kavrama açısı' : 'α — kavrama açısı');
+  document.getElementById('resultArea').classList.remove('show');
+  onChange();
+}
+
+/* ════════════════════════════════════════════════════════
+   CANLI GÜNCELLEME
+════════════════════════════════════════════════════════ */
+function onChange(){
+  document.getElementById('customMG').style.display =
+    document.getElementById('mSel').value==='custom' ? '' : 'none';
+
+  const m = getModule();
+  const al = parseFloat(document.getElementById('aSel').value);
+  const beta = curGear==='helical' ? (val('betaInp')||0) : 0;
+  const sigma = curGear==='bevel' ? (val('sigmaInp')||90) : 90;
+  const z1 = ival('z1Inp')||0;
+  const z2 = ival('z2Inp')||0;
+  const n1 = val('n1Inp');
+  const P  = val('pInp');
+  const b  = val('bInp');
+
+  setTxt('pBasic', `m = ${m} · α = ${al}°` + (curGear==='helical'?` · β = ${beta}°`:''));
+
+  /* — pinyon geometri — */
+  let g1;
+  if(curGear==='helical') g1 = helicalGeo(m, z1, al, beta);
+  else                    g1 = spurGeo(m, z1, al);
+  setTxt('z1Hint', z1>0 ? `d₁ = ${fmt(g1.d)} mm` : 'd₁ = —');
+
+  /* — ikinci dişli / oran — */
+  let ratioTxt='—', ratioSub='', a=null, g2=null;
+
+  if(curGear==='rack'){
+    /* kremayer: doğrusal strok */
+    const stroke = PI*g1.d;                    /* mm / pinyon devri */
+    setTxt('rackStroke', z1>0 ? `${fmt(stroke,2)} mm` : '—');
+    setTxt('ratioVal', z1>0 ? `${fmt(stroke,1)} mm/dev` : '—');
+    setTxt('ratioSub', 'pinyon dönüşü → kremayer ötelemesi');
+    const Lr = val('rackLen')||0;
+    setTxt('rackHint', (Lr>0) ? `Toplam diş: ${Math.floor(Lr/(PI*m))}` : 'Toplam diş sayısı: —');
+  } else {
+    if(curGear==='helical') g2 = helicalGeo(m, z2, al, beta);
+    else                    g2 = spurGeo(m, z2, al);
+    setTxt('z2Hint', z2>0 ? `d₂ = ${fmt(g2.d)} mm` : 'd₂ = —');
+
+    if(z1>0 && z2>0){
+      const i = z2/z1;
+      ratioTxt = `${fmt(i,3)} : 1`;
+      ratioSub = i>=1 ? `redüksiyon · ${z1}↔${z2} diş` : `hızlandırma · ${z1}↔${z2} diş`;
+      if(curGear==='internal') a = m*(z2-z1)/2;
+      else if(curGear==='helical') a = m*(z1+z2)/(2*Math.cos(rad(beta)));
+      else if(curGear==='bevel') a = null;     /* konikte eksen mesafesi yok */
+      else a = m*(z1+z2)/2;
+    }
+    setTxt('ratioVal', ratioTxt);
+    setTxt('ratioSub', ratioSub || (curGear==='bevel'?'konik dişli çifti':'redüksiyon'));
+  }
+
+  /* — quick strip — */
+  setTxt('qa', curGear==='bevel' ? '— (konik)' : (a!==null ? fmt(a)+' mm' : '—'));
+  setTxt('qp', z1>0 ? fmt(curGear==='helical'? g1.pn : g1.p, 3)+' mm' : '—');
+  setTxt('qh', z1>0 ? fmt(g1.h,3)+' mm' : '—');
+
+  /* — kinematik / yük — */
+  let n2=null, T1=null, v=null;
+  const dRef = g1.d;
+  if(curGear==='rack'){
+    if(n1>0) v = PI*dRef*n1/60000;             /* kremayer hızı m/s */
+  } else if(z1>0 && z2>0){
+    n2 = (n1>0) ? n1*z1/z2 : null;
+    setTxt('n2Hint', n2!==null ? `n₂ = ${fmt(n2,1)} rpm` : 'n₂ = —');
+    if(n1>0) v = PI*dRef*n1/60000;
+  }
+  if(P>0 && n1>0) T1 = 9550*P/n1;              /* Nm */
+  setTxt('tHint', T1!==null ? `T₁ = ${fmt(T1,2)} Nm` : 'T₁ = —');
+  setTxt('vDisp', v!==null ? fmt(v,3)+' m/s' : '—');
+  if(curGear!=='rack' && !(z1>0&&z2>0)) setTxt('n2Hint','n₂ = —');
+
+  /* helis uyarısı */
+  if(curGear==='helical'){
+    const bh = document.getElementById('betaHint');
+    if(beta>30){ bh.textContent='⚠ β>30° eksenel yükü çok artırır'; bh.className='inp-hint warn'; }
+    else if(beta===0){ bh.textContent='β=0 → düz dişli ile aynı'; bh.className='inp-hint'; }
+    else { bh.textContent='Tipik: 8°–20°'; bh.className='inp-hint'; }
+  }
+  /* alttan kesme uyarısı (α=20° için zmin≈17) */
+  const z1h = document.getElementById('z1Hint');
+  if(z1>0 && z1<17 && curGear!=='internal' && al==20){
+    z1h.textContent = `⚠ z<17 alttan kesme riski · d₁=${fmt(g1.d)} mm`;
+    z1h.className = 'inp-hint warn';
+  } else if(z1>0){ z1h.className='inp-hint'; }
+
+  drawSVG();
+  updateRP(m, al, beta, sigma, z1, z2, g1, g2, a, n1, n2, T1, v, b);
+}
+
+/* ════════════════════════════════════════════════════════
+   HESAPLA — SONUÇ KARTI
+════════════════════════════════════════════════════════ */
+function calculate(){
+  const aEl = document.getElementById('resultArea');
+  aEl.classList.remove('show');
+
+  const m  = getModule();
+  const al = parseFloat(document.getElementById('aSel').value);
+  const beta = curGear==='helical' ? (val('betaInp')||0) : 0;
+  const sigma = curGear==='bevel' ? (val('sigmaInp')||90) : 90;
+  const z1 = ival('z1Inp'), z2 = ival('z2Inp');
+  const n1 = val('n1Inp'), P = val('pInp'), b = val('bInp');
+
+  if(!z1 || z1<5){ alert('Geçerli bir pinyon diş sayısı girin (z₁ ≥ 5).'); return; }
+  if(curGear!=='rack' && (!z2 || z2<5)){ alert('Geçerli bir z₂ diş sayısı girin (≥ 5).'); return; }
+
+  const T1 = (P>0 && n1>0) ? 9550*P/n1 : null;
+  let rows='', warn='', headLbl='', headVal='';
+
+  if(curGear==='spur' || curGear==='internal'){
+    const g1=spurGeo(m,z1,al), g2=spurGeo(m,z2,al);
+    const a = curGear==='internal' ? m*(z2-z1)/2 : m*(z1+z2)/2;
+    const i = z2/z1;
+    const n2 = (n1>0)?n1*z1/z2:null;
+    const Ft = (T1!==null)?2000*T1/g1.d:null;
+    const Fr = (Ft!==null)?Ft*Math.tan(rad(al)):null;
+    const pb = PI*m*Math.cos(rad(al));
+    let eps=null;
+    if(curGear==='spur') eps = contactRatio(g1.da,g1.db,g2.da,g2.db,a,al,pb);
+    headLbl = `${GEARS[curGear].badge} · z₁=${z1} z₂=${z2}`;
+    headVal = `i = ${fmt(i,3)}`;
+    rows = `
+      <div class="spec-row"><span class="spec-nm">İletim Oranı (i)</span><span class="spec-vl c-pur">${fmt(i,4)}</span></div>
+      <div class="spec-row"><span class="spec-nm">Eksen Mesafesi (a)</span><span class="spec-vl c-tl">${fmt(a)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">d₁ / d₂ — Bölüm Çapı</span><span class="spec-vl">${fmt(g1.d)} / ${fmt(g2.d)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">da₁ / da₂ — Diş Üstü</span><span class="spec-vl c-bl">${fmt(g1.da)} / ${fmt(g2.da)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">df₁ / df₂ — Diş Dibi</span><span class="spec-vl">${fmt(g1.df)} / ${fmt(g2.df)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">db₁ / db₂ — Temel Çap</span><span class="spec-vl c-dim">${fmt(g1.db)} / ${fmt(g2.db)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Diş Boyu (h) / Adım (p)</span><span class="spec-vl">${fmt(g1.h)} / ${fmt(g1.p,3)} mm</span></div>
+      ${eps!==null?`<div class="spec-row"><span class="spec-nm">Temas Oranı (εα)</span><span class="spec-vl ${eps<1.2?'c-rd':'c-grn'}">${fmt(eps,3)}</span></div>`:''}
+      ${n2!==null?`<div class="spec-row"><span class="spec-nm">Çıkış Devri (n₂)</span><span class="spec-vl c-yl">${fmt(n2,1)} rpm</span></div>`:''}
+      ${Ft!==null?`<div class="spec-row"><span class="spec-nm">Çevresel Kuvvet (Ft)</span><span class="spec-vl c-yl">${fmt(Ft,1)} N</span></div>`:''}
+      ${Fr!==null?`<div class="spec-row"><span class="spec-nm">Radyal Kuvvet (Fr)</span><span class="spec-vl">${fmt(Fr,1)} N</span></div>`:''}`;
+    if(curGear==='internal') warn = `İç dişlide eksen mesafesi a = m(z₂−z₁)/2. Ring diş üstü içe doğrudur (da = m(z₂−2)).`;
+    else if(eps!==null && eps<1.2) warn = `⚠ Temas oranı εα = ${fmt(eps,3)} < 1.2 — sessiz çalışma için εα ≥ 1.2 önerilir.`;
+
+  } else if(curGear==='helical'){
+    const g1=helicalGeo(m,z1,al,beta), g2=helicalGeo(m,z2,al,beta);
+    const a = m*(z1+z2)/(2*Math.cos(rad(beta)));
+    const i = z2/z1;
+    const n2 = (n1>0)?n1*z1/z2:null;
+    const Ft = (T1!==null)?2000*T1/g1.d:null;            /* transverse teğetsel */
+    const Fr = (Ft!==null)?Ft*Math.tan(rad(g1.at)):null;
+    const Fa = (Ft!==null)?Ft*Math.tan(rad(beta)):null;  /* eksenel bileşen */
+    const Fn = (Ft!==null)?Ft/(Math.cos(rad(al))*Math.cos(rad(g1.betaB))):null;
+    const pbt = PI*g1.mt*Math.cos(rad(g1.at));
+    const epsA = contactRatio(g1.da,g1.db,g2.da,g2.db,a,g1.at,pbt);
+    const epsB = (b>0)?b*Math.sin(rad(beta))/(PI*m):null;
+    const epsG = (epsB!==null)?epsA+epsB:null;
+    headLbl = `HELICAL · β=${beta}° · z₁=${z1} z₂=${z2}`;
+    headVal = `i = ${fmt(i,3)}`;
+    rows = `
+      <div class="spec-row"><span class="spec-nm">İletim Oranı (i)</span><span class="spec-vl c-pur">${fmt(i,4)}</span></div>
+      <div class="spec-row"><span class="spec-nm">Eksen Mesafesi (a)</span><span class="spec-vl c-tl">${fmt(a)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Alın Modülü (mt)</span><span class="spec-vl">${fmt(g1.mt,4)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Alın Kavrama Açısı (αt)</span><span class="spec-vl">${fmt(g1.at,3)}°</span></div>
+      <div class="spec-row"><span class="spec-nm">d₁ / d₂ — Bölüm Çapı</span><span class="spec-vl c-bl">${fmt(g1.d)} / ${fmt(g2.d)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">da₁ / da₂</span><span class="spec-vl">${fmt(g1.da)} / ${fmt(g2.da)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Sanal Diş Sayısı (zn₁/zn₂)</span><span class="spec-vl c-dim">${fmt(g1.zv,1)} / ${fmt(g2.zv,1)}</span></div>
+      <div class="spec-row"><span class="spec-nm">Eksenel Adım (px)</span><span class="spec-vl">${isFinite(g1.px)?fmt(g1.px,2)+' mm':'∞'}</span></div>
+      <div class="spec-row"><span class="spec-nm">Alın Temas Oranı (εα)</span><span class="spec-vl ${epsA<1.2?'c-rd':'c-grn'}">${fmt(epsA,3)}</span></div>
+      ${epsB!==null?`<div class="spec-row"><span class="spec-nm">Atlama Oranı (εβ)</span><span class="spec-vl c-grn">${fmt(epsB,3)}</span></div>`:''}
+      ${epsG!==null?`<div class="spec-row"><span class="spec-nm">Toplam Temas Oranı (εγ)</span><span class="spec-vl c-grn">${fmt(epsG,3)}</span></div>`:''}
+      ${n2!==null?`<div class="spec-row"><span class="spec-nm">Çıkış Devri (n₂)</span><span class="spec-vl c-yl">${fmt(n2,1)} rpm</span></div>`:''}
+      ${Ft!==null?`<div class="spec-row"><span class="spec-nm">Teğetsel Kuvvet (Ft)</span><span class="spec-vl c-yl">${fmt(Ft,1)} N</span></div>`:''}
+      ${Fr!==null?`<div class="spec-row"><span class="spec-nm">Radyal Kuvvet (Fr)</span><span class="spec-vl">${fmt(Fr,1)} N</span></div>`:''}
+      ${Fa!==null?`<div class="spec-row"><span class="spec-nm">Eksenel Kuvvet (Fa)</span><span class="spec-vl c-rd">${fmt(Fa,1)} N</span></div>`:''}
+      ${Fn!==null?`<div class="spec-row"><span class="spec-nm">Normal Kuvvet (Fn)</span><span class="spec-vl c-dim">${fmt(Fn,1)} N</span></div>`:''}`;
+    if(Fa!==null) warn = `Helisel dişli eksenel kuvvet (Fa = Ft·tan β) üretir → eksenel yatak (rulman) gerekir. Çift helisel (herringbone) bunu dengeler.`;
+    else warn = `Eksenel kuvvet bileşeni için Güç (P) ve Devir (n₁) girin.`;
+
+  } else if(curGear==='bevel'){
+    const u = z2/z1;
+    const S = rad(sigma);
+    const d1 = m*z1, d2 = m*z2;
+    const delta1 = Math.atan(Math.sin(S)/(u+Math.cos(S)));
+    const delta2 = S - delta1;
+    const Re = (d2/2)/Math.sin(delta2);
+    const bRec = Math.min(Re/3, 10*m);
+    const bUse = (b>0)?b:bRec;
+    const Rm = Re - bUse/2;
+    const mm = m*Rm/Re;
+    const zv1 = z1/Math.cos(delta1), zv2 = z2/Math.cos(delta2);
+    const da1 = d1 + 2*m*Math.cos(delta1), da2 = d2 + 2*m*Math.cos(delta2);
+    const n2 = (n1>0)?n1*z1/z2:null;
+    const Ft = (T1!==null)?2000*T1/(d1*Rm/Re):null;   /* ortalama yarıçapta */
+    const Fa1 = (Ft!==null)?Ft*Math.tan(rad(al))*Math.sin(delta1):null;
+    const Fr1 = (Ft!==null)?Ft*Math.tan(rad(al))*Math.cos(delta1):null;
+    headLbl = `BEVEL · Σ=${sigma}° · z₁=${z1} z₂=${z2}`;
+    headVal = `u = ${fmt(u,3)}`;
+    rows = `
+      <div class="spec-row"><span class="spec-nm">İletim Oranı (u)</span><span class="spec-vl c-pur">${fmt(u,4)}</span></div>
+      <div class="spec-row"><span class="spec-nm">Pinyon Koni Açısı (δ₁)</span><span class="spec-vl c-bl">${fmt(deg(delta1),3)}°</span></div>
+      <div class="spec-row"><span class="spec-nm">Ayna Koni Açısı (δ₂)</span><span class="spec-vl c-bl">${fmt(deg(delta2),3)}°</span></div>
+      <div class="spec-row"><span class="spec-nm">d₁ / d₂ — Dış Bölüm Çapı</span><span class="spec-vl">${fmt(d1)} / ${fmt(d2)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">da₁ / da₂ — Dış Diş Üstü</span><span class="spec-vl">${fmt(da1)} / ${fmt(da2)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Dış Koni Mesafesi (Re)</span><span class="spec-vl c-tl">${fmt(Re)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Önerilen Diş Genişliği (b)</span><span class="spec-vl">${fmt(bRec)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Ortalama Modül (mm)</span><span class="spec-vl c-dim">${fmt(mm,3)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Sanal Diş (Tredgold zv₁/zv₂)</span><span class="spec-vl c-dim">${fmt(zv1,1)} / ${fmt(zv2,1)}</span></div>
+      ${n2!==null?`<div class="spec-row"><span class="spec-nm">Çıkış Devri (n₂)</span><span class="spec-vl c-yl">${fmt(n2,1)} rpm</span></div>`:''}
+      ${Ft!==null?`<div class="spec-row"><span class="spec-nm">Teğetsel Kuvvet (Ftm)</span><span class="spec-vl c-yl">${fmt(Ft,1)} N</span></div>`:''}
+      ${Fa1!==null?`<div class="spec-row"><span class="spec-nm">Pinyon Eksenel (Fa₁)</span><span class="spec-vl c-rd">${fmt(Fa1,1)} N</span></div>`:''}
+      ${Fr1!==null?`<div class="spec-row"><span class="spec-nm">Pinyon Radyal (Fr₁)</span><span class="spec-vl">${fmt(Fr1,1)} N</span></div>`:''}`;
+    warn = `Konik dişlide kuvvetler ortalama koni yarıçapında (Rm) hesaplanır. Pinyonun eksenel kuvveti aynanın radyal kuvvetine, radyali aynanın ekseneline eşittir. b ≤ Re/3 sınırına uyun.`;
+
+  } else if(curGear==='rack'){
+    const g1=spurGeo(m,z1,al);
+    const stroke = PI*g1.d;
+    const Lr = val('rackLen')||0;
+    const teeth = (Lr>0)?Math.floor(Lr/(PI*m)):null;
+    const Ft = (T1!==null)?2000*T1/g1.d:null;            /* = doğrusal itme kuvveti */
+    const vLin = (n1>0)?PI*g1.d*n1/60000:null;
+    headLbl = `RACK & PINION · z₁=${z1}`;
+    headVal = `${fmt(stroke,1)} mm/dev`;
+    rows = `
+      <div class="spec-row"><span class="spec-nm">Strok / Devir (π·d₁)</span><span class="spec-vl c-pur">${fmt(stroke,3)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Pinyon Bölüm Çapı (d₁)</span><span class="spec-vl c-bl">${fmt(g1.d)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">da₁ / df₁</span><span class="spec-vl">${fmt(g1.da)} / ${fmt(g1.df)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Kremayer Adımı (p)</span><span class="spec-vl">${fmt(g1.p,3)} mm</span></div>
+      <div class="spec-row"><span class="spec-nm">Diş Boyu (h)</span><span class="spec-vl">${fmt(g1.h,3)} mm</span></div>
+      ${teeth!==null?`<div class="spec-row"><span class="spec-nm">Kremayer Diş Sayısı</span><span class="spec-vl c-tl">${teeth} diş</span></div>`:''}
+      ${vLin!==null?`<div class="spec-row"><span class="spec-nm">Doğrusal Hız (v)</span><span class="spec-vl c-yl">${fmt(vLin,3)} m/s</span></div>`:''}
+      ${Ft!==null?`<div class="spec-row"><span class="spec-nm">İtme Kuvveti (Ft)</span><span class="spec-vl c-yl">${fmt(Ft,1)} N</span></div>`:''}`;
+    warn = `Kremayer = sonsuz çaplı dişli. 1 pinyon devri = π·d₁ doğrusal öteleme. İtme kuvveti Ft = 2·T₁/d₁.`;
+  }
+
+  aEl.innerHTML = `
+    <div class="result-card">
+      <div class="res-hdr">
+        <span class="res-hdr-lbl">${headLbl}</span>
+        <span class="res-main-val">${headVal}</span>
+      </div>
+      <div class="spec-grid">${rows}</div>
+      ${warn?`<div class="warn-strip">${warn}</div>`:''}
+    </div>`;
+  aEl.classList.add('show');
+}
+
+/* ════════════════════════════════════════════════════════
+   SAĞ PANEL
+════════════════════════════════════════════════════════ */
+function updateRP(m, al, beta, sigma, z1, z2, g1, g2, a, n1, n2, T1, v, b){
+  const body = document.getElementById('rpBody');
+  document.getElementById('rpTitle').textContent =
+    curGear==='rack' ? 'PİNYON GEOMETRİSİ'
+    : curGear==='bevel' ? 'KONİK DİŞLİ ÇİFTİ'
+    : 'DİŞLİ ÇİFTİ KARŞILAŞTIRMA';
+
+  if(!z1){ body.innerHTML = emptyRP(); return; }
+
+  let cards = '';
+
+  /* Çift karşılaştırma (rack hariç) */
+  if(curGear!=='rack' && g2){
+    const lbl1 = curGear==='bevel'?'PİNYON':'Z₁', lbl2 = curGear==='bevel'?'AYNA':'Z₂';
+    cards += `
+      <div class="rp-card">
+        <div class="rp-card-hdr">Karşılaştırma — m = ${m}</div>
+        <div class="dg-comp">
+          <div class="dg-col-hdr lbl"></div>
+          <div class="dg-col-hdr z1c">${lbl1} z=${z1||'?'}</div>
+          <div class="dg-col-hdr z2c">${lbl2} z=${z2||'?'}</div>
+          <div class="dg-sep">Çaplar</div>
+          <div class="dg-lbl">Bölüm d</div><div class="dg-val pur">${fmt(g1.d)}</div><div class="dg-val blu">${fmt(g2.d)}</div>
+          <div class="dg-lbl">Diş üstü da</div><div class="dg-val">${fmt(g1.da)}</div><div class="dg-val">${fmt(g2.da)}</div>
+          <div class="dg-lbl">Diş dibi df</div><div class="dg-val dim">${fmt(g1.df)}</div><div class="dg-val dim">${fmt(g2.df)}</div>
+          <div class="dg-lbl">Temel db</div><div class="dg-val dim">${fmt(g1.db)}</div><div class="dg-val dim">${fmt(g2.db)}</div>
+          ${curGear==='helical'?`
+          <div class="dg-sep">Helisel</div>
+          <div class="dg-lbl">Sanal diş zn</div><div class="dg-val">${fmt(g1.zv,1)}</div><div class="dg-val">${fmt(g2.zv,1)}</div>`:''}
+          <div class="dg-sep">Sistem</div>
+          <div class="dg-lbl">İletim oranı i</div><div class="dg-val pur" style="grid-column:2/-1">${(z1&&z2)?fmt(z2/z1,3)+' : 1':'—'}</div>
+          ${curGear!=='bevel'?`<div class="dg-lbl">Eksen mes. a</div><div class="dg-val tl" style="grid-column:2/-1">${a!==null?fmt(a)+' mm':'—'}</div>`:''}
+          ${n2!==null?`<div class="dg-lbl">n₁ → n₂</div><div class="dg-val dim" style="grid-column:2/-1">${fmt(n1,0)} → ${fmt(n2,1)} rpm</div>`:''}
+          ${v!==null?`<div class="dg-lbl">Çev. hız v</div><div class="dg-val yl" style="grid-column:2/-1">${fmt(v,3)} m/s</div>`:''}
+        </div>
+      </div>`;
+  } else {
+    /* rack: tek pinyon */
+    cards += `
+      <div class="rp-card">
+        <div class="rp-card-hdr">Pinyon — z = ${z1||'?'}, m = ${m}</div>
+        <div class="rp-card-body">
+          <div class="rp-row"><span class="rp-nm">Bölüm Çapı d₁</span><span class="rp-vl c-pur">${fmt(g1.d)} mm</span></div>
+          <div class="rp-row"><span class="rp-nm">Diş Üstü da₁</span><span class="rp-vl">${fmt(g1.da)} mm</span></div>
+          <div class="rp-row"><span class="rp-nm">Diş Dibi df₁</span><span class="rp-vl c-bl">${fmt(g1.df)} mm</span></div>
+          <div class="rp-row"><span class="rp-nm">Strok / Devir</span><span class="rp-vl c-tl">${fmt(PI*g1.d,2)} mm</span></div>
+          ${v!==null?`<div class="rp-row"><span class="rp-nm">Doğrusal Hız</span><span class="rp-vl c-yl">${fmt(v,3)} m/s</span></div>`:''}
+        </div>
+      </div>`;
+  }
+
+  /* Standart kart */
+  cards += `
+    <div class="rp-card">
+      <div class="rp-card-hdr">Standart Değerler</div>
+      <div class="rp-card-body">
+        <div class="rp-row"><span class="rp-nm">Norm</span><span class="rp-vl c-dim">${GEARS[curGear].std}</span></div>
+        <div class="rp-row"><span class="rp-nm">Modül (m)</span><span class="rp-vl c-pur">${m} mm</span></div>
+        <div class="rp-row"><span class="rp-nm">Kavrama Açısı (α)</span><span class="rp-vl">${al}°</span></div>
+        ${curGear==='helical'?`<div class="rp-row"><span class="rp-nm">Helis Açısı (β)</span><span class="rp-vl">${beta}°</span></div>
+        <div class="rp-row"><span class="rp-nm">Alın Açısı (αt)</span><span class="rp-vl">${fmt(g1.at,3)}°</span></div>`:''}
+        ${curGear==='bevel'?`<div class="rp-row"><span class="rp-nm">Mil Açısı (Σ)</span><span class="rp-vl">${sigma}°</span></div>`:''}
+        <div class="rp-row"><span class="rp-nm">Addendum / Dedendum</span><span class="rp-vl">${fmt(m,2)} / ${fmt(1.25*m,3)} mm</span></div>
+      </div>
+    </div>`;
+
+  /* Formül kutusu */
+  cards += `<div class="fml-box"><span class="fml-ttl">FORMÜLLER</span>${formulaFor(curGear)}</div>`;
+
+  body.innerHTML = cards;
+}
+function emptyRP(){
+  return `<div class="empty-st"><div class="empty-ic">⚙</div><p>Modül ve diş sayısını<br>girerek başlayın.</p></div>`;
+}
+function formulaFor(g){
+  if(g==='spur') return `d = m·z  ·  da = m(z+2)<br>df = m(z−2.5)  ·  db = d·cosα<br>a = m(z₁+z₂)/2  ·  i = z₂/z₁<br>εα = [√(ra1²−rb1²)+√(ra2²−rb2²)−a·sinα] / (π·m·cosα)`;
+  if(g==='helical') return `mt = mn/cosβ  ·  αt = atan(tanα/cosβ)<br>d = mn·z/cosβ  ·  a = mn(z₁+z₂)/(2cosβ)<br>zn = z/cos³β  ·  px = π·mn/sinβ<br>Fa = Ft·tanβ  ·  Fr = Ft·tanαt<br>εβ = b·sinβ/(π·mn)  ·  εγ = εα+εβ`;
+  if(g==='internal') return `a = m(z₂−z₁)/2  (iç dişli!)<br>Ring: da = m(z₂−2)  ·  df = m(z₂+2.5)<br>Pinyon: standart dış dişli<br>i = z₂/z₁`;
+  if(g==='bevel') return `tan δ₁ = sinΣ/(z₂/z₁+cosΣ)  ·  δ₂ = Σ−δ₁<br>d = m·z (dış uç)  ·  Re = d₂/(2sinδ₂)<br>zv = z/cosδ  (Tredgold)<br>u = z₂/z₁ = sinδ₂/sinδ₁  ·  b ≤ Re/3`;
+  if(g==='rack') return `d₁ = m·z₁  ·  strok = π·d₁ / devir<br>p = π·m  (kremayer adımı)<br>Ft = 2·T₁/d₁  ·  v = π·d₁·n/60000`;
+  return '';
+}
+
+/* ════════════════════════════════════════════════════════
+   SVG ÇİZİM
+════════════════════════════════════════════════════════ */
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, text){
+  const e = document.createElementNS(NS, tag);
+  for(const [k,v] of Object.entries(attrs)) e.setAttribute(k, String(v));
+  if(text!==undefined) e.textContent = text;
+  return e;
+}
+function lbl(svg, x, y, txt, col, size=9, anchor='middle'){
+  svg.appendChild(el('text',{x,y,'text-anchor':anchor,'font-family':'JetBrains Mono, monospace','font-size':size,fill:col}, txt));
+}
+
+/* dış dişli diş profili (trapez yaklaşım) */
+function toothPath(cx, cy, rRoot, rTip, Z, rot=0){
+  Z = Math.max(4, Math.min(Z, 80));
+  const ang = 2*PI/Z, landFrac = 0.5;
+  const c=Math.cos, s=Math.sin;
+  let d='';
+  for(let i=0;i<Z;i++){
+    const base = ang*i - PI/2 + rot;
+    const lS = base - ang*landFrac/2, lE = base + ang*landFrac/2;
+    const gE = base + ang - ang*landFrac/2;
+    if(i===0) d += `M ${cx+rRoot*c(base-ang/2)} ${cy+rRoot*s(base-ang/2)} `;
+    d += `L ${cx+rRoot*c(lS)} ${cy+rRoot*s(lS)} `;
+    d += `L ${cx+rTip*c(lS)} ${cy+rTip*s(lS)} `;
+    d += `A ${rTip} ${rTip} 0 0 1 ${cx+rTip*c(lE)} ${cy+rTip*s(lE)} `;
+    d += `L ${cx+rRoot*c(lE)} ${cy+rRoot*s(lE)} `;
+    d += `A ${rRoot} ${rRoot} 0 0 1 ${cx+rRoot*c(gE)} ${cy+rRoot*s(gE)} `;
+  }
+  return d+'Z';
+}
+
+function drawGear(svg, cx, cy, rTip, rRoot, rPitch, Z, col, rot=0, helix=0){
+  const fill = col==='pur'?'url(#gp)':'rgba(96,165,250,0.12)';
+  const stroke = col==='pur'?'#c084fc':'#60a5fa';
+  if(rRoot>3 && rTip>rRoot){
+    svg.appendChild(el('path',{d:toothPath(cx,cy,rRoot,rTip,Z,rot),fill,stroke,'stroke-width':'1.1','stroke-linejoin':'round'}));
+  } else {
+    svg.appendChild(el('circle',{cx,cy,r:rTip,fill,stroke,'stroke-width':'1.1'}));
+  }
+  /* bölüm dairesi */
+  svg.appendChild(el('circle',{cx,cy,r:rPitch,fill:'none',stroke,'stroke-width':'0.7','stroke-dasharray':'4 3',opacity:'0.6'}));
+  /* helis çizgileri */
+  if(helix>0 && rRoot>3){
+    const off = Math.tan(rad(helix))*rRoot*0.9;
+    for(let k=-2;k<=2;k++){
+      const yy = cy + k*rRoot*0.42;
+      if(Math.abs(k*rRoot*0.42)<rRoot){
+        const half = Math.sqrt(Math.max(rRoot*rRoot-(k*rRoot*0.42)**2,0));
+        svg.appendChild(el('line',{x1:cx-half,y1:yy,x2:cx+half,y2:yy-off*0.5,stroke:'rgba(192,132,252,0.35)','stroke-width':'0.6'}));
+      }
+    }
+  }
+  /* göbek + */
+  const rh = Math.max(rRoot*0.16,3);
+  svg.appendChild(el('circle',{cx,cy,r:rh,fill:'rgba(0,0,0,0.55)',stroke:'rgba(255,255,255,0.12)','stroke-width':'0.6'}));
+  const cl=rh*1.7;
+  [[-cl,0],[cl,0],[0,-cl],[0,cl]].forEach(([dx,dy])=>
+    svg.appendChild(el('line',{x1:cx,y1:cy,x2:cx+dx,y2:cy+dy,stroke:'rgba(255,255,255,0.16)','stroke-width':'0.6'})));
+}
+
+function drawSVG(){
+  const svg = document.getElementById('gearSVG');
+  svg.innerHTML='';
+  const defs = el('defs',{});
+  const rg = el('radialGradient',{id:'gp',cx:'42%',cy:'40%',r:'60%'});
+  rg.appendChild(el('stop',{offset:'0%','stop-color':'rgba(192,132,252,0.22)'}));
+  rg.appendChild(el('stop',{offset:'100%','stop-color':'rgba(192,132,252,0.05)'}));
+  defs.appendChild(rg); svg.appendChild(defs);
+
+  if(curGear==='bevel') return drawBevel(svg);
+  if(curGear==='rack')  return drawRack(svg);
+  if(curGear==='internal') return drawInternal(svg);
+  return drawPair(svg);
+}
+
+/* — Düz / Helisel çift — */
+function drawPair(svg){
+  const W=448,H=210, m=getModule(), al=parseFloat(document.getElementById('aSel').value);
+  const beta = curGear==='helical'?(val('betaInp')||0):0;
+  const z1=ival('z1Inp')||18, z2=ival('z2Inp')||54;
+  const g1 = curGear==='helical'?helicalGeo(m,z1,al,beta):spurGeo(m,z1,al);
+  const g2 = curGear==='helical'?helicalGeo(m,z2,al,beta):spurGeo(m,z2,al);
+  const a_mm = (g1.d+g2.d)/2;
+  const scale = Math.min((W-60)/(g1.da/2+a_mm+g2.da/2), (H-50)/Math.max(g1.da,g2.da), 4.5);
+  const CY=H/2;
+  const r1=g1.da/2*scale, r2=g2.da/2*scale;
+  const cx1 = 40 + r1;
+  const cx2 = cx1 + a_mm*scale;
+  drawGear(svg,cx2,CY,r2,g2.df/2*scale,g2.d/2*scale,z2,'blu',PI/z2,beta);
+  drawGear(svg,cx1,CY,r1,g1.df/2*scale,g1.d/2*scale,z1,'pur',0,beta);
+  lbl(svg,cx1,CY+3.5,`z₁=${z1}`,'#c084fc',10);
+  lbl(svg,cx2,CY+3.5,`z₂=${z2}`,'#60a5fa',10);
+  lbl(svg,cx1,CY-r1-7,`⌀${fmt(g1.d)}`,'rgba(192,132,252,0.7)',8.5);
+  lbl(svg,cx2,CY-r2-7,`⌀${fmt(g2.d)}`,'rgba(96,165,250,0.7)',8.5);
+  /* eksen mesafesi */
+  const dimY = Math.min(CY+Math.max(r1,r2)+18, H-12);
+  svg.appendChild(el('line',{x1:cx1,y1:dimY,x2:cx2,y2:dimY,stroke:'rgba(255,255,255,0.2)','stroke-width':'0.8'}));
+  [[cx1,1],[cx2,-1]].forEach(([ax,dir])=>svg.appendChild(el('path',{d:`M ${ax} ${dimY} l ${dir*7} -3 l 0 6 Z`,fill:'rgba(255,255,255,0.28)'})));
+  lbl(svg,(cx1+cx2)/2,dimY-3,`a = ${fmt(a_mm)} mm`,'rgba(255,255,255,0.5)',9);
+  lbl(svg,W/2,14,`i = ${fmt(z2/z1,3)} : 1`+(beta>0?`  ·  β=${beta}°`:''),'rgba(192,132,252,0.7)',9.5);
+}
+
+/* — İç dişli — */
+function drawInternal(svg){
+  const W=448,H=210, m=getModule(), al=parseFloat(document.getElementById('aSel').value);
+  const z1=ival('z1Inp')||18, z2=ival('z2Inp')||54;
+  const g1=spurGeo(m,z1,al), g2=spurGeo(m,z2,al);
+  const ringOuter = g2.d/2 + 2.5*m;         /* dış gövde */
+  const scale = Math.min((W*0.5-30)/ringOuter, (H-30)/(2*ringOuter), 3.2);
+  const CX=W*0.40, CY=H/2;
+  const Ro = ringOuter*scale, Rtip = g2.d/2*scale - 1*m*scale*0;
+  /* ring gövde dış */
+  svg.appendChild(el('circle',{cx:CX,cy:CY,r:Ro,fill:'rgba(96,165,250,0.06)',stroke:'#60a5fa','stroke-width':'1.2'}));
+  /* iç diş profili (içe doğru): tip yarıçapı küçük, root büyük */
+  const rTipIn = (g2.d/2 - m)*scale;        /* da = m(z2-2) → yarıçap d/2 - m */
+  const rRootIn = (g2.d/2 + 1.25*m)*scale;
+  svg.appendChild(el('path',{d:toothPath(CX,CY,rRootIn,rTipIn,z2,PI/z2),fill:'rgba(96,165,250,0.10)',stroke:'#60a5fa','stroke-width':'0.9','stroke-linejoin':'round'}));
+  /* bölüm dairesi ring */
+  svg.appendChild(el('circle',{cx:CX,cy:CY,r:g2.d/2*scale,fill:'none',stroke:'rgba(96,165,250,0.5)','stroke-width':'0.6','stroke-dasharray':'4 3'}));
+  /* pinyon — üstte içeride kavrama */
+  const r1tip=g1.da/2*scale;
+  const cyP = CY - (g2.d/2 - g1.d/2)*scale;   /* iç kavrama: a=(d2-d1)/2 */
+  drawGear(svg,CX,cyP,r1tip,g1.df/2*scale,g1.d/2*scale,z1,'pur',0,0);
+  lbl(svg,CX,cyP+3.5,`z₁=${z1}`,'#c084fc',9);
+  lbl(svg,CX,CY+Ro-6,`İç dişli z₂=${z2}`,'rgba(96,165,250,0.7)',9);
+  lbl(svg,W/2+150,18,`a = ${fmt(m*(z2-z1)/2)} mm`,'rgba(0,212,170,0.7)',9,'end');
+  lbl(svg,W/2+150,32,`i = ${fmt(z2/z1,3)} : 1`,'rgba(192,132,252,0.7)',9,'end');
+}
+
+/* — Konik (ayna-mahruti) yan görünüm — */
+function drawBevel(svg){
+  const W=448,H=210, m=getModule(), z1=ival('z1Inp')||18, z2=ival('z2Inp')||36;
+  const sigma=val('sigmaInp')||90;
+  const u=z2/z1, S=rad(sigma);
+  const delta1=Math.atan(Math.sin(S)/(u+Math.cos(S))), delta2=S-delta1;
+  const d1=m*z1, d2=m*z2;
+  const Re=(d2/2)/Math.sin(delta2);
+  const scale=Math.min((W*0.32)/Re,(H*0.36)/Re,2.4);
+  const ApX=W*0.52, ApY=H/2;                 /* koni tepesi (apex) */
+  const L=Re*scale;
+  /* pinyon ekseni yatay (sola), ayna ekseni dikey (yukarı) — Σ=90 varsayım görsel */
+  const aPin = PI;                            /* sola */
+  const aAyna = PI - S;                       /* mil açısına göre */
+  function cone(axisAng, delta, col, label, z){
+    const ax=Math.cos(axisAng), ay=Math.sin(axisAng);
+    const px=Math.cos(axisAng+PI/2), py=Math.sin(axisAng+PI/2);
+    const tipX=ApX+ax*L, tipY=ApY+ay*L;
+    const rEnd=L*Math.tan(delta);
+    const e1x=tipX+px*rEnd, e1y=tipY+py*rEnd;
+    const e2x=tipX-px*rEnd, e2y=tipY-py*rEnd;
+    svg.appendChild(el('path',{d:`M ${ApX} ${ApY} L ${e1x} ${e1y} L ${e2x} ${e2y} Z`,
+      fill: col==='pur'?'rgba(192,132,252,0.14)':'rgba(96,165,250,0.12)',
+      stroke: col==='pur'?'#c084fc':'#60a5fa','stroke-width':'1.2','stroke-linejoin':'round'}));
+    /* uç yüzeyde diş çizgileri */
+    const nT=Math.min(z,18);
+    for(let k=0;k<=nT;k++){
+      const t=k/nT, ex=e2x+(e1x-e2x)*t, ey=e2y+(e1y-e2y)*t;
+      svg.appendChild(el('line',{x1:tipX+(ex-tipX)*0.78,y1:tipY+(ey-tipY)*0.78,x2:ex,y2:ey,stroke:col==='pur'?'rgba(192,132,252,0.4)':'rgba(96,165,250,0.4)','stroke-width':'0.5'}));
+    }
+    lbl(svg,(e1x+e2x)/2+(col==='pur'?-6:6),(e1y+e2y)/2,label,col==='pur'?'#c084fc':'#60a5fa',9);
+  }
+  /* eksen çizgileri */
+  svg.appendChild(el('line',{x1:ApX,y1:ApY,x2:ApX+Math.cos(aPin)*(L+18),y2:ApY+Math.sin(aPin)*(L+18),stroke:'rgba(255,255,255,0.18)','stroke-width':'0.6','stroke-dasharray':'5 3'}));
+  svg.appendChild(el('line',{x1:ApX,y1:ApY,x2:ApX+Math.cos(aAyna)*(L+18),y2:ApY+Math.sin(aAyna)*(L+18),stroke:'rgba(255,255,255,0.18)','stroke-width':'0.6','stroke-dasharray':'5 3'}));
+  cone(aAyna, delta2, 'blu', `Ayna z₂=${z2}`, z2);
+  cone(aPin, delta1, 'pur', `Pinyon z₁=${z1}`, z1);
+  svg.appendChild(el('circle',{cx:ApX,cy:ApY,r:'2.5',fill:'#fff',opacity:'0.5'}));
+  lbl(svg,W/2,14,`u = ${fmt(u,3)}  ·  Σ=${sigma}°  ·  δ₁=${fmt(deg(delta1),1)}° δ₂=${fmt(deg(delta2),1)}°`,'rgba(192,132,252,0.7)',9);
+  lbl(svg,W-8,H-8,`Re = ${fmt(Re)} mm`,'rgba(0,212,170,0.7)',9,'end');
+}
+
+/* — Kremayer — */
+function drawRack(svg){
+  const W=448,H=210, m=getModule(), al=parseFloat(document.getElementById('aSel').value);
+  const z1=ival('z1Inp')||18;
+  const g1=spurGeo(m,z1,al);
+  const scale=Math.min((H*0.45)/(g1.da/2), 110/(g1.da/2), 3.5);
+  const r1=g1.da/2*scale, rRoot=g1.df/2*scale, rP=g1.d/2*scale;
+  const rackY = H/2 + rP + 6;               /* kremayer üst yüzeyi pinyon bölüm dairesine teğet */
+  const CX=W/2, CY=rackY - rP;
+  /* kremayer çubuğu */
+  const pPx = PI*m*scale;                    /* piksel adımı */
+  const toothH = g1.h*scale;
+  const barTop = rackY, barBot = H-10;
+  svg.appendChild(el('rect',{x:6,y:rackY+toothH*0.5,width:W-12,height:barBot-(rackY+toothH*0.5),fill:'rgba(96,165,250,0.10)',stroke:'#60a5fa','stroke-width':'1'}));
+  /* kremayer dişleri (trapez) */
+  let d=`M 6 ${rackY+toothH*0.5} `;
+  const n=Math.ceil((W-12)/pPx)+1;
+  for(let i=0;i<n;i++){
+    const x0=6+i*pPx;
+    d+=`L ${x0} ${rackY+toothH*0.5} L ${x0+pPx*0.22} ${rackY} L ${x0+pPx*0.28} ${rackY} L ${x0+pPx*0.5} ${rackY+toothH*0.5} `;
+  }
+  d+=`L ${W-6} ${rackY+toothH*0.5}`;
+  svg.appendChild(el('path',{d,fill:'none',stroke:'#60a5fa','stroke-width':'1.1','stroke-linejoin':'round'}));
+  /* bölüm hattı */
+  svg.appendChild(el('line',{x1:6,y1:rackY,x2:W-6,y2:rackY,stroke:'rgba(96,165,250,0.5)','stroke-width':'0.6','stroke-dasharray':'4 3'}));
+  /* pinyon */
+  drawGear(svg,CX,CY,r1,rRoot,rP,z1,'pur',0,0);
+  lbl(svg,CX,CY+3.5,`z₁=${z1}`,'#c084fc',9);
+  /* strok oku */
+  svg.appendChild(el('line',{x1:CX,y1:barBot+0,x2:CX+PI*g1.d*scale,y2:barBot,stroke:'rgba(0,212,170,0.6)','stroke-width':'1'}));
+  lbl(svg,W/2,16,`strok = π·d₁ = ${fmt(PI*g1.d,1)} mm / devir`,'rgba(192,132,252,0.7)',9);
+  lbl(svg,CX,CY-r1-6,`⌀${fmt(g1.d)} mm`,'rgba(192,132,252,0.7)',8.5);
+}
+
+/* ════════════════════════════════════════════════════════
+   BAŞLANGIÇ
+════════════════════════════════════════════════════════ */
+(function init(){
+  const sel = document.getElementById('mSel');
+  const og1 = el('optgroup',{label:'Reihe 1 (öncelikli)'});
+  MOD_R1.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent='m = '+v; if(v===2)o.selected=true; og1.appendChild(o); });
+  const og2 = el('optgroup',{label:'Reihe 2'});
+  MOD_R2.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent='m = '+v; og2.appendChild(o); });
+  const oc = document.createElement('option'); oc.value='custom'; oc.textContent='Özel modül…';
+  sel.appendChild(og1); sel.appendChild(og2); sel.appendChild(oc);
+  selectGear('spur');
+})();
+</script>
+</body>
+</html>
